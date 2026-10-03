@@ -27,12 +27,14 @@ export function ConsoleShell({
   children,
   unread = 0,
   bellHref,
+  banner,
 }: {
   station: string;
   nav: ConsoleNavItem[];
   children: ReactNode;
   unread?: number;
   bellHref?: string;
+  banner?: ReactNode;
 }) {
   const t = useT();
   const pathname = usePathname();
@@ -111,7 +113,7 @@ export function ConsoleShell({
           ))}
         </div>
       </nav>
-
+      {banner}
       <main id="main-content" tabIndex={-1} data-console className="mx-auto max-w-5xl px-4 py-5">{children}</main>
     </div>
   );
