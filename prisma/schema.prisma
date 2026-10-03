@@ -35,6 +35,7 @@ model User {
   notifications   Notification[]
   transactions    WalletTransaction[]
   messages        Message[]
+  appointments    Appointment[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -52,6 +53,7 @@ model MunicipalService {
   mapX        Float?
   mapY        Float?
   sector      String?
+  appointments Appointment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -225,6 +227,31 @@ model Message {
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+// A rendez-vous booked by a resident against a municipal service (F40).
+// Slots are per-service; `status` tracks BOOKED → CANCELLED / COMPLETED and
+// `reminderSent` marks whether the pre-appointment reminder was delivered.
+model Appointment {
+  id              String           @id @default(cuid())
+  reference       String           @unique @default(cuid())
+  serviceId       String
+  service         MunicipalService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  subject         String?
+  citizenId       String
+  citizen         User             @relation(fields: [citizenId], references: [id], onDelete: Cascade)
+  date            DateTime
+  durationMinutes Int              @default(30)
+  sector          String?
+  status          String           @default("BOOKED") // BOOKED | CANCELLED | COMPLETED
+  preparation     String?
+  reminderSent    Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([citizenId])
+  @@index([serviceId, date])
+  @@index([date])
 }
 
 // ------------------------------------------------------------------
