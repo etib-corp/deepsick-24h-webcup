@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Bell } from "lucide-react";
 
+import { SkipLink } from "@/components/layout/SkipLink";
 import { StatusStrip } from "@/components/colony/StatusStrip";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemePicker } from "@/components/layout/ThemePicker";
@@ -38,13 +39,17 @@ export function ConsoleShell({
   const t = useT();
   const pathname = usePathname();
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const activeHref = nav
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+  const isActive = (href: string) => href === activeHref;
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-          <Link href={nav[0]?.href ?? "/"} className="flex items-center gap-2">
+        <SkipLink label={t.accessibility.skipToContent} />
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
+          <Link href={nav[0]?.href ?? "/"} aria-label={station} className="flex items-center gap-2">
             <span className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-primary">
               <span className="size-3 rounded-full bg-primary" />
             </span>
@@ -66,7 +71,7 @@ export function ConsoleShell({
             >
               <Bell className="size-4" />
               {unread > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-destructive font-mono text-[9px] text-white">
+                <span className="absolute -right-0.5 -top-0.5 grid min-h-4 min-w-4 place-items-center rounded-full bg-destructive px-0.5 font-mono text-[9px] text-destructive-foreground">
                   {unread > 9 ? "9+" : unread}
                 </span>
               ) : null}
@@ -88,16 +93,17 @@ export function ConsoleShell({
         <StatusStrip />
       </header>
 
-      <nav className="border-b border-border bg-card/30">
-        <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-2">
+      <nav aria-label={t.accessibility.spaceNavigation} className="border-b border-border bg-card/30">
+        <div className="mx-auto flex max-w-5xl flex-wrap gap-1 px-4 py-2">
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition",
+                "flex min-w-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition",
                 isActive(item.href)
-                  ? "bg-muted text-primary"
+                  ? "bg-muted text-primary underline underline-offset-4"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
@@ -107,10 +113,8 @@ export function ConsoleShell({
           ))}
         </div>
       </nav>
-
       {banner}
-
-      <main className="mx-auto max-w-5xl px-4 py-5">{children}</main>
+      <main id="main-content" tabIndex={-1} data-console className="mx-auto max-w-5xl px-4 py-5">{children}</main>
     </div>
   );
 }

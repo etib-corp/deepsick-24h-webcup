@@ -49,7 +49,14 @@ export default async function CitizenNotificationsPage() {
           {notifications.map((notification) => {
             const row = (
               <FeedRow
-                icon={notification.read ? "•" : "◉"}
+                icon={
+                  <>
+                    <span aria-hidden>{notification.read ? "•" : "◉"}</span>
+                    <span className="sr-only">
+                      {notification.read ? t.accessibility.read : t.accessibility.unread}
+                    </span>
+                  </>
+                }
                 title={notification.title}
                 meta={`${formatDateTime(notification.createdAt)}${notification.body ? ` · ${notification.body}` : ""}`}
               />

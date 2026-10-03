@@ -255,6 +255,23 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
 }
 
 /* ------------------------------------------------------------------ *
+ * Rendez-vous (F40) — a resident books a slot with a municipal service
+ * ------------------------------------------------------------------ */
+
+export const APPOINTMENT_STATUSES = ["BOOKED", "CANCELLED", "COMPLETED"] as const;
+export type AppointmentStatus = (typeof APPOINTMENT_STATUSES)[number];
+
+export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
+  BOOKED: "Confirmé",
+  CANCELLED: "Annulé",
+  COMPLETED: "Terminé",
+};
+
+export function isAppointmentStatus(value: unknown): value is AppointmentStatus {
+  return typeof value === "string" && (APPOINTMENT_STATUSES as readonly string[]).includes(value);
+}
+
+/* ------------------------------------------------------------------ *
  * Civic network — the services grid shown on the citizen dashboard
  * ------------------------------------------------------------------ */
 
