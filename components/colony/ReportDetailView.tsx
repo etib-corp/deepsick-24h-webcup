@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 import { SectionHeader } from "@/components/colony/FeedRow";
 import { PoliceCaseForm, ReportAssignButton, ReportStatusForm } from "@/components/colony/ReportActions";
@@ -37,6 +38,7 @@ export async function ReportDetailView({ id }: { id: string }) {
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs currentLabel={report.title} />
       <Link
         href={`/operations/${station}`}
         className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline"
