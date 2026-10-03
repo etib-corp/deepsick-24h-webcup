@@ -117,7 +117,7 @@ export default async function NewAppointmentPage({
           {selected ? (
             <Card className="p-4">
               <AppointmentForm
-                service={{ id: selected.id, name: selected.name, icon: selected.icon }}
+                service={{ id: selected.id, name: selected.name, icon: selected.icon, preparation: selected.preparation }}
                 slotGroups={slotGroups}
               />
             </Card>

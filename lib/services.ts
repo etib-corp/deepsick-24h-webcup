@@ -435,6 +435,7 @@ export async function createAppointment(
         date: input.date,
         durationMinutes: 30,
         sector: service.sector ?? null,
+        preparation: service.preparation ?? null,
         status: "BOOKED",
       },
     });
