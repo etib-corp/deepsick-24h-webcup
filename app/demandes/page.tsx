@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function LegacyDemandes() {
-  redirect("/citizen/reports");
+  redirect("/citizen/demandes");
 }

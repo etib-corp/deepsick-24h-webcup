@@ -73,6 +73,7 @@ A second, parallel flow handles **démarches administratives** (`ServiceRequest`
 | `/login`, `/register` | Public | Auth (D03 / D01) |
 | `/citizen` | Citizen | Dashboard |
 | `/citizen/report`, `/citizen/reports`, `/citizen/reports/[id]` | Citizen | Signalements |
+| `/citizen/demandes`, `/citizen/demandes/[id]` | Citizen | Démarches (request history, F26) |
 | `/citizen/orders`, `/citizen/wallet`, `/citizen/map`, `/citizen/notifications` | Citizen | Services & profile |
 | `/operations/security`, `/operations/medical`, `/operations/maintenance` | Service (+Council) | Incident consoles + `/[id]` |
 | `/operations/transport`, `/operations/commerce` | Driver / Merchant (+Council) | Order queues |
@@ -81,7 +82,7 @@ A second, parallel flow handles **démarches administratives** (`ServiceRequest`
 | `/apparence` | Public | Theme gallery |
 | `/dev/tickets`, `/dev/tickets/[code]` | Dev / Council | Webcup needs tracked as tickets |
 
-Legacy routes redirect: `/espace → /citizen`, `/demandes → /citizen/reports`,
+Legacy routes redirect: `/espace → /citizen`, `/demandes → /citizen/demandes`,
 `/agents → /operations/administration`, `/admin → /council`.
 
 ### API
