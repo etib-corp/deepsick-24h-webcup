@@ -28,8 +28,8 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-3 flex items-center justify-between gap-3", className)}>
-      <div className="flex items-center gap-2">
+    <div className={cn("mb-3 flex flex-wrap items-center justify-between gap-3", className)}>
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
           {title}
         </h2>
@@ -73,21 +73,21 @@ export function FeedRow({
     <div
       ref={ref}
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 transition",
+        "flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 transition",
         href && "hover:border-primary/50",
         className,
       )}
     >
       {icon ? <span className="shrink-0 text-base">{icon}</span> : null}
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-mono text-sm text-foreground">{title}</p>
+      <div className="min-w-0 flex-1 basis-48">
+        <p className="font-mono text-sm text-foreground">{title}</p>
         {meta ? (
-          <p className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
             {meta}
           </p>
         ) : null}
       </div>
-      {trailing ? <div className="shrink-0">{trailing}</div> : null}
+      {trailing ? <div className="flex max-w-full flex-wrap gap-2 [&>div]:flex-wrap">{trailing}</div> : null}
     </div>
   );
 

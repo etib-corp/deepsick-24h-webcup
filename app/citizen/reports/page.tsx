@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
-import { Alert } from "@/components/ui/Alert";
 import { buttonClasses } from "@/components/ui/Button";
 import { ReportPriorityBadge, ReportStatusBadge } from "@/components/ui/StatusBadge";
 import { getReports } from "@/lib/data";
@@ -15,11 +14,7 @@ export function generateMetadata(): Metadata {
   return { title: getDictionary().citizen.reports.title };
 }
 
-export default async function CitizenReportsPage({
-  searchParams,
-}: {
-  searchParams: { cree?: string };
-}) {
+export default async function CitizenReportsPage() {
   const t = getDictionary();
   const session = await requirePageRole(["CITIZEN"]);
   const reports = await getReports({ authorId: session.user.id });
@@ -35,12 +30,6 @@ export default async function CitizenReportsPage({
           {t.citizen.reports.new}
         </Link>
       </div>
-
-      {searchParams.cree === "1" ? (
-        <Alert tone="success" className="mb-4">
-          {t.citizen.reports.created}
-        </Alert>
-      ) : null}
 
       <SectionHeader
         title={t.citizen.reports.history}

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { StatTile } from "@/components/colony/StatTile";
+import { TourLauncher } from "@/components/tour/TourLauncher";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -53,7 +54,7 @@ export default async function CitizenDashboardPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3" data-tour="citizen-stats">
         <StatTile
           label={t.citizen.dashboard.local}
           value={colonyTime()}
@@ -98,7 +99,7 @@ export default async function CitizenDashboardPage() {
             </Badge>
           }
           action={
-            <Link href="/citizen/reports" className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline">
+            <Link href="/citizen/requests" className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline">
               {t.common.seeAll}
             </Link>
           }
@@ -175,6 +176,13 @@ export default async function CitizenDashboardPage() {
             );
           })}
         </div>
+      </section>
+
+      {/* Guided tours this colonist can run from here */}
+      <section>
+        <Card className="p-5">
+          <TourLauncher onlyAccessible role={session.user.role} />
+        </Card>
       </section>
     </div>
   );

@@ -70,6 +70,7 @@ A second, parallel flow handles **démarches administratives** (`ServiceRequest`
 | `/services`, `/services/[slug]` | Public | Services directory (D05) |
 | `/announcements`, `/announcements/[slug]` | Public | Council publications (D06) |
 | `/contact` | Public | Contact + acknowledgement (D04) |
+| `/guide` | Public | In-app tutorial, one walkthrough per profile |
 | `/login`, `/register` | Public | Auth (D03 / D01) |
 | `/citizen` | Citizen | Dashboard |
 | `/citizen/report`, `/citizen/reports`, `/citizen/reports/[id]` | Citizen | Signalements |
@@ -130,6 +131,33 @@ Full schema: [`prisma/schema.prisma`](../prisma/schema.prisma).
 - **Typography:** `font-mono` for headings and figures, `font-sans` for body copy.
 - **Copy:** user-facing text is **localized** (French, English, Spanish); code, comments and docs are
   **English**.
+
+### Tutorial & interactive guide
+
+`/guide` teaches the platform twice over:
+
+| Piece | File |
+| --- | --- |
+| Written walkthroughs, one per profile (visitor, citizen, 6 service roles, Council) | `lib/guide.ts` + `t.guide` |
+| Interactive tour: lessons, steps, target selectors | `lib/tour.ts` + `t.tour.lessons` |
+| Tour engine (dim, spotlight, event blocking, step machine) | `components/tour/TourProvider.tsx` |
+| Launcher cards / compact console menu | `components/tour/TourLauncher.tsx`, `components/tour/TourMenu.tsx` |
+| Entry points | `/` section, `/guide`, `/citizen` + `/council` cards, console header (all personal spaces) |
+
+- **Accessibility of a lesson** is decided by `canStartLesson(role, id)` / `accessibleLessons(role)`:
+  Council reaches every console, an anonymous visitor only the public lesson. Personal spaces and the
+  home page **hide** what the role cannot play; `/guide` lists everything and locks the rest.
+- **Blocking:** the backdrop is drawn as four panels around the target's box, leaving a real hole —
+  the highlighted element stays clickable and everything else is swallowed (with a nudge).
+- **Targets are declared in the markup** with `data-tour="<name>"`; the engine resolves the first
+  *visible* match, so desktop and mobile navigation can share one name.
+- **Advance:** `click` (the real action) or *Next*; `route` moves to another page, and the fallback
+  to the lesson's own route waits 1.5 s and re-checks the target, so dynamic routes (an incident
+  detail) are never bounced.
+- **State** lives in `sessionStorage` (`nt-tour`) while the tour is active, so navigating through a
+  lesson does not lose it; finishing or quitting clears it.
+- **Accessibility:** `role="dialog" aria-modal="true"`, the step text is announced
+  (`aria-live`), `Esc` quits, and reduced motion only removes the shake.
 
 ### Themes
 

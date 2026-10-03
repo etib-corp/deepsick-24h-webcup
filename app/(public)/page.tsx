@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ColonyScene } from "@/components/colony/ColonyScene";
 import { SectionHeader } from "@/components/colony/FeedRow";
 import { Reveal } from "@/components/motion/Reveal";
+import { TourLauncher } from "@/components/tour/TourLauncher";
 import { Card } from "@/components/ui/Card";
 import { buttonClasses } from "@/components/ui/Button";
 import { ReportStatusBadge } from "@/components/ui/StatusBadge";
@@ -61,7 +62,7 @@ export default async function LandingPage() {
               <Link href={spaceHref} className={buttonClasses("primary")}>
                 {session?.user ? t.landing.ctaSpace : t.landing.ctaRegister}
               </Link>
-              <Link href="/services" className={buttonClasses("secondary")}>
+              <Link href="/services" className={buttonClasses("secondary")} data-tour="hero-services">
                 {t.landing.ctaServices}
               </Link>
             </div>
@@ -81,10 +82,18 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Interactive tutorials — only the lessons this visitor can actually run */}
+      <section className="mx-auto max-w-6xl px-4 pb-10 py-10">
+        <Card className="p-5">
+          <TourLauncher onlyAccessible role={session?.user?.role ?? null} />
+        </Card>
+      </section>
+
+
       {/* Quick actions */}
       <section className="mx-auto max-w-6xl px-4 py-10">
         <SectionHeader title={t.landing.whatNext} />
-        <Reveal stagger={70} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal stagger={70} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" dataTour="quick-actions">
           {quickActions.map((action) => (
             <Link key={action.href} href={action.href}>
               <Card size="sm" className="h-full gap-2 p-4 transition hover:border-primary/50">

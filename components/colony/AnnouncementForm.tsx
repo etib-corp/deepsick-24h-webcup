@@ -24,7 +24,7 @@ export function AnnouncementForm() {
   const [state, formAction] = useFormState(createAnnouncementAction, initialAdminActionState);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-4" data-tour="announcement-form">
       {state.message ? (
         <Alert tone={state.ok ? "success" : "error"}>{state.message}</Alert>
       ) : null}
@@ -55,7 +55,9 @@ export function AnnouncementForm() {
         {t.council.announcements.form.publishNow}
       </label>
 
-      <SubmitButton />
+      <div data-tour="announcement-submit">
+        <SubmitButton />
+      </div>
     </form>
   );
 }

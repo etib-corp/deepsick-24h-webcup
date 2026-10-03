@@ -1,3 +1,4 @@
+import { BroadcastBanner } from "@/components/layout/BroadcastBanner";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { getAuthSession } from "@/lib/permissions";
@@ -9,7 +10,8 @@ export default async function PublicLayout({ children }: { children: React.React
   return (
     <div className="flex min-h-screen flex-col">
       <PublicHeader user={user} />
-      <main className="flex-1">{children}</main>
+      <BroadcastBanner />
+      <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
       <PublicFooter />
     </div>
   );

@@ -12,6 +12,7 @@ export type ColonyMapNode = {
   icon?: string | null;
   sector?: string | null;
   description?: string;
+  featured?: boolean;
   x: number;
   y: number;
   href: string;
@@ -87,44 +88,13 @@ export function ColonyMap({
                   isActive ? "scale-100 opacity-100" : "scale-0 opacity-0",
                 )}
               />
+              {node.featured ? (
+                <span className="absolute size-2 rounded-full border border-primary bg-primary/80" />
+              ) : null}
               <span className="sr-only">{node.label}</span>
             </Link>
           );
         })}
-
-        {/* Detail panel */}
-        <div
-          className="pointer-events-none absolute inset-x-3 bottom-3 z-20 sm:inset-x-auto sm:left-3 sm:max-w-xs"
-          aria-live="polite"
-        >
-          {active ? (
-            <div className="pointer-events-auto rounded-lg border border-primary/40 bg-background/95 p-3 shadow-lg backdrop-blur">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                {active.sector}
-              </p>
-              <p className="mt-0.5 flex items-center gap-2 font-mono text-sm text-foreground">
-                <span aria-hidden>{active.icon ?? "•"}</span>
-                {active.label}
-              </p>
-              {active.description ? (
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                  {active.description}
-                </p>
-              ) : null}
-              <Link
-                href={active.href}
-                className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-primary hover:underline"
-              >
-                {ctaLabel}
-                <ArrowRight className="size-3" />
-              </Link>
-            </div>
-          ) : (
-            <p className="rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground backdrop-blur">
-              {hint ?? label}
-            </p>
-          )}
-        </div>
 
         {/* Corner ticks */}
         <span className="pointer-events-none absolute left-2 top-2 font-mono text-[10px] text-primary/70">
@@ -137,6 +107,40 @@ export function ColonyMap({
           +
         </span>
       </div>
+      {/* Detail panel */}
+      <div
+        className="relative"
+        aria-live="polite"
+      >
+        {active ? (
+          <div className="pointer-events-auto rounded-lg border border-primary/40 bg-background/95 p-3 shadow-lg backdrop-blur">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              {active.sector}
+            </p>
+            <p className="mt-0.5 flex items-center gap-2 font-mono text-sm text-foreground">
+              <span aria-hidden>{active.icon ?? "•"}</span>
+              {active.label}
+            </p>
+            {active.description ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {active.description}
+              </p>
+            ) : null}
+            <Link
+              href={active.href}
+              className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-primary hover:underline"
+            >
+              {ctaLabel}
+              <ArrowRight className="size-3" />
+            </Link>
+          </div>
+        ) : (
+          <p className="rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground backdrop-blur">
+            {hint ?? label}
+          </p>
+        )}
+      </div>
+
     </div>
   );
 }

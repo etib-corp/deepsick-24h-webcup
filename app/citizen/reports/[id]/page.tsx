@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 import { RadarCard } from "@/components/colony/RadarCard";
 import { SectionHeader } from "@/components/colony/FeedRow";
@@ -23,6 +24,7 @@ export default async function CitizenReportDetailPage({ params }: Params) {
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs currentLabel={report.title} />
       <Link href="/citizen/reports" className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline">
         {t.citizen.reports.back}
       </Link>

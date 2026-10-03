@@ -15,6 +15,9 @@ SQLite (dev) / PostgreSQL (prod)
 
 ## Getting started
 
+Set `NEXTAUTH_SECRET` in `.env` to the output of `openssl rand -base64 32` before
+starting the app. NextAuth requires this secret in production, including Docker.
+
 ```bash
 cp .env.example .env          # then fill in the values
 npm install
@@ -132,6 +135,24 @@ Motion is built on [**anime.js v4**](https://animejs.com) — no CSS-animation l
 - **Rules:** import these helpers from client components only; never animate `foreground`-based
   copy over the dark scene (see the `scene-*` tokens above); keep durations from `DUR`.
 
+## User guide
+
+`/guide` is an in-app tutorial that walks every profile through the platform — visitor, citizen and
+each service role — localized like the rest of the UI. Pick a profile to see where it works, which
+demo account it uses, and its walkthrough step by step (it opens on your own walkthrough when you
+are signed in).
+
+**The interactive tutorial** (`▶ Start the tour`) turns that into a hands-on, game-style lesson:
+the screen is dimmed, one element is spotlighted, and every other interaction is blocked until you
+click the highlighted element — which performs the real action. Four lessons: *Discover the city*,
+*Citizen journey*, *Work a case* (any service console) and *Run the colony*.
+
+Launch it from the home page, from `/guide`, or from your own space (compass button in the console
+header). Lessons you cannot run with your current account are hidden outside `/guide`.
+
+The same content in writing, plus the permissions matrix, the status lifecycles, the 10-minute demo
+script and troubleshooting, lives in [`docs/TUTORIAL.md`](docs/TUTORIAL.md).
+
 ## Scripts
 
 | Command | Purpose |
@@ -147,6 +168,7 @@ Motion is built on [**anime.js v4**](https://animejs.com) — no CSS-animation l
 
 - [`AGENTS.md`](AGENTS.md) — AI coding agent brief
 - [`docs/PROJECT.md`](docs/PROJECT.md) — product & architecture overview
+- [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — complete tutorial by type of user (= the in-app `/guide`)
 - [`docs/terra_nova_ecosysteme_roles.md`](docs/terra_nova_ecosysteme_roles.md) — the ecosystem spec
 - [`docs/NEEDS.md`](docs/NEEDS.md) — needs API + fetch script workflow
 - [`docs/README.md`](docs/README.md) — documentation index

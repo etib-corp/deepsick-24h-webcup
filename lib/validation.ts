@@ -46,6 +46,7 @@ export const serviceSchema = z.object({
   mapX: optionalCoord,
   mapY: optionalCoord,
   sector: z.string().trim().max(80).optional().or(z.literal("")),
+  featured: z.coerce.boolean().optional(),
 });
 
 export const announcementSchema = z.object({
@@ -53,6 +54,22 @@ export const announcementSchema = z.object({
   excerpt: z.string().trim().max(280).optional().or(z.literal("")),
   body: z.string().trim().min(10, "Rédigez le contenu.").max(8000),
   published: z.coerce.boolean().optional(),
+});
+
+const optionalDateTime = z.preprocess(
+  (value) =>
+    value === "" || value === null || value === undefined ? undefined : new Date(String(value)),
+  z.date().optional(),
+);
+
+export const broadcastSchema = z.object({
+  title: z.string().trim().min(3, "Indiquez un titre.").max(160),
+  message: z.string().trim().min(10, "Rédigez le message.").max(2000),
+  actionLabel: z.string().trim().max(60).optional().or(z.literal("")),
+  actionHref: z.string().trim().max(240).optional().or(z.literal("")),
+  startsAt: optionalDateTime,
+  endsAt: optionalDateTime,
+  active: z.coerce.boolean().optional(),
 });
 
 export function firstError(error: z.ZodError): string {

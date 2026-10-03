@@ -76,7 +76,7 @@
   --card-foreground: oklch(0.22 0.03 160);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.03 160);
-  --primary: oklch(0.52 0.15 150);
+  --primary: oklch(0.47 0.13 150);
   --primary-foreground: oklch(0.98 0.01 150);
   --secondary: oklch(0.93 0.015 150);
   --secondary-foreground: oklch(0.28 0.03 160);
@@ -88,28 +88,28 @@
   --destructive-foreground: oklch(0.98 0.01 25);
   --border: oklch(0.84 0.02 150);
   --input: oklch(0.84 0.02 150);
-  --ring: oklch(0.52 0.15 150);
+  --ring: oklch(0.47 0.13 150);
 
-  --chart-1: oklch(0.52 0.15 150);
+  --chart-1: oklch(0.47 0.13 150);
   --chart-2: oklch(0.58 0.13 230);
-  --chart-3: oklch(0.72 0.13 70);
+  --chart-3: oklch(0.43 0.09 70);
   --chart-4: oklch(0.55 0.22 25);
   --chart-5: oklch(0.45 0.03 160);
 
   --sidebar: oklch(0.95 0.012 150);
   --sidebar-foreground: oklch(0.22 0.03 160);
-  --sidebar-primary: oklch(0.52 0.15 150);
+  --sidebar-primary: oklch(0.47 0.13 150);
   --sidebar-primary-foreground: oklch(0.98 0.01 150);
   --sidebar-accent: oklch(0.93 0.015 150);
   --sidebar-accent-foreground: oklch(0.28 0.03 160);
   --sidebar-border: oklch(0.84 0.02 150);
-  --sidebar-ring: oklch(0.52 0.15 150);
+  --sidebar-ring: oklch(0.47 0.13 150);
 
   --surface: var(--card);
   --surface-light: var(--secondary);
   --mars: var(--primary);
   --alert: var(--destructive);
-  --info: oklch(0.58 0.13 230);
+  --info: oklch(0.48 0.11 230);
 
   /* Overlay palette for the hero / login scene. Declared once here and never
      redefined by a theme class: the scene keeps a dark sky on every theme, so
@@ -188,10 +188,10 @@
   --secondary: #1f2937;
   --secondary-foreground: #e2e8f0;
   --muted: #1b2534;
-  --muted-foreground: #8290a3;
+  --muted-foreground: #a0aec0;
   --accent: #1e293b;
   --accent-foreground: #e2e8f0;
-  --destructive: #e63946;
+  --destructive: #ff6b75;
   --destructive-foreground: #0b0f19;
   --border: #334155;
   --input: #334155;
@@ -281,7 +281,7 @@
   --muted-foreground: #d9a441;
   --accent: #3a1d08;
   --accent-foreground: #ffe9bf;
-  --destructive: #ef4444;
+  --destructive: #ff7373;
   --destructive-foreground: #1a0505;
   --border: #5a3312;
   --input: #5a3312;
@@ -341,7 +341,7 @@
   --muted-foreground: #b08968;
   --accent: #3a211b;
   --accent-foreground: #f2d6cb;
-  --destructive: #e63946;
+  --destructive: #ff6b75;
   --destructive-foreground: #1a0505;
   --border: #5a342a;
   --input: #5a342a;
@@ -363,7 +363,7 @@
   --card-foreground: #241c10;
   --popover: #ffffff;
   --popover-foreground: #241c10;
-  --primary: #b45309;
+  --primary: #92400e;
   --primary-foreground: #fff8ed;
   --secondary: #f1e7d4;
   --secondary-foreground: #3a2c15;
@@ -375,10 +375,10 @@
   --destructive-foreground: #fff5f5;
   --border: #e0cfb0;
   --input: #e0cfb0;
-  --ring: #b45309;
+  --ring: #92400e;
   --chart-1: #b45309;
   --chart-2: #0369a1;
-  --chart-3: #15803d;
+  --chart-3: #166534;
   --chart-4: #b91c1c;
   --chart-5: #6b5a3e;
   --info: #0369a1;
@@ -505,4 +505,86 @@ body::after {
   .cursor-blink::after {
     animation: none;
   }
+}
+
+/* Accessibility: shared text and controls keep the existing theme palette.
+   Borders identifying editable fields need more contrast than card separators. */
+:root,
+:is(.dark, .mars-civic, .bio-dome, .nebula, .solar-flare, .glacier, .iron-oxide, .daylight, .void) {
+  --input: color-mix(in srgb, var(--foreground) 55%, var(--background));
+}
+
+@layer utilities {
+  /* Replace the legacy tiny pixel utilities centrally; respect user font settings. */
+  .text-\[9px\], .text-\[10px\], .text-\[11px\] {
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+}
+
+/* Text reflows rather than escaping narrow cards at browser zoom/text resize. */
+body { overflow-wrap: anywhere; }
+main, [data-slot="card"] { min-width: 0; }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+[data-slot="input"], select:not([multiple]) {
+  height: auto;
+  min-height: 2rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+[data-slot="textarea"] { font-size: 1rem; }
+
+/* Native selects: keep the text and option popup readable in every theme.
+   `color-scheme` drives the OS-native dropdown list (Chrome/Safari/Edge), while
+   the explicit `option` colours cover Firefox. The dark list mirrors the
+   @custom-variant dark set at the top of this file. */
+select {
+  color: var(--foreground);
+  color-scheme: light;
+}
+:is(.dark, .mars-civic, .bio-dome, .nebula, .solar-flare, .glacier, .iron-oxide, .void) select {
+  color-scheme: dark;
+}
+select option {
+  color: var(--foreground);
+  background-color: var(--popover);
+}
+select:not([multiple]) {
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 1.75rem;
+}
+
+[data-slot="dropdown-menu-content"] {
+  max-width: calc(100vw - 1rem);
+}
+[data-slot="card"] :is(.line-clamp-2, .line-clamp-3) {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 0.2em; }
+
+[data-slot="dropdown-menu-content"] .truncate,
+[data-slot="card"] .truncate {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+/* Compact console grids collapse sooner when the user's base text is larger. */
+@media (max-width: 40rem) {
+  main[data-console] :is(.grid-cols-2, .grid-cols-3) { grid-template-columns: minmax(0, 1fr); }
+  header.sticky { position: static; }
 }
