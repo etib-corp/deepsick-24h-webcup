@@ -111,17 +111,17 @@ export function ConsoleShell({
             </Link>
           ))}
         </div>
-        </nav>
-          {banner}
-          <main
-            id="main-content"
-            tabIndex={-1}
-            data-console
-            className="mx-auto max-w-5xl px-4 py-5">
-            <Breadcrumbs />
-            {children}
-          </main>
       </nav>
+
+      <main
+        id="main-content"
+        tabIndex={-1}
+        data-console
+        className="mx-auto max-w-5xl px-4 py-5"
+      >
+        <Breadcrumbs />
+        {children}
+      </main>
     </div>
   );
 }
