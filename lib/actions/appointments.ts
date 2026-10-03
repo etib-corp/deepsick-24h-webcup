@@ -47,22 +47,24 @@ export async function createAppointmentAction(
     return { ok: false, message: t.errors.appointmentSlotInvalid };
   }
 
-  if (await isAppointmentSlotTaken(parsed.data.serviceId, date)) {
-    return { ok: false, message: t.errors.appointmentSlotTaken };
-  }
-
+  let reference: string;
   try {
-    await createAppointment(session.user.id, {
+    if (await isAppointmentSlotTaken(parsed.data.serviceId, date)) {
+      return { ok: false, message: t.errors.appointmentSlotTaken };
+    }
+
+    const appointment = await createAppointment(session.user.id, {
       serviceId: parsed.data.serviceId,
       subject: parsed.data.subject || null,
       date,
     });
+    reference = appointment.reference;
   } catch {
     return { ok: false, message: t.errors.appointmentFailed };
   }
 
   revalidateAppointments();
-  redirect("/citizen/appointments?cree=1");
+  return { ok: true, reference };
 }
 
 export async function cancelAppointmentAction(formData: FormData) {

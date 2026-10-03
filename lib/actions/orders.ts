@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { ActionState } from "@/lib/action-state";
@@ -40,18 +39,20 @@ export async function createOrderAction(
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
 
+  let reference: string;
   try {
-    await createOrder(session.user.id, {
+    const order = await createOrder(session.user.id, {
       ...parsed.data,
       total: parsed.data.type === "TAXI" ? 12 : 18,
       etaMinutes: parsed.data.type === "TAXI" ? 8 : 24,
     });
+    reference = order.reference;
   } catch {
     return { ok: false, message: getDictionary().errors.orderFailed };
   }
 
   revalidateOrders();
-  redirect("/citizen/orders?cree=1");
+  return { ok: true, reference };
 }
 
 export async function updateOrderStatusAction(formData: FormData) {

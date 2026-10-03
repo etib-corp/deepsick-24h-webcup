@@ -22,7 +22,7 @@ export function generateMetadata(): Metadata {
 export default async function CitizenAppointmentsPage({
   searchParams,
 }: {
-  searchParams: { cree?: string; annule?: string };
+  searchParams: { annule?: string };
 }) {
   const t = getDictionary();
   const session = await requirePageRole(["CITIZEN"]);
@@ -51,9 +51,6 @@ export default async function CitizenAppointmentsPage({
         </Link>
       </header>
 
-      {searchParams.cree === "1" ? (
-        <Alert tone="success">{t.citizen.appointments.created}</Alert>
-      ) : null}
       {searchParams.annule === "1" ? (
         <Alert tone="info">{t.citizen.appointments.cancelled}</Alert>
       ) : null}

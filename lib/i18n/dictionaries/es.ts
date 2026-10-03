@@ -2,6 +2,11 @@ import type { Dictionary } from "../types";
 
 /** Español. */
 const es: Dictionary = {
+  submission: {
+    received: "Tu solicitud se ha recibido correctamente",
+    reference: "Referencia de seguimiento:",
+    noResubmit: "No es necesario volver a enviar esta solicitud. Conserva su referencia para encontrarla más adelante.",
+  },
   meta: {
     title: "Terra Nova — Plataforma ciudadana",
     description:
