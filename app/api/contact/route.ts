@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { serverErrorResponse } from "@/lib/api";
 import { getAuthSession } from "@/lib/permissions";
+import { auditNeutralizedInputs } from "@/lib/security";
 import { createContactMessage } from "@/lib/services";
 import { contactSchema, firstError } from "@/lib/validation";
 
@@ -14,10 +16,21 @@ export async function POST(request: Request) {
   }
 
   const session = await getAuthSession();
-  const message = await createContactMessage({
-    ...parsed.data,
-    authorId: session?.user?.id ?? null,
-  });
 
-  return NextResponse.json({ reference: message.reference }, { status: 201 });
+  const raw = (body ?? {}) as Record<string, unknown>;
+  await auditNeutralizedInputs(
+    { subject: raw.subject, email: raw.email, body: raw.body },
+    "api contact",
+    session,
+  );
+
+  try {
+    const message = await createContactMessage({
+      ...parsed.data,
+      authorId: session?.user?.id ?? null,
+    });
+    return NextResponse.json({ reference: message.reference }, { status: 201 });
+  } catch (error) {
+    return serverErrorResponse("contact.create", error);
+  }
 }

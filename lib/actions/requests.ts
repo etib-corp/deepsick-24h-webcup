@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import type { ActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
 import { getAuthSession } from "@/lib/permissions";
+import { auditNeutralizedInputs } from "@/lib/security";
 import { createServiceRequest } from "@/lib/services";
 import { firstError, requestSchema } from "@/lib/validation";
 
@@ -28,6 +29,16 @@ export async function createRequestAction(
   if (!parsed.success) {
     return { ok: false, message: firstError(parsed.error) };
   }
+
+  await auditNeutralizedInputs(
+    {
+      subject: formData.get("subject"),
+      description: formData.get("description"),
+      category: formData.get("category"),
+    },
+    "demande citoyenne",
+    session,
+  );
 
   try {
     await createServiceRequest(session.user.id, parsed.data);

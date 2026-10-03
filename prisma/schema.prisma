@@ -329,3 +329,24 @@ model LoginAttempt {
 
   @@index([identifier, createdAt])
 }
+
+// Append-only audit trail for sensitive operations: authentication events,
+// access denials and privileged actions (roles, content, workflows, case
+// files, neutralised inputs). Read by the High Council's security console to
+// allow after-the-fact analysis; rows are never updated or deleted by the app.
+model SecurityEvent {
+  id         String   @id @default(cuid())
+  type       String // LOGIN_FAILED | LOGIN_BLOCKED | ACCESS_DENIED | ROLE_CHANGED | CONTENT_CHANGED | REQUEST_STATUS_CHANGED | REPORT_STATUS_CHANGED | ORDER_STATUS_CHANGED | RECORD_ASSIGNED | CASE_FILED | INPUT_NEUTRALIZED
+  outcome    String   @default("INFO") // INFO | SUCCESS | DENIED | FLAGGED
+  actorId    String?
+  actorRole  String?
+  targetType String?
+  targetId   String?
+  detail     String?  @db.Text
+  ip         String?
+  userAgent  String?  @db.VarChar(255)
+  createdAt  DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([createdAt])
+}

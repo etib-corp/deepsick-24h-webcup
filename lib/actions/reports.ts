@@ -1,26 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import type { ActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
+import { auditActor, auditNeutralizedInputs, recordSecurityEvent } from "@/lib/security";
+import { readId, readText } from "@/lib/sanitize";
 import {
   assignReport,
   createReport,
   filePoliceCase,
   updateReportStatus,
 } from "@/lib/services";
-import { REPORT_PRIORITIES, REPORT_TYPES, STAFF_ROLES, isReportStatus } from "@/lib/roles";
-
-const reportSchema = z.object({
-  type: z.enum(REPORT_TYPES),
-  title: z.string().trim().min(3, "Indiquez un objet.").max(120),
-  description: z.string().trim().min(10, "Décrivez la situation (10 caractères min.).").max(4000),
-  priority: z.enum(REPORT_PRIORITIES),
-  sector: z.string().trim().max(80).optional().or(z.literal("")),
-});
+import { STAFF_ROLES, isReportStatus } from "@/lib/roles";
+import { firstError, policeCaseSchema, reportSchema } from "@/lib/validation";
 
 function revalidateIncidents(reportId?: string) {
   for (const path of [
@@ -56,8 +50,18 @@ export async function createReportAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "Données invalides." };
+    return { ok: false, message: firstError(parsed.error) };
   }
+
+  await auditNeutralizedInputs(
+    {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      sector: formData.get("sector"),
+    },
+    "signalement",
+    session,
+  );
 
   let reference: string;
   try {
@@ -74,37 +78,91 @@ export async function createReportAction(
 export async function updateReportStatusAction(formData: FormData) {
   const session = await requirePageRole(STAFF_ROLES);
 
-  const reportId = String(formData.get("reportId") ?? "");
+  const reportId = readId(formData.get("reportId"));
   const status = String(formData.get("status") ?? "");
-  const note = formData.get("note") ? String(formData.get("note")) : undefined;
+  const note = readText(formData.get("note"), 1000);
 
   if (!reportId || !isReportStatus(status)) return;
 
-  await updateReportStatus(reportId, status, session.user.id, note);
+  try {
+    await updateReportStatus(reportId, status, session.user.id, note);
+  } catch {
+    // Unknown or stale record — nothing to disclose, nothing to change.
+    return;
+  }
+
+  await recordSecurityEvent({
+    type: "REPORT_STATUS_CHANGED",
+    outcome: "SUCCESS",
+    ...auditActor(session),
+    targetType: "report",
+    targetId: reportId,
+    detail: `nouveau statut ${status}`,
+  });
+
   revalidateIncidents(reportId);
 }
 
 export async function assignReportAction(formData: FormData) {
   const session = await requirePageRole(STAFF_ROLES);
-  const reportId = String(formData.get("reportId") ?? "");
+  const reportId = readId(formData.get("reportId"));
   if (!reportId) return;
 
-  await assignReport(reportId, session.user.id);
+  try {
+    await assignReport(reportId, session.user.id);
+  } catch {
+    return;
+  }
+
+  await recordSecurityEvent({
+    type: "RECORD_ASSIGNED",
+    outcome: "SUCCESS",
+    ...auditActor(session),
+    targetType: "report",
+    targetId: reportId,
+    detail: "prise en charge",
+  });
+
   revalidateIncidents(reportId);
 }
 
 export async function filePoliceCaseAction(formData: FormData) {
   const session = await requirePageRole(["SECURITY", "COUNCIL"]);
-  const reportId = String(formData.get("reportId") ?? "");
+  const reportId = readId(formData.get("reportId"));
   if (!reportId) return;
 
-  const fine = formData.get("fineAmount") ? Number(formData.get("fineAmount")) : null;
+  const parsed = policeCaseSchema.safeParse({
+    suspectName: formData.get("suspectName"),
+    arrestNotes: formData.get("arrestNotes"),
+    fineAmount: formData.get("fineAmount"),
+    pvContent: formData.get("pvContent"),
+  });
+  if (!parsed.success) return;
 
-  await filePoliceCase(reportId, session.user.id, {
-    suspectName: formData.get("suspectName") ? String(formData.get("suspectName")) : null,
-    arrestNotes: formData.get("arrestNotes") ? String(formData.get("arrestNotes")) : null,
-    fineAmount: Number.isFinite(fine) ? fine : null,
-    pvContent: formData.get("pvContent") ? String(formData.get("pvContent")) : null,
+  await auditNeutralizedInputs(
+    {
+      suspectName: formData.get("suspectName"),
+      arrestNotes: formData.get("arrestNotes"),
+      pvContent: formData.get("pvContent"),
+    },
+    "dossier de sécurité",
+    session,
+    { targetType: "report", targetId: reportId },
+  );
+
+  try {
+    await filePoliceCase(reportId, session.user.id, parsed.data);
+  } catch {
+    return;
+  }
+
+  await recordSecurityEvent({
+    type: "CASE_FILED",
+    outcome: "SUCCESS",
+    ...auditActor(session),
+    targetType: "report",
+    targetId: reportId,
+    detail: "dossier de sécurité enregistré",
   });
 
   revalidateIncidents(reportId);
