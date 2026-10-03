@@ -13,6 +13,7 @@ import {
   deleteMunicipalService,
   setAnnouncementPublished,
   setBroadcastActive,
+  setServiceFeatured,
   setUserRole,
 } from "@/lib/services";
 import { isRole } from "@/lib/roles";
