@@ -539,6 +539,27 @@ main, [data-slot="card"] { min-width: 0; }
 }
 [data-slot="textarea"] { font-size: 1rem; }
 
+/* Native selects: keep the text and option popup readable in every theme
+   (foreground on popover), and redraw the chevron that appearance-none removes. */
+select {
+  color: var(--foreground);
+}
+select option {
+  color: var(--foreground);
+  background-color: var(--popover);
+}
+select:not([multiple]) {
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 1.75rem;
+}
+
 [data-slot="dropdown-menu-content"] {
   max-width: calc(100vw - 1rem);
 }
