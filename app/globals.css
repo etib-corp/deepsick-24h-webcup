@@ -539,10 +539,16 @@ main, [data-slot="card"] { min-width: 0; }
 }
 [data-slot="textarea"] { font-size: 1rem; }
 
-/* Native selects: keep the text and option popup readable in every theme
-   (foreground on popover), and redraw the chevron that appearance-none removes. */
+/* Native selects: keep the text and option popup readable in every theme.
+   `color-scheme` drives the OS-native dropdown list (Chrome/Safari/Edge), while
+   the explicit `option` colours cover Firefox. The dark list mirrors the
+   @custom-variant dark set at the top of this file. */
 select {
   color: var(--foreground);
+  color-scheme: light;
+}
+:is(.dark, .mars-civic, .bio-dome, .nebula, .solar-flare, .glacier, .iron-oxide, .void) select {
+  color-scheme: dark;
 }
 select option {
   color: var(--foreground);
