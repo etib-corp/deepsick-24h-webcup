@@ -213,6 +213,42 @@ export async function setAnnouncementPublished(id: string, published: boolean) {
   });
 }
 
+/* ------------------------------------------------------------------ *
+ * Broadcasts (general announcements shown site-wide)
+ * ------------------------------------------------------------------ */
+
+export async function createBroadcast(input: {
+  title: string;
+  message: string;
+  actionLabel?: string | null;
+  actionHref?: string | null;
+  startsAt?: Date | null;
+  endsAt?: Date | null;
+  active?: boolean;
+  authorId?: string | null;
+}) {
+  return prisma.broadcast.create({
+    data: {
+      title: input.title.trim(),
+      message: input.message.trim(),
+      actionLabel: input.actionLabel?.trim() || null,
+      actionHref: input.actionHref?.trim() || null,
+      startsAt: input.startsAt ?? null,
+      endsAt: input.endsAt ?? null,
+      active: input.active ?? true,
+      authorId: input.authorId ?? null,
+    },
+  });
+}
+
+export async function setBroadcastActive(id: string, active: boolean) {
+  return prisma.broadcast.update({ where: { id }, data: { active } });
+}
+
+export async function deleteBroadcast(id: string) {
+  return prisma.broadcast.delete({ where: { id } });
+}
+
 // ------------------------------------------------------------------
 // Terra Nova ecosystem — reports, police cases, orders, notifications
 // ------------------------------------------------------------------
