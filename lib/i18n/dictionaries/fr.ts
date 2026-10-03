@@ -180,6 +180,7 @@ const fr = {
         "Session résistante · données biométriques locales · audit 18:30 MTC",
       registered: "Identité créée. Vous pouvez vous connecter.",
       invalid: "Identifiant colon ou mot de passe incorrect.",
+      tooManyAttempts: "Trop de tentatives. Réessayez dans {minutes} minute(s).",
     },
     register: {
       title: "Rejoindre Terra Nova.",

@@ -318,3 +318,14 @@ model TicketComment {
 
   @@index([ticketId])
 }
+
+// One row per credential login attempt, used to throttle brute-force attacks.
+// `identifier` is the normalized email or `ip:<addr>` so both can be limited.
+model LoginAttempt {
+  id         String   @id @default(cuid())
+  identifier String
+  success    Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, createdAt])
+}

@@ -178,6 +178,7 @@ const en: Dictionary = {
       session: "Hardened session · biometric data stays local · audited 18:30 MTC",
       registered: "Identity created. You can sign in.",
       invalid: "Incorrect colonist ID or password.",
+      tooManyAttempts: "Too many attempts. Try again in {minutes} minute(s).",
     },
     register: {
       title: "Join Terra Nova.",

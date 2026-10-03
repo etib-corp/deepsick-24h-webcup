@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
@@ -9,6 +9,8 @@ import { Fingerprint, IdCard, LockKeyhole } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
+import { loginThrottleStatusAction } from "@/lib/actions/auth";
+import { format } from "@/lib/i18n/format";
 import { useT } from "@/lib/i18n/client";
 import { homeForRole } from "@/lib/roles";
 
@@ -17,6 +19,22 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+      if (remaining <= 0) setLockedUntil(null);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [lockedUntil]);
+
+  const locked = secondsLeft > 0;
 
   const tabs = [
     { href: "/login", label: t.auth.loginTab, active: true },
@@ -29,14 +47,26 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const result = await signIn("credentials", {
-      redirect: false,
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("password") ?? ""),
-    });
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
+
+    const throttle = await loginThrottleStatusAction({ email });
+    if (throttle.locked) {
+      setLockedUntil(Date.now() + throttle.retryAfterSeconds * 1000);
+      setPending(false);
+      return;
+    }
+
+    const result = await signIn("credentials", { redirect: false, email, password });
 
     if (!result || result.error) {
-      setError(t.auth.login.invalid);
+      // A failure may have just pushed us over the limit; surface it clearly.
+      const after = await loginThrottleStatusAction({ email });
+      if (after.locked) {
+        setLockedUntil(Date.now() + after.retryAfterSeconds * 1000);
+      } else {
+        setError(t.auth.login.invalid);
+      }
       setPending(false);
       return;
     }
@@ -72,7 +102,15 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
       </div>
 
       {registered ? <Alert tone="success">{t.auth.login.registered}</Alert> : null}
-      {error ? <Alert tone="error">{error}</Alert> : null}
+      {locked ? (
+        <Alert tone="error">
+          {format(t.auth.login.tooManyAttempts, {
+            minutes: Math.max(1, Math.ceil(secondsLeft / 60)),
+          })}
+        </Alert>
+      ) : error ? (
+        <Alert tone="error">{error}</Alert>
+      ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label={t.auth.login.identifier} htmlFor="email">
@@ -115,7 +153,7 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
           </span>
         </div>
 
-        <Button type="submit" disabled={pending} className="w-full">
+        <Button type="submit" disabled={pending || locked} className="w-full">
           {pending ? t.auth.login.submitting : t.auth.login.submit}
         </Button>
       </form>
