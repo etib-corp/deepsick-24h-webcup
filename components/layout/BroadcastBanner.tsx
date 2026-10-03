@@ -1,25 +1,13 @@
-import { BroadcastCarousel } from "@/components/layout/BroadcastCarousel";
-import { getActiveBroadcasts } from "@/lib/data";
+import { BroadcastMessages } from "@/components/layout/BroadcastMessages";
+import { getPublicBroadcasts } from "@/lib/actions/broadcasts";
 
-/**
- * Site-wide banner for active general announcements. Rendered on the public
- * site and inside every console shell; shows nothing when no broadcast is
- * active or inside its scheduled time window. Multiple active broadcasts are
- * rotated in a carousel instead of stacked.
- */
+/** Initial server rendering plus isolated updates for pages already open. */
 export async function BroadcastBanner() {
-  const broadcasts = await getActiveBroadcasts();
-  if (broadcasts.length === 0) return null;
+  const result = await getPublicBroadcasts();
 
   return (
-    <BroadcastCarousel
-      items={broadcasts.map((broadcast) => ({
-        id: broadcast.id,
-        title: broadcast.title,
-        message: broadcast.message,
-        actionLabel: broadcast.actionLabel,
-        actionHref: broadcast.actionHref,
-      }))}
+    <BroadcastMessages
+      initialMessages={result.ok ? result.messages : []}
     />
   );
 }
