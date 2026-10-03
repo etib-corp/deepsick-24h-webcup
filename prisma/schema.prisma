@@ -58,6 +58,9 @@ model MunicipalService {
   mapX         Float?
   mapY         Float?
   sector       String?
+  // Preparation instructions / required documents shown to residents before
+  // their appointment (copied onto the booking when an appointment is made).
+  preparation  String?       @db.Text
   appointments Appointment[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
