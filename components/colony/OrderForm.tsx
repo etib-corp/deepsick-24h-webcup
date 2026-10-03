@@ -2,6 +2,8 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 
+import { SubmissionConfirmation } from "@/components/forms/SubmissionConfirmation";
+import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
@@ -24,8 +26,19 @@ export function OrderForm({ defaultType = "TAXI" }: { defaultType?: string }) {
   const t = useT();
   const [state, formAction] = useFormState(createOrderAction, initialActionState);
 
+  if (state.ok) {
+    return (
+      <SubmissionConfirmation
+        message={t.citizen.orders.created}
+        reference={state.reference}
+        href="/citizen/requests"
+        linkLabel={t.citizen.tracking.title}
+      />
+    );
+  }
+
   return (
-    <form action={formAction} className="space-y-4">
+    <SubmissionForm action={formAction} className="space-y-4">
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <fieldset className="space-y-2">
@@ -76,6 +89,6 @@ export function OrderForm({ defaultType = "TAXI" }: { defaultType?: string }) {
       </div>
 
       <SubmitButton />
-    </form>
+    </SubmissionForm>
   );
 }

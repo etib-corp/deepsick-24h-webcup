@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { OrderForm } from "@/components/colony/OrderForm";
-import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { OrderStatusBadge } from "@/components/ui/StatusBadge";
 import { getOrders } from "@/lib/data";
@@ -18,7 +17,7 @@ export function generateMetadata(): Metadata {
 export default async function CitizenOrdersPage({
   searchParams,
 }: {
-  searchParams: { cree?: string; type?: string };
+  searchParams: { type?: string };
 }) {
   const t = getDictionary();
   const session = await requirePageRole(["CITIZEN"]);
@@ -30,10 +29,6 @@ export default async function CitizenOrdersPage({
         <h1 className="font-mono text-xl text-foreground">{t.citizen.orders.title}</h1>
         <p className="text-sm text-muted-foreground">{t.citizen.orders.subtitle}</p>
       </header>
-
-      {searchParams.cree === "1" ? (
-        <Alert tone="success">{t.citizen.orders.created}</Alert>
-      ) : null}
 
       <Card className="p-4">
         <SectionHeader title={t.citizen.orders.newOrder} />

@@ -2,6 +2,7 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 
+import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Textarea } from "@/components/ui/Field";
@@ -39,7 +40,7 @@ export function ContactForm() {
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <SubmissionForm action={formAction} className="space-y-4">
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <Field label={t.publicPages.contact.subject} htmlFor="subject">
@@ -71,6 +72,6 @@ export function ContactForm() {
       </Field>
 
       <SubmitButton />
-    </form>
+    </SubmissionForm>
   );
 }

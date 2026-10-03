@@ -3,6 +3,11 @@
  * (TypeScript enforces it via `Dictionary = typeof fr`).
  */
 const fr = {
+  submission: {
+    received: "Votre demande a bien été reçue",
+    reference: "Référence de suivi :",
+    noResubmit: "Il n’est pas nécessaire de renvoyer cette demande. Conservez sa référence pour la retrouver.",
+  },
   meta: {
     title: "Terra Nova — Plateforme citoyenne",
     description:
