@@ -10,13 +10,13 @@ import { ACTIONABLE_STATUSES, REPORT_ACTIONABLE } from "@/lib/roles";
 export function getPublishedServices() {
   return prisma.municipalService.findMany({
     where: { published: true },
-    orderBy: [{ order: "asc" }, { name: "asc" }],
+    orderBy: [{ featured: "desc" }, { order: "asc" }, { name: "asc" }],
   });
 }
 
 export function getAllServices() {
   return prisma.municipalService.findMany({
-    orderBy: [{ order: "asc" }, { name: "asc" }],
+    orderBy: [{ featured: "desc" }, { order: "asc" }, { name: "asc" }],
   });
 }
 

@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { ActionState } from "@/lib/action-state";
@@ -60,14 +59,16 @@ export async function createReportAction(
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
 
+  let reference: string;
   try {
-    await createReport(session.user.id, parsed.data);
+    const report = await createReport(session.user.id, parsed.data);
+    reference = report.reference;
   } catch {
     return { ok: false, message: getDictionary().errors.reportFailed };
   }
 
   revalidateIncidents();
-  redirect("/citizen/reports?cree=1");
+  return { ok: true, reference };
 }
 
 export async function updateReportStatusAction(formData: FormData) {

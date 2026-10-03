@@ -3,6 +3,11 @@
  * (TypeScript enforces it via `Dictionary = typeof fr`).
  */
 const fr = {
+  submission: {
+    received: "Votre demande a bien été reçue",
+    reference: "Référence de suivi :",
+    noResubmit: "Il n’est pas nécessaire de renvoyer cette demande. Conservez sa référence pour la retrouver.",
+  },
   meta: {
     title: "Terra Nova — Plateforme citoyenne",
     description:
@@ -569,6 +574,9 @@ const fr = {
       new: "Nouveau service",
       existing: "Services existants",
       remove: "Supprimer",
+      featured: "Prioritaire",
+      feature: "Mettre en avant",
+      unfeature: "Retirer de la priorité",
       form: {
         name: "Nom du service",
         namePlaceholder: "Ex. Recyclage d'air",
@@ -580,6 +588,8 @@ const fr = {
         mapY: "Position Y",
         mapHint: "Coordonnées normalisées (0 à 1) sur le plan.",
         description: "Description",
+        featured: "Service prioritaire",
+        featuredHint: "Affiché en tête du catalogue et mis en avant.",
         submit: "Créer le service",
         submitting: "Création…",
         created: "Service créé.",
@@ -702,6 +712,9 @@ const fr = {
       empty: "Aucun service publié pour le moment",
       emptyHint: "Les services seront publiés prochainement.",
       other: "Autres services",
+      featured: "Services prioritaires",
+      featuredBadge: "Prioritaire",
+      allServices: "Tous les services",
       consult: "Consulter →",
       viewMap: "Carte",
       viewList: "Liste",

@@ -2,6 +2,11 @@ import type { Dictionary } from "../types";
 
 /** Español. */
 const es: Dictionary = {
+  submission: {
+    received: "Tu solicitud se ha recibido correctamente",
+    reference: "Referencia de seguimiento:",
+    noResubmit: "No es necesario volver a enviar esta solicitud. Conserva su referencia para encontrarla más adelante.",
+  },
   meta: {
     title: "Terra Nova — Plataforma ciudadana",
     description:
@@ -565,6 +570,9 @@ const es: Dictionary = {
       new: "Nuevo servicio",
       existing: "Servicios existentes",
       remove: "Eliminar",
+      featured: "Prioritario",
+      feature: "Destacar",
+      unfeature: "Quitar destacado",
       form: {
         name: "Nombre del servicio",
         namePlaceholder: "Ej. Reciclaje de aire",
@@ -576,6 +584,8 @@ const es: Dictionary = {
         mapY: "Posición Y",
         mapHint: "Coordenadas normalizadas (0 a 1) en el plano.",
         description: "Descripción",
+        featured: "Servicio prioritario",
+        featuredHint: "Se muestra al principio del catálogo y destacado.",
         submit: "Crear el servicio",
         submitting: "Creando…",
         created: "Servicio creado.",
@@ -698,6 +708,9 @@ const es: Dictionary = {
       empty: "Ningún servicio publicado todavía",
       emptyHint: "Los servicios se publicarán pronto.",
       other: "Otros servicios",
+      featured: "Servicios prioritarios",
+      featuredBadge: "Prioritario",
+      allServices: "Todos los servicios",
       consult: "Abrir →",
       viewMap: "Mapa",
       viewList: "Lista",

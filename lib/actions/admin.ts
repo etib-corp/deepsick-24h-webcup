@@ -32,6 +32,7 @@ export async function createServiceAction(
     mapX: formData.get("mapX"),
     mapY: formData.get("mapY"),
     sector: formData.get("sector"),
+    featured: formData.get("featured"),
   });
   if (!parsed.success) return { ok: false, message: firstError(parsed.error) };
 
@@ -51,6 +52,16 @@ export async function deleteServiceAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await deleteMunicipalService(id);
+  revalidatePath("/council/services");
+  revalidatePath("/services");
+}
+
+export async function toggleServiceFeaturedAction(formData: FormData) {
+  await requirePageRole(["COUNCIL"]);
+  const id = String(formData.get("id") ?? "");
+  const featured = formData.get("featured") === "true";
+  if (!id) return;
+  await setServiceFeatured(id, featured);
   revalidatePath("/council/services");
   revalidatePath("/services");
 }

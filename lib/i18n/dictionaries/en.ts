@@ -2,6 +2,11 @@ import type { Dictionary } from "../types";
 
 /** English. */
 const en: Dictionary = {
+  submission: {
+    received: "Your request has been received",
+    reference: "Tracking reference:",
+    noResubmit: "There is no need to submit this request again. Keep its reference to find it later.",
+  },
   meta: {
     title: "Terra Nova — Civic platform",
     description:
@@ -565,6 +570,9 @@ const en: Dictionary = {
       new: "New service",
       existing: "Existing services",
       remove: "Delete",
+      featured: "Priority",
+      feature: "Highlight",
+      unfeature: "Remove highlight",
       form: {
         name: "Service name",
         namePlaceholder: "e.g. Air recycling",
@@ -576,6 +584,8 @@ const en: Dictionary = {
         mapY: "Position Y",
         mapHint: "Normalised coordinates (0 to 1) on the plan.",
         description: "Description",
+        featured: "Priority service",
+        featuredHint: "Shown at the top of the catalogue and highlighted.",
         submit: "Create the service",
         submitting: "Creating…",
         created: "Service created.",
@@ -698,6 +708,9 @@ const en: Dictionary = {
       empty: "No service published yet",
       emptyHint: "Services will be published soon.",
       other: "Other services",
+      featured: "Priority services",
+      featuredBadge: "Priority",
+      allServices: "All services",
       consult: "Open →",
       viewMap: "Map",
       viewList: "List",

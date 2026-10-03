@@ -46,6 +46,7 @@ export const serviceSchema = z.object({
   mapX: optionalCoord,
   mapY: optionalCoord,
   sector: z.string().trim().max(80).optional().or(z.literal("")),
+  featured: z.coerce.boolean().optional(),
 });
 
 export const announcementSchema = z.object({

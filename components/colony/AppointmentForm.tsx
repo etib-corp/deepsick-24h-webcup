@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 
+import { SubmissionConfirmation } from "@/components/forms/SubmissionConfirmation";
+import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
@@ -51,8 +53,19 @@ export function AppointmentForm({
     return `${activeGroup.dayLabel} · ${slot.time}`;
   }, [selectedIso, activeGroup]);
 
+  if (state.ok) {
+    return (
+      <SubmissionConfirmation
+        message={t.citizen.appointments.created}
+        reference={state.reference}
+        href="/citizen/appointments"
+        linkLabel={t.citizen.appointments.title}
+      />
+    );
+  }
+
   return (
-    <form action={formAction} className="space-y-5">
+    <SubmissionForm action={formAction} className="space-y-5">
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <input type="hidden" name="serviceId" value={service.id} />
@@ -154,6 +167,6 @@ export function AppointmentForm({
       )}
 
       <SubmitButton disabled={!selectedIso} />
-    </form>
+    </SubmissionForm>
   );
 }
