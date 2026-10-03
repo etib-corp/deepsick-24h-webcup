@@ -28,14 +28,12 @@ export function ConsoleShell({
   children,
   unread = 0,
   bellHref,
-  banner,
 }: {
   station: string;
   nav: ConsoleNavItem[];
   children: ReactNode;
   unread?: number;
   bellHref?: string;
-  banner?: ReactNode;
 }) {
   const t = useT();
   const pathname = usePathname();
@@ -123,6 +121,7 @@ export function ConsoleShell({
             <Breadcrumbs />
             {children}
           </main>
+      </nav>
     </div>
   );
 }

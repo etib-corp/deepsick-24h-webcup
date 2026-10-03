@@ -1,5 +1,4 @@
 import { ConsoleShell } from "@/components/colony/ConsoleShell";
-import { BroadcastBanner } from "@/components/layout/BroadcastBanner";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 
@@ -13,13 +12,8 @@ export default async function CouncilLayout({ children }: { children: React.Reac
     { href: "/council", label: t.council.nav.overview, icon: "🛰️" },
     { href: "/council/users", label: t.council.nav.users, icon: "👥" },
     { href: "/council/announcements", label: t.council.nav.announcements, icon: "📣" },
-    { href: "/council/broadcasts", label: t.council.broadcasts.title, icon: "📢" },
     { href: "/council/services", label: t.council.nav.services, icon: "🏛️" },
   ];
 
-  return (
-    <ConsoleShell station={t.council.station} nav={nav} banner={<BroadcastBanner />}>
-      {children}
-    </ConsoleShell>
-  );
+  return <ConsoleShell station={t.council.station} nav={nav}>{children}</ConsoleShell>;
 }
