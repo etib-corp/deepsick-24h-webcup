@@ -46,6 +46,32 @@ export function getAnnouncementBySlug(slug: string) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Broadcasts (D18 — general announcements)
+ * ------------------------------------------------------------------ */
+
+/** Active broadcasts currently visible to users (inside their time window). */
+export function getActiveBroadcasts(now = new Date()) {
+  return prisma.broadcast.findMany({
+    where: {
+      active: true,
+      AND: [
+        { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+        { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+      ],
+    },
+    orderBy: [{ createdAt: "desc" }],
+  });
+}
+
+/** All broadcasts for the council admin (including inactive and scheduled). */
+export function getAllBroadcasts() {
+  return prisma.broadcast.findMany({
+    orderBy: [{ createdAt: "desc" }],
+    include: { author: { select: { name: true } } },
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * Requests
  * ------------------------------------------------------------------ */
 
