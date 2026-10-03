@@ -81,7 +81,7 @@ A second, parallel flow handles **démarches administratives** (`ServiceRequest`
 | `/apparence` | Public | Theme gallery |
 | `/dev/tickets`, `/dev/tickets/[code]` | Dev / Council | Webcup needs tracked as tickets |
 
-Legacy routes redirect: `/espace → /citizen`, `/demandes → /citizen/reports`,
+Legacy routes redirect: `/espace → /citizen`, `/demandes → /citizen/requests`,
 `/agents → /operations/administration`, `/admin → /council`.
 
 ### API

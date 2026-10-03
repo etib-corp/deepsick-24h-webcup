@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { SkipLink } from "@/components/layout/SkipLink";
 import { Logo } from "@/components/layout/Logo";
 import { ThemePicker } from "@/components/layout/ThemePicker";
 import { buttonClasses } from "@/components/ui/Button";
@@ -28,16 +29,18 @@ export function PublicHeader({
   const t = useT();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background backdrop-blur">
+      <SkipLink label={t.accessibility.skipToContent} />
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3">
         <Logo />
 
-        <nav className="hidden flex-wrap items-center gap-1 md:flex">
+        <nav aria-label={t.accessibility.publicNavigation} className="hidden flex-wrap items-center gap-1 md:flex">
           {LINKS.map((link) => (
             <Link
               key={link.href}
@@ -88,7 +91,10 @@ export function PublicHeader({
 
         <button
           type="button"
-          aria-label={t.nav.openMenu}
+          ref={menuButton}
+          aria-label={open ? t.accessibility.closeMenu : t.nav.openMenu}
+          aria-expanded={open}
+          aria-controls="public-mobile-menu"
           onClick={() => setOpen((value) => !value)}
           className={buttonClasses("secondary", "sm", "md:hidden")}
         >
@@ -97,19 +103,29 @@ export function PublicHeader({
       </div>
 
       {open ? (
-        <div className="border-t border-border px-4 py-3 md:hidden">
-          <div className="flex flex-col gap-1">
+        <div
+          id="public-mobile-menu"
+          className="border-t border-border px-4 py-3 md:hidden"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setOpen(false);
+              menuButton.current?.focus();
+            }
+          }}
+        >
+          <nav aria-label={t.accessibility.publicNavigation} className="flex flex-col gap-1">
             {LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={isActive(link.href) ? "page" : undefined}
                 onClick={() => setOpen(false)}
                 className="rounded-md px-3 py-2 font-mono text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 {t.nav[link.label]}
               </Link>
             ))}
-          </div>
+          </nav>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <LocaleSwitcher />
             <ThemePicker />

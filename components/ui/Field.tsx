@@ -1,3 +1,6 @@
+"use client";
+
+import { createContext, useContext, useId } from "react";
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -13,6 +16,14 @@ import { cn } from "@/lib/ui";
 const SELECT_BASE =
   "h-8 w-full min-w-0 appearance-none rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 md:text-sm";
 
+const FieldHintContext = createContext<{ controlId: string; hintId?: string } | null>(null);
+
+function useFieldDescription(id?: string, describedBy?: string) {
+  const field = useContext(FieldHintContext);
+  return [describedBy, field?.controlId === id ? field?.hintId : undefined]
+    .filter(Boolean).join(" ") || undefined;
+}
+
 export function Field({
   label,
   htmlFor,
@@ -20,32 +31,38 @@ export function Field({
   children,
 }: {
   label: string;
-  htmlFor?: string;
+  htmlFor: string;
   hint?: string;
   children: ReactNode;
 }) {
+  const hintId = useId();
   return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="font-mono text-xs uppercase tracking-wide text-foreground">
-        {label}
-      </Label>
-      {children}
-      {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
-    </div>
+    <FieldHintContext.Provider value={{ controlId: htmlFor, hintId: hint ? hintId : undefined }}>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={htmlFor} className="font-mono text-xs uppercase tracking-wide text-foreground">
+          {label}
+        </Label>
+        {children}
+        {hint ? <span id={hintId} className="text-xs text-muted-foreground">{hint}</span> : null}
+      </div>
+    </FieldHintContext.Provider>
   );
 }
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <ShadcnInput className={cn("font-mono", className)} {...props} />;
+  const describedBy = useFieldDescription(props.id, props["aria-describedby"]);
+  return <ShadcnInput className={cn("font-mono", className)} {...props} aria-describedby={describedBy} />;
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <ShadcnTextarea className={cn("min-h-28 font-mono", className)} {...props} />;
+  const describedBy = useFieldDescription(props.id, props["aria-describedby"]);
+  return <ShadcnTextarea className={cn("min-h-28 font-mono", className)} {...props} aria-describedby={describedBy} />;
 }
 
 export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  const describedBy = useFieldDescription(props.id, props["aria-describedby"]);
   return (
-    <select className={cn(SELECT_BASE, "font-mono", className)} {...props}>
+    <select className={cn(SELECT_BASE, "font-mono", className)} {...props} aria-describedby={describedBy}>
       {children}
     </select>
   );

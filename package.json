@@ -5,7 +5,7 @@
   "description": "Nova Terra — citizen services platform (24h Webcup)",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && prisma db seed && next build",
+    "build": "prisma migrate deploy && next build",
     "start": "next start",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
