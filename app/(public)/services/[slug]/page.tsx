@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { buttonClasses } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { getPublishedServices, getServiceBySlug } from "@/lib/data";
@@ -43,7 +44,12 @@ export default async function ServiceDetailPage({ params }: Params) {
               {service.category}
             </p>
           ) : null}
-          <h1 className="mt-1 font-mono text-3xl text-foreground">{service.name}</h1>
+          <h1 className="mt-1 flex flex-wrap items-center gap-2 font-mono text-3xl text-foreground">
+            {service.name}
+            {service.featured ? (
+              <Badge tone="mars">{t.publicPages.services.featuredBadge}</Badge>
+            ) : null}
+          </h1>
         </div>
       </header>
 

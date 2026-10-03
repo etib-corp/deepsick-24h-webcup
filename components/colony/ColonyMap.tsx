@@ -12,6 +12,7 @@ export type ColonyMapNode = {
   icon?: string | null;
   sector?: string | null;
   description?: string;
+  featured?: boolean;
   x: number;
   y: number;
   href: string;
@@ -87,6 +88,9 @@ export function ColonyMap({
                   isActive ? "scale-100 opacity-100" : "scale-0 opacity-0",
                 )}
               />
+              {node.featured ? (
+                <span className="absolute size-2 rounded-full border border-primary bg-primary/80" />
+              ) : null}
               <span className="sr-only">{node.label}</span>
             </Link>
           );

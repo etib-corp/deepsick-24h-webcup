@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { ServiceForm } from "@/components/colony/ServiceForm";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { deleteServiceAction } from "@/lib/actions/admin";
+import { deleteServiceAction, toggleServiceFeaturedAction } from "@/lib/actions/admin";
 import { getAllServices } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
@@ -48,13 +49,31 @@ export default async function CouncilServicesPage() {
                     icon={service.icon ?? "🏛️"}
                     title={service.name}
                     meta={`/${service.slug} · ${formatDate(service.createdAt)}`}
+                    trailing={
+                      service.featured ? (
+                        <Badge tone="mars">{t.council.services.featured}</Badge>
+                      ) : null
+                    }
                   />
-                  <form action={deleteServiceAction}>
-                    <input type="hidden" name="id" value={service.id} />
-                    <Button type="submit" variant="danger" size="sm">
-                      {t.council.services.remove}
-                    </Button>
-                  </form>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <form action={toggleServiceFeaturedAction}>
+                      <input type="hidden" name="id" value={service.id} />
+                      <input
+                        type="hidden"
+                        name="featured"
+                        value={service.featured ? "false" : "true"}
+                      />
+                      <Button type="submit" variant="secondary" size="sm">
+                        {service.featured ? t.council.services.unfeature : t.council.services.feature}
+                      </Button>
+                    </form>
+                    <form action={deleteServiceAction}>
+                      <input type="hidden" name="id" value={service.id} />
+                      <Button type="submit" variant="danger" size="sm">
+                        {t.council.services.remove}
+                      </Button>
+                    </form>
+                  </div>
                 </div>
               </Card>
             ))}
