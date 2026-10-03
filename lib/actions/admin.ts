@@ -13,6 +13,7 @@ import {
   deleteMunicipalService,
   setAnnouncementPublished,
   setBroadcastActive,
+  setServiceFeatured,
   setUserRole,
   setServiceFeatured
 } from "@/lib/services";
