@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useId, type ReactNode } from "react";
 
 import { Alert as ShadcnAlert, AlertDescription, AlertTitle } from "@/components/shadcn/alert";
 import { cn } from "@/lib/ui";
@@ -16,14 +18,26 @@ export function Alert({
   title,
   children,
   className,
+  autoFocus = false,
 }: {
   tone?: Tone;
   title?: string;
   children?: ReactNode;
   className?: string;
+  autoFocus?: boolean;
 }) {
+  const id = useId();
+  useEffect(() => {
+    // Opt in when feedback replaces the submitted form and its focused control.
+    if (autoFocus) document.getElementById(id)?.focus();
+  }, [autoFocus, id]);
+
   return (
     <ShadcnAlert
+      id={id}
+      role={tone === "error" ? "alert" : "status"}
+      aria-atomic="true"
+      tabIndex={autoFocus ? -1 : undefined}
       variant={tone === "error" ? "destructive" : "default"}
       className={cn(TONES[tone], className)}
     >

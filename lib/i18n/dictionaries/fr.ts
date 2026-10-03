@@ -8,6 +8,15 @@ const fr = {
     description:
       "Plateforme des services de la ville de Terra Nova : signalements, commandes, démarches et annonces.",
   },
+  accessibility: {
+    skipToContent: "Aller au contenu principal",
+    publicNavigation: "Navigation principale",
+    spaceNavigation: "Navigation de mon espace",
+    closeMenu: "Fermer le menu",
+    roleFor: "Rôle de {name}",
+    read: "Notification lue",
+    unread: "Notification non lue",
+  },
   common: {
     appName: "Terra Nova",
     colonyNominal: "Colonie nominale",
