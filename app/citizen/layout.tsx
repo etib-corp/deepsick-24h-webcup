@@ -12,6 +12,7 @@ export default async function CitizenLayout({ children }: { children: React.Reac
 
   const nav: ConsoleNavItem[] = [
     { href: "/citizen", label: t.citizen.nav.home, icon: "🏠" },
+    { href: "/citizen/requests", label: t.citizen.tracking.title, icon: "📄" },
     { href: "/citizen/report", label: t.citizen.nav.report, icon: "⚠️" },
     { href: "/citizen/reports", label: t.citizen.nav.reports, icon: "📋" },
     { href: "/citizen/orders", label: t.citizen.nav.orders, icon: "🎫" },
