@@ -52,12 +52,12 @@ async function main() {
 
   /* --- Civic services directory (D05) ---------------------------------- */
   const services = [
-    { slug: "securite", name: "Sécurité publique", category: "Protection", icon: "🛡️", order: 1, mapX: 0.574, mapY: 0.338, sector: "Secteur 04 · Rempart", description: "Ares Security Command veille sur les secteurs de la colonie : signalements, escorte et coordination des interventions." },
-    { slug: "medical", name: "Soins médicaux", category: "Santé", icon: "✚", order: 2, mapX: 0.443, mapY: 0.153, sector: "Secteur 02 · BioDôme", description: "Asclepius Medical Net assure le triage des urgences, les soins courants et l'accès aux modules médicaux." },
-    { slug: "maintenance", name: "Infrastructure", category: "Technique", icon: "🛠️", order: 3, mapX: 0.269, mapY: 0.467, sector: "Secteur 05 · Industrie", description: "Hephaestus Infrastructure maintient le recyclage d'air, l'énergie, l'eau et la propreté des modules." },
-    { slug: "transport", name: "Transport & logistique", category: "Mobilité", icon: "🚡", order: 4, mapX: 0.295, mapY: 0.686, sector: "Secteur 03 · Planitia", description: "Hermes Mobility Net opère les rovers, les navettes et le fret entre les secteurs de Nova Terra." },
-    { slug: "commerce", name: "Commerce & restauration", category: "Vie quotidienne", icon: "🍜", order: 5, mapX: 0.546, mapY: 0.728, sector: "Secteur 01 · Habitat", description: "Mercator Exchange réunit les cantines et fournisseurs de la colonie : commandes et livraisons." },
-    { slug: "demarches", name: "Démarches administratives", category: "Administration", icon: "📄", order: 6, mapX: 0.689, mapY: 0.469, sector: "Secteur 03 · Planitia", description: "Permis, autorisations et documents officiels traités par le Bureau des démarches." },
+    { slug: "securite", name: "Sécurité publique", category: "Protection", icon: "🛡️", order: 1, featured: true, mapX: 0.574, mapY: 0.338, sector: "Secteur 04 · Rempart", description: "Ares Security Command veille sur les secteurs de la colonie : signalements, escorte et coordination des interventions." },
+    { slug: "medical", name: "Soins médicaux", category: "Santé", icon: "✚", order: 2, featured: true, mapX: 0.443, mapY: 0.153, sector: "Secteur 02 · BioDôme", description: "Asclepius Medical Net assure le triage des urgences, les soins courants et l'accès aux modules médicaux." },
+    { slug: "maintenance", name: "Infrastructure", category: "Technique", icon: "🛠️", order: 3, featured: false, mapX: 0.269, mapY: 0.467, sector: "Secteur 05 · Industrie", description: "Hephaestus Infrastructure maintient le recyclage d'air, l'énergie, l'eau et la propreté des modules." },
+    { slug: "transport", name: "Transport & logistique", category: "Mobilité", icon: "🚡", order: 4, featured: false, mapX: 0.295, mapY: 0.686, sector: "Secteur 03 · Planitia", description: "Hermes Mobility Net opère les rovers, les navettes et le fret entre les secteurs de Nova Terra." },
+    { slug: "commerce", name: "Commerce & restauration", category: "Vie quotidienne", icon: "🍜", order: 5, featured: false, mapX: 0.546, mapY: 0.728, sector: "Secteur 01 · Habitat", description: "Mercator Exchange réunit les cantines et fournisseurs de la colonie : commandes et livraisons." },
+    { slug: "demarches", name: "Démarches administratives", category: "Administration", icon: "📄", order: 6, featured: true, mapX: 0.689, mapY: 0.469, sector: "Secteur 03 · Planitia", description: "Permis, autorisations et documents officiels traités par le Bureau des démarches." },
   ];
   for (const service of services) {
     await prisma.municipalService.upsert({ where: { slug: service.slug }, update: service, create: service });

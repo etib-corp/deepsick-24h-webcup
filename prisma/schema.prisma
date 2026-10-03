@@ -52,6 +52,7 @@ model MunicipalService {
   icon         String?
   order        Int           @default(0)
   published    Boolean       @default(true)
+  featured     Boolean       @default(false)
   // Position on the stylised colony map (normalised 0..1) + sector label.
   mapX         Float?
   mapY         Float?

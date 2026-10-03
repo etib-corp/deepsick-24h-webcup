@@ -56,6 +56,14 @@ export function ServiceForm() {
         <Textarea id="description" name="description" required />
       </Field>
 
+      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <input type="checkbox" name="featured" value="true" className="size-4 accent-primary" />
+        {t.council.services.form.featured}
+      </label>
+      <p className="-mt-2 text-xs text-muted-foreground">
+        {t.council.services.form.featuredHint}
+      </p>
+
       <Field label={t.council.services.form.sector} htmlFor="sector">
         <Select id="sector" name="sector" defaultValue="">
           <option value="">{t.common.none}</option>

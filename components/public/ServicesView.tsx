@@ -22,6 +22,7 @@ export function ServicesView({ services }: { services: MapService[] }) {
       icon: service.icon,
       sector: service.sector,
       description: service.description,
+      featured: service.featured,
       x: service.x,
       y: service.y,
       href: `/services/${service.slug}`,
