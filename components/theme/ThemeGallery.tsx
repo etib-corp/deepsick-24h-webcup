@@ -49,6 +49,7 @@ export function ThemeGallery() {
 
             <Button
               type="button"
+              aria-label={`${isActive ? t.common.activeTheme : t.common.apply} : ${item.label}`}
               size="sm"
               variant={isActive ? "secondary" : "primary"}
               disabled={isActive}

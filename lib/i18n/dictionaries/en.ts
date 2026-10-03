@@ -7,6 +7,15 @@ const en: Dictionary = {
     description:
       "Service platform for the city of Terra Nova: incident reports, orders, requests and announcements.",
   },
+  accessibility: {
+    skipToContent: "Skip to main content",
+    publicNavigation: "Main navigation",
+    spaceNavigation: "Workspace navigation",
+    closeMenu: "Close menu",
+    roleFor: "Role for {name}",
+    read: "Read notification",
+    unread: "Unread notification",
+  },
   common: {
     appName: "Terra Nova",
     colonyNominal: "Colony nominal",

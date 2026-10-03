@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { Check, Monitor, Palette } from "lucide-react";
+import { Monitor, Palette } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -43,41 +44,40 @@ export function ThemePicker({ className }: { className?: string }) {
         <DropdownMenuLabel className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
           {t.common.theme}
         </DropdownMenuLabel>
-        <DropdownMenuItem onSelect={() => setTheme("system")} className="gap-3">
-          <Monitor className="size-4 shrink-0 text-muted-foreground" />
-          <span className="flex-1 text-sm">{t.common.system}</span>
-          {active === "system" ? <Check className="size-4 shrink-0" /> : null}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {THEMES.map((candidate) => {
-          const isActive = active === candidate.id;
-          const item = copy[candidate.id] ?? {
-            label: candidate.label,
-            description: candidate.description,
-          };
-          return (
-            <DropdownMenuItem
-              key={candidate.id}
-              onSelect={() => setTheme(candidate.id)}
-              className="gap-3"
-            >
-              <span
-                className="flex size-5 shrink-0 overflow-hidden rounded-sm border border-border"
-                aria-hidden
+        <DropdownMenuRadioGroup value={active ?? ""} onValueChange={setTheme}>
+          <DropdownMenuRadioItem value="system" className="gap-3">
+            <Monitor className="size-4 shrink-0 text-muted-foreground" />
+            <span className="flex-1 text-sm">{t.common.system}</span>
+          </DropdownMenuRadioItem>
+          <DropdownMenuSeparator />
+          {THEMES.map((candidate) => {
+            const item = copy[candidate.id] ?? {
+              label: candidate.label,
+              description: candidate.description,
+            };
+            return (
+              <DropdownMenuRadioItem
+                key={candidate.id}
+                value={candidate.id}
+                className="gap-3"
               >
-                <span className="h-full w-1/2" style={{ background: candidate.swatch.background }} />
-                <span className="h-full w-1/2" style={{ background: candidate.swatch.primary }} />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-sm">{item.label}</span>
-                <span className="truncate text-[11px] text-muted-foreground">
-                  {item.description}
+                <span
+                  className="flex size-5 shrink-0 overflow-hidden rounded-sm border border-border"
+                  aria-hidden
+                >
+                  <span className="h-full w-1/2" style={{ background: candidate.swatch.background }} />
+                  <span className="h-full w-1/2" style={{ background: candidate.swatch.primary }} />
                 </span>
-              </span>
-              {isActive ? <Check className="size-4 shrink-0" /> : null}
-            </DropdownMenuItem>
-          );
-        })}
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-sm">{item.label}</span>
+                  <span className="truncate text-[11px] text-muted-foreground">
+                    {item.description}
+                  </span>
+                </span>
+              </DropdownMenuRadioItem>
+            );
+          })}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
