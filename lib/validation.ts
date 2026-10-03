@@ -32,11 +32,21 @@ export const requestSchema = z.object({
   priority: z.enum(REQUEST_PRIORITIES),
 });
 
+const optionalCoord = z.preprocess(
+  (value) =>
+    value === "" || value === null || value === undefined ? undefined : Number(value),
+  z.number().min(0).max(1).optional(),
+);
+
 export const serviceSchema = z.object({
   name: z.string().trim().min(3, "Indiquez un nom.").max(120),
   description: z.string().trim().min(10, "Décrivez le service.").max(2000),
   category: z.string().trim().max(60).optional().or(z.literal("")),
   icon: z.string().trim().max(8).optional().or(z.literal("")),
+  mapX: optionalCoord,
+  mapY: optionalCoord,
+  sector: z.string().trim().max(80).optional().or(z.literal("")),
+  featured: z.coerce.boolean().optional(),
 });
 
 export const announcementSchema = z.object({

@@ -2,6 +2,8 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 
+import { SubmissionConfirmation } from "@/components/forms/SubmissionConfirmation";
+import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Select, Textarea } from "@/components/ui/Field";
@@ -24,8 +26,19 @@ export function ReportForm({ defaultType = "SECURITY" }: { defaultType?: string 
   const t = useT();
   const [state, formAction] = useFormState(createReportAction, initialActionState);
 
+  if (state.ok) {
+    return (
+      <SubmissionConfirmation
+        message={t.citizen.reports.created}
+        reference={state.reference}
+        href="/citizen/reports"
+        linkLabel={t.citizen.reports.title}
+      />
+    );
+  }
+
   return (
-    <form action={formAction} className="space-y-4">
+    <SubmissionForm action={formAction} className="space-y-4">
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <fieldset className="space-y-2" data-tour="report-type">
@@ -99,6 +112,6 @@ export function ReportForm({ defaultType = "SECURITY" }: { defaultType?: string 
       <div data-tour="report-submit">
         <SubmitButton />
       </div>
-    </form>
+    </SubmissionForm>
   );
 }

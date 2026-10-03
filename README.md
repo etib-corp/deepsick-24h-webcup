@@ -15,6 +15,9 @@ SQLite (dev) / PostgreSQL (prod)
 
 ## Getting started
 
+Set `NEXTAUTH_SECRET` in `.env` to the output of `openssl rand -base64 32` before
+starting the app. NextAuth requires this secret in production, including Docker.
+
 ```bash
 cp .env.example .env          # then fill in the values
 npm install

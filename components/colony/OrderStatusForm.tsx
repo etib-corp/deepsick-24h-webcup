@@ -11,7 +11,7 @@ export async function OrderStatusForm({ orderId, status }: { orderId: string; st
   return (
     <form action={updateOrderStatusAction} className="flex items-center gap-2">
       <input type="hidden" name="orderId" value={orderId} />
-      <Select name="status" defaultValue={status} className="h-8 w-auto text-xs">
+      <Select aria-label={t.ops.forms.status} name="status" defaultValue={status} className="h-8 w-auto text-xs">
         {ORDER_STATUSES.map((value) => (
           <option key={value} value={value}>
             {t.orderStatus[value]}

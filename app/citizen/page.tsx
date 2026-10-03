@@ -99,7 +99,7 @@ export default async function CitizenDashboardPage() {
             </Badge>
           }
           action={
-            <Link href="/citizen/reports" className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline">
+            <Link href="/citizen/requests" className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline">
               {t.common.seeAll}
             </Link>
           }

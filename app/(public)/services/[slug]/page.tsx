@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { buttonClasses } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { getPublishedServices, getServiceBySlug } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 
@@ -27,6 +29,7 @@ export default async function ServiceDetailPage({ params }: Params) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
+      <Breadcrumbs currentLabel={service.name} />
       <Link href="/services" className="text-sm text-primary hover:underline">
         {t.publicPages.services.backAll}
       </Link>
@@ -41,7 +44,12 @@ export default async function ServiceDetailPage({ params }: Params) {
               {service.category}
             </p>
           ) : null}
-          <h1 className="mt-1 font-mono text-3xl text-foreground">{service.name}</h1>
+          <h1 className="mt-1 flex flex-wrap items-center gap-2 font-mono text-3xl text-foreground">
+            {service.name}
+            {service.featured ? (
+              <Badge tone="mars">{t.publicPages.services.featuredBadge}</Badge>
+            ) : null}
+          </h1>
         </div>
       </header>
 
@@ -50,6 +58,12 @@ export default async function ServiceDetailPage({ params }: Params) {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/citizen/report" className={buttonClasses("primary")}>
           {t.publicPages.services.createRequest}
+        </Link>
+        <Link
+          href={`/citizen/appointments/nouveau?service=${service.id}`}
+          className={buttonClasses("secondary")}
+        >
+          {t.publicPages.services.bookAppointment}
         </Link>
         <Link href="/contact" className={buttonClasses("secondary")}>
           {t.publicPages.services.askQuestion}

@@ -2,12 +2,13 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Languages } from "lucide-react";
+import { Languages } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { buttonClasses } from "@/components/ui/Button";
@@ -40,15 +41,16 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        {LOCALES.map((value) => (
-          <DropdownMenuItem key={value} onSelect={() => choose(value)} className="gap-2">
-            <span className="w-6 font-mono text-[10px] uppercase text-muted-foreground">
-              {LOCALE_LABELS[value].short}
-            </span>
-            <span className="flex-1 text-sm">{LOCALE_LABELS[value].label}</span>
-            {locale === value ? <Check className="size-4" /> : null}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuRadioGroup value={locale} onValueChange={(value) => choose(value as Locale)}>
+          {LOCALES.map((value) => (
+            <DropdownMenuRadioItem key={value} value={value} className="gap-2">
+              <span className="w-6 font-mono text-[10px] uppercase text-muted-foreground">
+                {LOCALE_LABELS[value].short}
+              </span>
+              <span className="flex-1 text-sm">{LOCALE_LABELS[value].label}</span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
