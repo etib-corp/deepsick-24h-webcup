@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { REQUEST_PRIORITIES } from "@/lib/roles";
+import { OPINION_STANCES, REQUEST_PRIORITIES } from "@/lib/roles";
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Indiquez votre nom complet.").max(80),
@@ -70,6 +70,21 @@ export const broadcastSchema = z.object({
   startsAt: optionalDateTime,
   endsAt: optionalDateTime,
   active: z.coerce.boolean().optional(),
+});
+
+export const consultationSchema = z.object({
+  title: z.string().trim().min(3, "Indiquez un titre.").max(160),
+  summary: z.string().trim().max(400).optional().or(z.literal("")),
+  description: z.string().trim().min(10, "Décrivez le projet.").max(8000),
+  published: z.coerce.boolean().optional(),
+  opensAt: optionalDateTime,
+  closesAt: optionalDateTime,
+});
+
+export const opinionSchema = z.object({
+  consultationId: z.string().trim().min(1),
+  stance: z.enum(OPINION_STANCES),
+  comment: z.string().trim().min(10, "Exprimez votre avis (10 caractères min.).").max(2000),
 });
 
 export function firstError(error: z.ZodError): string {

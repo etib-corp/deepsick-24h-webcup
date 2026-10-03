@@ -95,6 +95,32 @@ async function main() {
     ],
   });
 
+  /* --- Consultations & opinions (F66) ---------------------------------- */
+  await prisma.opinion.deleteMany({});
+  await prisma.consultation.deleteMany({});
+  const consultation = await prisma.consultation.create({
+    data: {
+      slug: "extension-secteur-05",
+      title: "Extension du Secteur 05",
+      summary: "Faut-il prioriser l'extension des modules d'habitation du Secteur 05 ?",
+      description:
+        "Le Haut Conseil étudie l'extension des modules d'habitation du Secteur 05 pour accueillir de nouvelles familles. Donnez votre avis : ce retour est consultatif et n'a pas valeur de vote officiel.",
+      status: "OPEN",
+      published: true,
+      authorId: council.id,
+    },
+  });
+  await prisma.opinion.create({
+    data: {
+      reference: "OPN-501",
+      consultationId: consultation.id,
+      authorId: citizen.id,
+      stance: "SUPPORT",
+      comment:
+        "Je suis favorable à l'extension : de nouvelles familles dynamiseront le secteur et les services de proximité.",
+    },
+  });
+
   /* --- Reports (signalements) ------------------------------------------ */
   const reports = [
     { reference: "INC-042", type: "SECURITY", title: "Alerte intrusion airlock", description: "Détection d'une ouverture non autorisée sur le sas du Secteur 04. Aucun badge enregistré.", priority: "CRITICAL", status: "EN_ROUTE", sector: "Secteur 04 · Rempart", unit: "ARES-04", assigneeId: officer.id },
