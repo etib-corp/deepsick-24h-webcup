@@ -31,6 +31,7 @@ const es: Dictionary = {
     simulatedData: "Barrido en directo · datos simulados",
   },
   nav: {
+    breadcrumb: "Ruta de navegación",
     home: "Inicio",
     services: "Servicios",
     announcements: "Anuncios",

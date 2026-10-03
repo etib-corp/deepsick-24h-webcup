@@ -9,6 +9,7 @@ import { Bell } from "lucide-react";
 import { StatusStrip } from "@/components/colony/StatusStrip";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemePicker } from "@/components/layout/ThemePicker";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { buttonClasses } from "@/components/ui/Button";
 import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/ui";
@@ -107,7 +108,10 @@ export function ConsoleShell({
         </div>
       </nav>
 
-      <main data-console className="mx-auto max-w-5xl px-4 py-5">{children}</main>
+      <main data-console className="mx-auto max-w-5xl px-4 py-5">
+        <Breadcrumbs />
+        {children}
+      </main>
     </div>
   );
 }

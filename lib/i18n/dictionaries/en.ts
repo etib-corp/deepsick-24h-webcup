@@ -31,6 +31,7 @@ const en: Dictionary = {
     simulatedData: "Live sweep · simulated data",
   },
   nav: {
+    breadcrumb: "Breadcrumb",
     home: "Home",
     services: "Services",
     announcements: "News",

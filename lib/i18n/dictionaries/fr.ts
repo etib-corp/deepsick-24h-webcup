@@ -32,6 +32,7 @@ const fr = {
     simulatedData: "Balayage en direct · données simulées",
   },
   nav: {
+    breadcrumb: "Fil d’Ariane",
     home: "Accueil",
     services: "Services",
     announcements: "Annonces",

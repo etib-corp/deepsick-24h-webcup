@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 import { getAnnouncementBySlug } from "@/lib/data";
 import { formatDate } from "@/lib/format";
@@ -22,6 +23,7 @@ export default async function AnnouncementDetailPage({ params }: Params) {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
+      <Breadcrumbs currentLabel={announcement.title} />
       <Link href="/announcements" className="text-sm text-primary hover:underline">
         {t.publicPages.announcements.backAll}
       </Link>
