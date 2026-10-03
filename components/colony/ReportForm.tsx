@@ -41,7 +41,7 @@ export function ReportForm({ defaultType = "SECURITY" }: { defaultType?: string 
     <SubmissionForm action={formAction} className="space-y-4">
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
-      <fieldset className="space-y-2">
+      <fieldset className="space-y-2" data-tour="report-type">
         <legend className="font-mono text-xs uppercase tracking-wide text-foreground">
           {t.citizen.report.service}
         </legend>
@@ -109,7 +109,9 @@ export function ReportForm({ defaultType = "SECURITY" }: { defaultType?: string 
         />
       </Field>
 
-      <SubmitButton />
+      <div data-tour="report-submit">
+        <SubmitButton />
+      </div>
     </SubmissionForm>
   );
 }

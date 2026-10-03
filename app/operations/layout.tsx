@@ -56,6 +56,7 @@ export default async function OperationsLayout({ children }: { children: React.R
     <ConsoleShell
       station={STATION_NAMES[session.user.role] ?? t.common.appName}
       nav={config.nav}
+      role={session.user.role}
       banner={<BroadcastBanner />}
     >
       {children}

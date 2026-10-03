@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { StatTile } from "@/components/colony/StatTile";
+import { TourLauncher } from "@/components/tour/TourLauncher";
 import { Card } from "@/components/ui/Card";
 import { ReportStatusBadge } from "@/components/ui/StatusBadge";
 import { getCouncilStats, getReports } from "@/lib/data";
@@ -37,7 +38,7 @@ export default async function CouncilPage() {
         <p className="text-sm text-muted-foreground">{t.council.overview.subtitle}</p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" data-tour="council-stats">
         <StatTile
           label={t.council.overview.open}
           value={stats.openReports}
@@ -121,6 +122,13 @@ export default async function CouncilPage() {
             <p className="text-xs text-muted-foreground">{t.council.overview.devPanelHint}</p>
           </Card>
         </Link>
+      </section>
+
+      {/* Every tour the Council can run, from here */}
+      <section>
+        <Card className="p-5">
+          <TourLauncher onlyAccessible role="COUNCIL" />
+        </Card>
       </section>
     </div>
   );

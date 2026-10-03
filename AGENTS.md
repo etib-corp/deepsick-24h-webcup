@@ -376,6 +376,9 @@ Demonstrate the role separation, the distinct agent workspace and the request li
   Hephaestus, Hermes, Mercator, BioDôme); seeded content keeps its stored language.
 - **Motion is anime.js, via `lib/motion.ts`.** Use `reveal`/`revealSelf`/`countUp`/`drawIn` rather
   than ad-hoc transitions, and always keep the reduced-motion guard intact.
+- **The interactive tutorial drives the real UI.** Mark any element a lesson can spotlight with
+  `data-tour="<name>"`, declare the step in `lib/tour.ts` and add its copy to `t.tour.lessons` in
+  the three dictionaries (see [`docs/TUTORIAL.md`](docs/TUTORIAL.md) §6).
 - **Focus on flow:** one complete, solid journey beats many half-built screens.
 
 ---

@@ -21,6 +21,7 @@ export function Reveal({
   stagger = 70,
   delay = 0,
   y = 12,
+  dataTour,
 }: {
   children: ReactNode;
   className?: string;
@@ -30,6 +31,8 @@ export function Reveal({
   delay?: number;
   /** Vertical distance the content travels from, in px. */
   y?: number;
+  /** Optional `data-tour` hook so the interactive tutorial can spotlight it. */
+  dataTour?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -44,7 +47,7 @@ export function Reveal({
   }, [self, stagger, delay, y]);
 
   return (
-    <div ref={ref} className={cn(className)}>
+    <div ref={ref} className={cn(className)} data-tour={dataTour}>
       {children}
     </div>
   );

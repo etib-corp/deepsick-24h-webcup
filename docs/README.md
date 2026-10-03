@@ -6,6 +6,7 @@ Index of the project documentation.
 | --- | --- |
 | [`../AGENTS.md`](../AGENTS.md) | AI coding agent brief — mission, stack, features, data model, roadmap, demo |
 | [`PROJECT.md`](PROJECT.md) | Product & architecture overview — roles, routes, data model, security, conventions |
+| [`TUTORIAL.md`](TUTORIAL.md) | Complete tutorial by type of user — walkthroughs, permissions, demo script (mirrors `/guide`) |
 | [`NEEDS.md`](NEEDS.md) | Competition needs — the fetch script, the Webcup API and how needs are tracked |
 | [`TODO_terra_nova.md`](TODO_terra_nova.md) | **Auto-generated** needs checklist (do not edit by hand) |
 | [`../README.md`](../README.md) | Quick start for the repository |

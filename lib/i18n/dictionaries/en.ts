@@ -51,6 +51,7 @@ const en: Dictionary = {
     announcements: "News",
     contact: "Contact",
     appearance: "Appearance",
+    guide: "Guide",
     login: "Sign in",
     register: "Create an account",
     mySpace: "My space",
@@ -749,6 +750,268 @@ const en: Dictionary = {
       tip1: "Your message is stored and receives a unique reference shown on submit.",
       tip2: "Agents read the messages from their console and reply as soon as possible.",
       tip3: "Emergency? Contact the colony emergency services directly.",
+    },
+  },
+  guide: {
+    title: "User guide",
+    subtitle:
+      "Pick your profile: each walkthrough explains, step by step, what you can do on the platform.",
+    basicsTitle: "The basics, for everyone",
+    stepsTitle: "Step by step",
+    whereTitle: "Where it happens",
+    openSpace: "Open that space",
+    accountTitle: "Demo account",
+    noAccount: "No account needed",
+    tipTitle: "Tip",
+    pickProfile: "Pick a profile",
+    basics: [
+      "Language: globe icon in the header (French, English, Spanish) — remembered on this device.",
+      "Theme: palette icon in the header, or the full gallery at /apparence (ten themes).",
+      "Sign in and out from the header; use “Quit” inside a console.",
+      "Your role decides the landing space: /citizen, /operations/… or /council.",
+      "Consoles refresh every 5 seconds — the LIVE lamp confirms the view is current.",
+      "No email is sent in the demo: acknowledgements and tracking codes are shown on screen.",
+    ],
+    profiles: {
+      VISITOR: {
+        label: "Visitor",
+        intro:
+          "You are exploring the city without an account: the whole public site is open, and creating an identity takes a minute.",
+        steps: [
+          "Start on the home page: where you are, what you can do, and the way to every service.",
+          "Browse the civic network (/services), then open a service to see what it covers.",
+          "Read the official announcements (/announcements): service changes, works, campaigns.",
+          "Write to the administration (/contact): a tracking code is shown immediately.",
+          "Pick your theme and language, then create your colonist identity (/register).",
+          "Sign in (/login): you land in the space that matches your role.",
+        ],
+        tip: "Keep the tracking code shown after a message — it is how your request is found again.",
+      },
+      CITIZEN: {
+        label: "Citizen",
+        intro:
+          "Your personal space: follow your reports and orders, reach the city and keep track of everything.",
+        steps: [
+          "Sign in: you land on /citizen, your dashboard.",
+          "Read the colony indicators (local time, breathable air, radiation) and your active requests.",
+          "Report an incident: service, subject, priority, sector, description, then send it.",
+          "Track it in /citizen/reports and open it: status, assigned unit, timeline.",
+          "Order a service (/citizen/orders): a Hermes rover or a Mercator meal, with ETA and credits.",
+          "Watch your notifications (bell): every status change lands there.",
+          "Check your balance and transactions in /citizen/wallet.",
+        ],
+        tip: "The service drives the status: your tracking view follows along without any action from you.",
+      },
+      SECURITY: {
+        label: "Security",
+        intro:
+          "Security console: incidents are routed to you, critical ones and open cases first.",
+        steps: [
+          "Sign in: the Ares Security Command console opens at /operations/security.",
+          "Filter with the chips (All / Critical / To handle / Resolved) and read the four counters.",
+          "Open an incident: the colonist's report, the sector, the radar and the timeline.",
+          "Take it over — the case is assigned to your unit.",
+          "Move the status along and add an intervention note (the colonist sees it).",
+          "On a security incident: fill in the person concerned, the fine and the report, then open the case.",
+        ],
+        tip: "The console refreshes every 5 seconds; the LIVE lamp means you are up to date.",
+      },
+      MEDIC: {
+        label: "Medical",
+        intro:
+          "Medical incidents are routed straight to you; triage happens in the same console as security.",
+        steps: [
+          "Sign in: the console opens at /operations/medical.",
+          "Handle critical incidents first (chip and counter): those are life-threatening.",
+          "Open the incident, check the sector and the description.",
+          "Take it over, then move the status (en route → in progress → resolved) with a care note.",
+        ],
+        tip: "You only see medical incidents — security, maintenance and cleanliness stay with their services.",
+      },
+      MAINTENANCE: {
+        label: "Maintenance",
+        intro: "Air, power, water and cleanliness: technical incidents in the modules land here.",
+        steps: [
+          "Sign in: the console opens at /operations/maintenance.",
+          "You handle both maintenance and cleanliness incidents.",
+          "Open the incident: sector, description, timeline.",
+          "Take it over, update the status and leave an intervention note.",
+        ],
+        tip: "A critical breakdown sits at the top of the “Critical” filter — start there.",
+      },
+      DRIVER: {
+        label: "Transport",
+        intro: "The colony ride queue: rovers and shuttles between sectors.",
+        steps: [
+          "Sign in: /operations/transport shows the Hermes ride queue.",
+          "Spot the pending rides (to assign) and the ones already running.",
+          "Move each ride along: confirmed → en route → completed.",
+          "The colonist sees the new status and ETA in their space, with no action on their side.",
+        ],
+        tip: "Change the status straight from the list: a menu plus “Upd.” per ride.",
+      },
+      MERCHANT: {
+        label: "Commerce",
+        intro: "Canteens and supplies: prepare, mark ready, collect (simulated credits).",
+        steps: [
+          "Sign in: /operations/commerce shows the Mercator meal queue.",
+          "Follow preparing, ready and the revenue for the cycle.",
+          "Move an order along: confirmed → preparing → ready → completed (or cancelled).",
+          "The colonist is notified at every step.",
+        ],
+        tip: "Credits are fictional: the revenue only shows economic activity.",
+      },
+      ADMIN_AGENT: {
+        label: "Administrative agent",
+        intro: "Colonist requests: permits, authorisations and documents to process.",
+        steps: [
+          "Sign in: /operations/administration opens the requests queue.",
+          "Open a request: what the colonist filed, their contact details and the date.",
+          "Move the status: submitted → in review → in progress → resolved → closed.",
+          "Write the official reply: it is appended to the history the colonist reads.",
+        ],
+        tip: "Every status change notifies the colonist concerned.",
+      },
+      COUNCIL: {
+        label: "High Council",
+        intro:
+          "Running the colony: content, accounts and the big picture — plus access to every service console.",
+        steps: [
+          "Sign in: /council shows the overview (incidents, interventions, services, announcements, colonists, orders).",
+          "Publish an announcement (/council/announcements): title, standfirst, body, publish now or keep as a draft.",
+          "Manage services (/council/services): add or remove an entry from the civic network.",
+          "Change a role (/council/users): promoting a colonist to staff opens their console.",
+          "Open any service console to act on a case.",
+          "Track the competition needs in the developer panel (/dev/tickets).",
+        ],
+        tip: "Publishing an announcement makes it appear on the public home page immediately.",
+      },
+    },
+  },
+  tour: {
+    badge: "Guided tour",
+    launchTitle: "Interactive tutorial",
+    launchHint:
+      "A guided tour over the screen, like in a video game: the element to use is highlighted and the rest of the page is blocked until you perform the action.",
+    launchIntro: "Every profile has its own tour: discover the city, work a case, publish an announcement…",
+    start: "Start the tour",
+    needsAccount: "Account required: {account}",
+    step: "Step {current} / {total}",
+    next: "Next",
+    finish: "Finish",
+    skip: "Quit the tour",
+    clickHint: "Click the highlighted element",
+    blocked: "Not so fast: follow the highlighted element to continue.",
+    waiting: "Preparing the screen…",
+    lessons: {
+      PUBLIC: {
+        label: "Discover the city",
+        steps: [
+          {
+            title: "Welcome to Terra Nova",
+            body: "This tour walks you through step by step: during a tutorial only highlighted elements respond. Just like a game.",
+          },
+          {
+            title: "Open the civic network",
+            body: "Every municipal service sits behind this entry. Click “Services” to continue.",
+          },
+          {
+            title: "One service, one page",
+            body: "Services are grouped by category. Open one to see what it covers and how to call on it.",
+          },
+          {
+            title: "The guide is always there",
+            body: "The “Guide” entry reopens this tour, the written walkthroughs and the other profiles' tutorials. Click it.",
+          },
+          {
+            title: "Your turn",
+            body: "You know your way around: create your colonist identity to open your personal space.",
+          },
+        ],
+      },
+      CITIZEN: {
+        label: "Citizen journey",
+        steps: [
+          {
+            title: "Your personal space",
+            body: "Make yourself at home. During the tour only the highlighted target responds: everything else is locked.",
+          },
+          {
+            title: "Move between your screens",
+            body: "Reports, orders, wallet and the colony map all live in this bar.",
+          },
+          {
+            title: "The state of the colony",
+            body: "Local time, breathable air and radiation: your environment at a glance.",
+          },
+          {
+            title: "Report an incident",
+            body: "Click “Report” in the bar: the form opens on the right service.",
+          },
+          {
+            title: "Pick the service",
+            body: "Security, medical, maintenance or cleanliness: the report is routed automatically. Click one of the choices.",
+          },
+          {
+            title: "Nothing left to do but send",
+            body: "Subject, priority, sector and description, then “Transmit the report”. You will follow every step after that.",
+          },
+        ],
+      },
+      CONSOLE: {
+        label: "Work a case",
+        steps: [
+          {
+            title: "Your service console",
+            body: "Everything your service has to handle lands here. Follow the tour: it walks you through a real case.",
+          },
+          {
+            title: "Filter the queue",
+            body: "These chips sort the incidents: critical, to handle, resolved. Click “All”.",
+          },
+          {
+            title: "The station radar",
+            body: "It locates incidents and sweeps continuously; it slows down while a case is engaged.",
+          },
+          {
+            title: "Open a case",
+            body: "Click the first incident in the log to see its full detail.",
+          },
+          {
+            title: "Take it over",
+            body: "This button really assigns the case to your unit — the tour acts on the data.",
+          },
+          {
+            title: "Move the status along",
+            body: "New status, an intervention note the colonist can read, then “Save”. That is the heart of the job.",
+          },
+        ],
+      },
+      COUNCIL: {
+        label: "Run the colony",
+        steps: [
+          {
+            title: "The big picture",
+            body: "The High Council sees everything: incidents, services, announcements, colonists and orders. Follow the tour.",
+          },
+          {
+            title: "The key indicators",
+            body: "Six counters summarise the colony's activity; they refresh on their own.",
+          },
+          {
+            title: "Publish an announcement",
+            body: "Click “Announcements” in the bar to open the editorial desk.",
+          },
+          {
+            title: "Write it",
+            body: "Title, standfirst and body. Click inside the “Title” field to start.",
+          },
+          {
+            title: "Publish",
+            body: "“Publish the announcement” makes it appear on the public home page immediately.",
+          },
+        ],
+      },
     },
   },
   themes: {

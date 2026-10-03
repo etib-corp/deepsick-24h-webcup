@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/shadcn/sonner";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TourProvider } from "@/components/tour/TourProvider";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { DEFAULT_THEME, THEME_IDS } from "@/lib/themes";
@@ -34,8 +35,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <LocaleProvider locale={locale} dictionary={dictionary}>
             <TooltipProvider>
-              {children}
-              <Toaster />
+              <TourProvider>
+                {children}
+                <Toaster />
+              </TourProvider>
             </TooltipProvider>
           </LocaleProvider>
         </ThemeProvider>
