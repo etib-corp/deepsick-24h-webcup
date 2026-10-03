@@ -51,6 +51,12 @@ export default async function ServiceDetailPage({ params }: Params) {
         <Link href="/citizen/report" className={buttonClasses("primary")}>
           {t.publicPages.services.createRequest}
         </Link>
+        <Link
+          href={`/citizen/appointments/nouveau?service=${service.id}`}
+          className={buttonClasses("secondary")}
+        >
+          {t.publicPages.services.bookAppointment}
+        </Link>
         <Link href="/contact" className={buttonClasses("secondary")}>
           {t.publicPages.services.askQuestion}
         </Link>

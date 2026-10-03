@@ -3,11 +3,13 @@
 import { Badge } from "@/components/ui/Badge";
 import { useT } from "@/lib/i18n/client";
 import {
+  isAppointmentStatus,
   isOrderStatus,
   isReportPriority,
   isReportStatus,
   isRequestStatus,
   isRole,
+  type AppointmentStatus,
   type OrderStatus,
   type ReportPriority,
   type ReportStatus,
@@ -58,6 +60,12 @@ const ORDER_STATUS_TONES: Record<OrderStatus, Tone> = {
   CANCELLED: "neutral",
 };
 
+const APPOINTMENT_STATUS_TONES: Record<AppointmentStatus, Tone> = {
+  BOOKED: "mars",
+  CANCELLED: "neutral",
+  COMPLETED: "success",
+};
+
 const ROLE_TONES: Record<Role, Tone> = {
   CITIZEN: "mars",
   SECURITY: "danger",
@@ -95,6 +103,17 @@ export function OrderStatusBadge({ status }: { status: string }) {
   const label = isOrderStatus(status) ? t.orderStatus[status] : status;
   return (
     <Badge tone={isOrderStatus(status) ? ORDER_STATUS_TONES[status] : "neutral"}>{label}</Badge>
+  );
+}
+
+/** Rendez-vous status (BOOKED → CANCELLED / COMPLETED). */
+export function AppointmentStatusBadge({ status }: { status: string }) {
+  const t = useT();
+  const label = isAppointmentStatus(status) ? t.appointmentStatus[status] : status;
+  return (
+    <Badge tone={isAppointmentStatus(status) ? APPOINTMENT_STATUS_TONES[status] : "neutral"}>
+      {label}
+    </Badge>
   );
 }
 

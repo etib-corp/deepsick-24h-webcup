@@ -18,6 +18,7 @@ export default async function CitizenLayout({ children }: { children: React.Reac
     { href: "/citizen/demandes", label: t.citizen.nav.demandes, icon: "📄" },
     { href: "/citizen/orders", label: t.citizen.nav.orders, icon: "🎫" },
     { href: "/citizen/wallet", label: t.citizen.nav.wallet, icon: "◈" },
+    { href: "/citizen/appointments", label: t.citizen.nav.appointments, icon: "🗓️" },
     { href: "/citizen/map", label: t.citizen.nav.map, icon: "🗺️" },
   ];
 
