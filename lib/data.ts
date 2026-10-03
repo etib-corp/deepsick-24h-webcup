@@ -298,6 +298,63 @@ export function getUnreadNotificationCount(userId: string) {
   return prisma.notification.count({ where: { userId, read: false } });
 }
 
+/* ------------------------------------------------------------------ *
+ * Rendez-vous (F40) — slots and a resident's appointments
+ * ------------------------------------------------------------------ */
+
+const APPOINTMENT_SLOT_START = 9; // 09:00 local
+const APPOINTMENT_SLOT_END = 17; // 17:00 local
+const APPOINTMENT_SLOT_STEP = 30; // minutes
+const APPOINTMENT_SLOT_DAYS = 7;
+
+export type AppointmentSlot = { date: Date; available: boolean };
+
+/** Next `APPOINTMENT_SLOT_DAYS` of bookable 30-min slots for a service. */
+export async function getAvailableSlots(serviceId: string): Promise<AppointmentSlot[]> {
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + APPOINTMENT_SLOT_DAYS);
+
+  const booked = await prisma.appointment.findMany({
+    where: { serviceId, status: "BOOKED", date: { gte: start, lt: end } },
+    select: { date: true },
+  });
+  const taken = new Set(booked.map((item) => item.date.getTime()));
+
+  const slots: AppointmentSlot[] = [];
+  for (let day = 0; day < APPOINTMENT_SLOT_DAYS; day++) {
+    const cursor = new Date(start);
+    cursor.setDate(cursor.getDate() + day);
+    for (let hour = APPOINTMENT_SLOT_START; hour < APPOINTMENT_SLOT_END; hour++) {
+      for (let minute = 0; minute < 60; minute += APPOINTMENT_SLOT_STEP) {
+        const date = new Date(cursor);
+        date.setHours(hour, minute, 0, 0);
+        if (date.getTime() <= now.getTime()) continue;
+        slots.push({ date, available: !taken.has(date.getTime()) });
+      }
+    }
+  }
+  return slots;
+}
+
+export function getAppointments(citizenId: string) {
+  return prisma.appointment.findMany({
+    where: { citizenId },
+    orderBy: [{ date: "asc" }],
+    include: { service: { select: { name: true, icon: true, sector: true } } },
+  });
+}
+
+export function getUpcomingAppointments(citizenId: string) {
+  return prisma.appointment.findMany({
+    where: { citizenId, status: "BOOKED", date: { gt: new Date() } },
+    orderBy: [{ date: "asc" }],
+    include: { service: { select: { name: true, icon: true, sector: true } } },
+  });
+}
+
 export function getMessages(channel: string) {
   return prisma.message.findMany({
     where: { channel },

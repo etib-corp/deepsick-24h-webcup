@@ -25,7 +25,7 @@ export function ContactForm() {
 
   if (state.ok) {
     return (
-      <Alert tone="success" title={t.publicPages.contact.sent}>
+      <Alert autoFocus tone="success" title={t.publicPages.contact.sent}>
         <p>{state.message}</p>
         {state.reference ? (
           <p className="mt-2">
