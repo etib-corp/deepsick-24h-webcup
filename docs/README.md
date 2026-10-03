@@ -8,6 +8,8 @@ Index of the project documentation.
 | [`PROJECT.md`](PROJECT.md) | Product & architecture overview — roles, routes, data model, security, conventions |
 | [`NEEDS.md`](NEEDS.md) | Competition needs — the fetch script, the Webcup API and how needs are tracked |
 | [`TODO_terra_nova.md`](TODO_terra_nova.md) | **Auto-generated** needs checklist (do not edit by hand) |
+| [`CLOSED_ISSUES.md`](CLOSED_ISSUES.md) | Snapshot of the closed GitHub issues, with the need code each one covers |
+| [`CLOSED_ISSUES_FORMS.md`](CLOSED_ISSUES_FORMS.md) | **Jury evidence forms** (FR) — one pre-filled form per closed issue |
 | [`../README.md`](../README.md) | Quick start for the repository |
 
 ## Scope
