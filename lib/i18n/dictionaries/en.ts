@@ -739,6 +739,9 @@ const en: Dictionary = {
   broadcast: {
     eyebrow: "Message from the High Council",
     action: "Learn more",
+    previous: "Previous message",
+    next: "Next message",
+    goTo: "Go to message {index} of {total}",
   },
   dev: {
     station: "DEV · Webcup console",

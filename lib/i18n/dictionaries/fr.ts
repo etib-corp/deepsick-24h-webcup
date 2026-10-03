@@ -743,6 +743,9 @@ const fr = {
   broadcast: {
     eyebrow: "Message du Haut Conseil",
     action: "En savoir plus",
+    previous: "Message précédent",
+    next: "Message suivant",
+    goTo: "Aller au message {index} sur {total}",
   },
   dev: {
     station: "DEV · Console Webcup",
