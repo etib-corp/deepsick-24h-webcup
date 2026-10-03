@@ -1,4 +1,5 @@
 import { ConsoleShell, type ConsoleNavItem } from "@/components/colony/ConsoleShell";
+import { BroadcastBanner } from "@/components/layout/BroadcastBanner";
 import { getUnreadNotificationCount } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
@@ -28,6 +29,7 @@ export default async function CitizenLayout({ children }: { children: React.Reac
       unread={unread}
       bellHref="/citizen/notifications"
       role={session.user.role}
+      banner={<BroadcastBanner />}
     >
       {children}
     </ConsoleShell>

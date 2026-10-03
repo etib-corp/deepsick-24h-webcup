@@ -56,6 +56,22 @@ export const announcementSchema = z.object({
   published: z.coerce.boolean().optional(),
 });
 
+const optionalDateTime = z.preprocess(
+  (value) =>
+    value === "" || value === null || value === undefined ? undefined : new Date(String(value)),
+  z.date().optional(),
+);
+
+export const broadcastSchema = z.object({
+  title: z.string().trim().min(3, "Indiquez un titre.").max(160),
+  message: z.string().trim().min(10, "Rédigez le message.").max(2000),
+  actionLabel: z.string().trim().max(60).optional().or(z.literal("")),
+  actionHref: z.string().trim().max(240).optional().or(z.literal("")),
+  startsAt: optionalDateTime,
+  endsAt: optionalDateTime,
+  active: z.coerce.boolean().optional(),
+});
+
 export function firstError(error: z.ZodError): string {
   return error.issues[0]?.message ?? "Données invalides.";
 }

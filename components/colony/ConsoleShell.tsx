@@ -30,6 +30,7 @@ export function ConsoleShell({
   unread = 0,
   bellHref,
   role,
+  banner,
 }: {
   station: string;
   nav: ConsoleNavItem[];
@@ -38,6 +39,7 @@ export function ConsoleShell({
   bellHref?: string;
   /** Signed-in role — decides which tutorials this space offers. */
   role?: string | null;
+  banner?: ReactNode;
 }) {
   const t = useT();
   const pathname = usePathname();
@@ -117,6 +119,8 @@ export function ConsoleShell({
           ))}
         </div>
       </nav>
+
+      {banner}
 
       <main
         id="main-content"
