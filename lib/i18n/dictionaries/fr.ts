@@ -179,6 +179,7 @@ const fr = {
       session:
         "Session résistante · données biométriques locales · audit 18:30 MTC",
       registered: "Identité créée. Vous pouvez vous connecter.",
+      deleted: "Compte supprimé. Votre identité civique a été retirée du réseau.",
       invalid: "Identifiant colon ou mot de passe incorrect.",
     },
     register: {
@@ -374,6 +375,29 @@ const fr = {
       title: "Carte de Terra Nova",
       subtitle: "Modules, services et points d'intérêt — visualisation simulée.",
       sectors: "Secteurs",
+    },
+    account: {
+      title: "Mon compte",
+      subtitle: "Votre identité civique et les options liées à votre profil colon.",
+      identity: "Identité",
+      email: "Adresse e-mail",
+      role: "Rôle",
+      dangerZone: "Zone dangereuse",
+      dangerZoneHint:
+        "La suppression est définitive et irréversible. Vos demandes, signalements et commandes seront retirés du réseau.",
+      deleteButton: "Supprimer mon compte",
+      dialogTitle: "Supprimer définitivement votre compte",
+      dialogText:
+        "Cette action est irréversible. Vous perdrez l'accès à votre espace et à l'ensemble de vos démarches. Saisissez « SUPPRIMER » pour confirmer.",
+      confirmLabel: "Tapez SUPPRIMER",
+      confirmPhrase: "SUPPRIMER",
+      cancel: "Annuler",
+      confirmButton: "Supprimer définitivement",
+      pending: "Suppression…",
+      confirmMismatch: "Saisissez SUPPRIMER pour confirmer la suppression.",
+      unauthorized: "Vous devez être connecté pour supprimer votre compte.",
+      forbidden: "Cette action est réservée aux comptes citoyens.",
+      failed: "Impossible de supprimer votre compte. Veuillez réessayer.",
     },
   },
   civicServices: {

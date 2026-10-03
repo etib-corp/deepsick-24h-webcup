@@ -177,6 +177,7 @@ const en: Dictionary = {
       biometric: "Biometric passkey",
       session: "Hardened session · biometric data stays local · audited 18:30 MTC",
       registered: "Identity created. You can sign in.",
+      deleted: "Account deleted. Your civic identity has been removed from the network.",
       invalid: "Incorrect colonist ID or password.",
     },
     register: {
@@ -370,6 +371,29 @@ const en: Dictionary = {
       title: "Map of Terra Nova",
       subtitle: "Modules, services and points of interest — simulated view.",
       sectors: "Sectors",
+    },
+    account: {
+      title: "My account",
+      subtitle: "Your civic identity and the options for your colonist profile.",
+      identity: "Identity",
+      email: "Email address",
+      role: "Role",
+      dangerZone: "Danger zone",
+      dangerZoneHint:
+        "Deletion is permanent and irreversible. Your requests, reports and orders will be removed from the network.",
+      deleteButton: "Delete my account",
+      dialogTitle: "Permanently delete your account",
+      dialogText:
+        "This action is irreversible. You will lose access to your space and all your requests. Type \"DELETE\" to confirm.",
+      confirmLabel: "Type DELETE",
+      confirmPhrase: "DELETE",
+      cancel: "Cancel",
+      confirmButton: "Delete permanently",
+      pending: "Deleting…",
+      confirmMismatch: "Type DELETE to confirm the deletion.",
+      unauthorized: "You must be signed in to delete your account.",
+      forbidden: "This action is reserved for citizen accounts.",
+      failed: "Unable to delete your account. Please try again.",
     },
   },
   civicServices: {

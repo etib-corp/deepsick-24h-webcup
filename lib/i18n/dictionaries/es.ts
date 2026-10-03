@@ -177,6 +177,7 @@ const es: Dictionary = {
       biometric: "Clave biométrica",
       session: "Sesión reforzada · datos biométricos locales · auditado 18:30 MTC",
       registered: "Identidad creada. Ya puedes iniciar sesión.",
+      deleted: "Cuenta eliminada. Tu identidad cívica se ha retirado de la red.",
       invalid: "ID de colono o contraseña incorrectos.",
     },
     register: {
@@ -370,6 +371,29 @@ const es: Dictionary = {
       title: "Mapa de Terra Nova",
       subtitle: "Módulos, servicios y puntos de interés — vista simulada.",
       sectors: "Sectores",
+    },
+    account: {
+      title: "Mi cuenta",
+      subtitle: "Tu identidad cívica y las opciones de tu perfil de colono.",
+      identity: "Identidad",
+      email: "Correo electrónico",
+      role: "Rol",
+      dangerZone: "Zona peligrosa",
+      dangerZoneHint:
+        "La eliminación es definitiva e irreversible. Tus solicitudes, reportes y pedidos se retirarán de la red.",
+      deleteButton: "Eliminar mi cuenta",
+      dialogTitle: "Eliminar permanentemente tu cuenta",
+      dialogText:
+        "Esta acción es irreversible. Perderás el acceso a tu espacio y a todos tus trámites. Escribe «ELIMINAR» para confirmar.",
+      confirmLabel: "Escribe ELIMINAR",
+      confirmPhrase: "ELIMINAR",
+      cancel: "Cancelar",
+      confirmButton: "Eliminar definitivamente",
+      pending: "Eliminando…",
+      confirmMismatch: "Escribe ELIMINAR para confirmar la eliminación.",
+      unauthorized: "Debes iniciar sesión para eliminar tu cuenta.",
+      forbidden: "Esta acción está reservada a las cuentas de ciudadano.",
+      failed: "No se pudo eliminar tu cuenta. Inténtalo de nuevo.",
     },
   },
   civicServices: {
