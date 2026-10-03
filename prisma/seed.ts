@@ -77,6 +77,24 @@ async function main() {
     });
   }
 
+  /* --- General broadcast (D18) ------------------------------------------ */
+  await prisma.broadcast.deleteMany({});
+  await prisma.broadcast.createMany({
+    data: [
+      {
+        title: "Tempête de poussière — confinement temporaire",
+        message:
+          "Une tempête de poussière approche du Secteur 01. Confinez-vous dans les modules habitables jusqu'à nouvel ordre.",
+        actionLabel: "Consulter les consignes",
+        actionHref: "/announcements",
+        startsAt: new Date("2026-10-01T00:00:00Z"),
+        endsAt: null,
+        active: true,
+        authorId: council.id,
+      },
+    ],
+  });
+
   /* --- Reports (signalements) ------------------------------------------ */
   const reports = [
     { reference: "INC-042", type: "SECURITY", title: "Alerte intrusion airlock", description: "Détection d'une ouverture non autorisée sur le sas du Secteur 04. Aucun badge enregistré.", priority: "CRITICAL", status: "EN_ROUTE", sector: "Secteur 04 · Rempart", unit: "ARES-04", assigneeId: officer.id },
