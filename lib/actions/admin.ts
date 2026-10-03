@@ -14,6 +14,7 @@ import {
   setAnnouncementPublished,
   setBroadcastActive,
   setUserRole,
+  setServiceFeatured
 } from "@/lib/services";
 import { isRole } from "@/lib/roles";
 import { announcementSchema, broadcastSchema, firstError, serviceSchema } from "@/lib/validation";
