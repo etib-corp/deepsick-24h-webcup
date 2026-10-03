@@ -2,9 +2,15 @@ import "server-only";
 
 import bcrypt from "bcryptjs";
 
-import { slugify } from "@/lib/format";
+import { formatDateTime, slugify } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
-import { isOrderStatus, isReportStatus, isRequestStatus, isRole, needsAction } from "@/lib/roles";
+import {
+  isOrderStatus,
+  isReportStatus,
+  isRequestStatus,
+  isRole,
+  needsAction,
+} from "@/lib/roles";
 
 /* ------------------------------------------------------------------ *
  * Accounts
@@ -352,4 +358,123 @@ export async function pushNotification(
 
 export async function markAllNotificationsRead(userId: string) {
   return prisma.notification.updateMany({ where: { userId, read: false }, data: { read: true } });
+}
+
+/* ------------------------------------------------------------------ *
+ * Rendez-vous (F40) — booking, cancellation and reminders
+ * ------------------------------------------------------------------ */
+
+/** Window (ms) during which a booked appointment triggers a reminder. */
+export const APPOINTMENT_REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+export async function createAppointment(
+  citizenId: string,
+  input: { serviceId: string; subject?: string | null; date: Date },
+) {
+  return prisma.$transaction(async (tx) => {
+    const service = await tx.municipalService.findUnique({ where: { id: input.serviceId } });
+    if (!service) throw new Error("Service introuvable.");
+
+    // Authoritative re-check: never allow a double-booking of the same slot.
+    const clash = await tx.appointment.findFirst({
+      where: { serviceId: service.id, status: "BOOKED", date: input.date },
+    });
+    if (clash) throw new Error("Ce créneau vient d'être réservé.");
+
+    const count = await tx.appointment.count();
+    const reference = `APT-${String(count + 1).padStart(4, "0")}`;
+
+    const appointment = await tx.appointment.create({
+      data: {
+        reference,
+        serviceId: service.id,
+        subject: input.subject?.trim() || null,
+        citizenId,
+        date: input.date,
+        durationMinutes: 30,
+        sector: service.sector ?? null,
+        status: "BOOKED",
+      },
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: citizenId,
+        title: "Rendez-vous confirmé",
+        body: `${service.name} · ${formatDateTime(input.date)}`,
+        href: "/citizen/appointments",
+      },
+    });
+
+    return appointment;
+  });
+}
+
+export async function cancelAppointment(id: string, citizenId: string) {
+  const appointment = await prisma.appointment.findFirst({
+    where: { id, citizenId },
+  });
+  if (!appointment) throw new Error("Rendez-vous introuvable.");
+  if (appointment.status !== "BOOKED") throw new Error("Ce rendez-vous ne peut plus être annulé.");
+
+  return prisma.$transaction(async (tx) => {
+    const cancelled = await tx.appointment.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+      include: { service: { select: { name: true } } },
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: citizenId,
+        title: "Rendez-vous annulé",
+        body: `${cancelled.service.name} · ${formatDateTime(cancelled.date)}`,
+        href: "/citizen/appointments",
+      },
+    });
+
+    return cancelled;
+  });
+}
+
+/** Deliver a reminder notification once per booked appointment within the window. */
+export async function ensureAppointmentReminders(citizenId: string): Promise<number> {
+  const now = new Date();
+  const horizon = new Date(now.getTime() + APPOINTMENT_REMINDER_WINDOW_MS);
+  const upcoming = await prisma.appointment.findMany({
+    where: {
+      citizenId,
+      status: "BOOKED",
+      reminderSent: false,
+      date: { gt: now, lte: horizon },
+    },
+    include: { service: { select: { name: true } } },
+  });
+
+  for (const appointment of upcoming) {
+    await prisma.$transaction(async (tx) => {
+      await tx.notification.create({
+        data: {
+          userId: citizenId,
+          title: "Rappel — rendez-vous à venir",
+          body: `${appointment.service.name} · ${formatDateTime(appointment.date)}`,
+          href: "/citizen/appointments",
+        },
+      });
+      await tx.appointment.update({
+        where: { id: appointment.id },
+        data: { reminderSent: true },
+      });
+    });
+  }
+
+  return upcoming.length;
+}
+
+export async function isAppointmentSlotTaken(serviceId: string, date: Date): Promise<boolean> {
+  const existing = await prisma.appointment.findFirst({
+    where: { serviceId, status: "BOOKED", date },
+    select: { id: true },
+  });
+  return Boolean(existing);
 }

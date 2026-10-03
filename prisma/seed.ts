@@ -137,6 +137,24 @@ async function main() {
     });
   }
 
+  /* --- Rendez-vous (F40) ---------------------------------------------- */
+  const medicalService = await prisma.municipalService.findUnique({ where: { slug: "medical" } });
+  const demarchesService = await prisma.municipalService.findUnique({ where: { slug: "demarches" } });
+  const appointmentCount = await prisma.appointment.count();
+  if (appointmentCount === 0 && medicalService && demarchesService) {
+    const soon = new Date(Date.now() + 3 * 60 * 60 * 1000);
+    const later = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const appointments = [
+      { reference: "APT-0001", serviceId: medicalService.id, subject: "Vaccination saisonnière", date: soon, sector: medicalService.sector ?? null },
+      { reference: "APT-0002", serviceId: demarchesService.id, subject: "Retrait attestation de résidence", date: later, sector: demarchesService.sector ?? null },
+    ];
+    for (const appointment of appointments) {
+      await prisma.appointment.create({
+        data: { ...appointment, citizenId: citizen.id },
+      });
+    }
+  }
+
   /* --- Notifications + wallet ------------------------------------------ */
   await prisma.notification.deleteMany({ where: { userId: citizen.id } });
   await prisma.notification.createMany({
