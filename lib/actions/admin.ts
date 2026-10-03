@@ -10,16 +10,26 @@ import { readId } from "@/lib/sanitize";
 import {
   createAnnouncement,
   createBroadcast,
+  createConsultation,
   createMunicipalService,
   deleteBroadcast,
+  deleteConsultation,
   deleteMunicipalService,
   setAnnouncementPublished,
   setBroadcastActive,
+  setConsultationPublished,
+  setConsultationStatus,
   setServiceFeatured,
   setUserRole,
 } from "@/lib/services";
-import { isRole } from "@/lib/roles";
-import { announcementSchema, broadcastSchema, firstError, serviceSchema } from "@/lib/validation";
+import { isConsultationStatus, isRole } from "@/lib/roles";
+import {
+  announcementSchema,
+  broadcastSchema,
+  consultationSchema,
+  firstError,
+  serviceSchema,
+} from "@/lib/validation";
 
 export async function createServiceAction(
   _previous: AdminActionState,
@@ -288,6 +298,63 @@ export async function deleteBroadcastAction(formData: FormData) {
 
   revalidatePath("/council/broadcasts");
   revalidatePath("/", "layout");
+}
+
+export async function createConsultationAction(
+  _previous: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await requirePageRole(["COUNCIL"]);
+
+  const parsed = consultationSchema.safeParse({
+    title: formData.get("title"),
+    summary: formData.get("summary"),
+    description: formData.get("description"),
+    published: formData.get("published") === "on" || formData.get("published") === "true",
+    opensAt: formData.get("opensAt"),
+    closesAt: formData.get("closesAt"),
+  });
+  if (!parsed.success) return { ok: false, message: firstError(parsed.error) };
+
+  try {
+    await createConsultation({ ...parsed.data, authorId: session.user.id });
+  } catch {
+    return { ok: false, message: getDictionary().errors.consultationFailed };
+  }
+
+  revalidatePath("/council/consultations");
+  revalidatePath("/citizen/consultations");
+  return { ok: true, message: getDictionary().council.consultations.form.created };
+}
+
+export async function toggleConsultationAction(formData: FormData) {
+  await requirePageRole(["COUNCIL"]);
+  const id = String(formData.get("id") ?? "");
+  const published = formData.get("published") === "true";
+  if (!id) return;
+  await setConsultationPublished(id, published);
+  revalidatePath("/council/consultations");
+  revalidatePath("/citizen/consultations");
+}
+
+export async function setConsultationStatusAction(formData: FormData) {
+  await requirePageRole(["COUNCIL"]);
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "");
+  if (!id || !isConsultationStatus(status)) return;
+  await setConsultationStatus(id, status);
+  revalidatePath("/council/consultations");
+  revalidatePath(`/council/consultations/${id}`);
+  revalidatePath("/citizen/consultations");
+}
+
+export async function deleteConsultationAction(formData: FormData) {
+  await requirePageRole(["COUNCIL"]);
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await deleteConsultation(id);
+  revalidatePath("/council/consultations");
+  revalidatePath("/citizen/consultations");
 }
 
 export async function setUserRoleAction(formData: FormData) {

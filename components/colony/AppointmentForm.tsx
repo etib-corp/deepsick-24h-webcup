@@ -33,7 +33,7 @@ export function AppointmentForm({
   service,
   slotGroups,
 }: {
-  service: { id: string; name: string; icon?: string | null };
+  service: { id: string; name: string; icon?: string | null; preparation?: string | null };
   slotGroups: AppointmentSlotGroup[];
 }) {
   const t = useT();
@@ -90,6 +90,15 @@ export function AppointmentForm({
           placeholder={t.citizen.appointments.subjectPlaceholder}
         />
       </Field>
+
+      {service.preparation ? (
+        <div className="rounded-md border border-border bg-muted/20 px-3 py-2 text-sm">
+          <p className="font-mono text-xs uppercase tracking-wide text-foreground">
+            {t.citizen.appointments.preparation}
+          </p>
+          <p className="text-muted-foreground">{service.preparation}</p>
+        </div>
+      ) : null}
 
       <fieldset className="space-y-2">
         <legend className="font-mono text-xs uppercase tracking-wide text-foreground">

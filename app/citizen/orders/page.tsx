@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
-import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
+import { CitizenOrderCard } from "@/components/citizen/CitizenOrderCard";
 import { OrderForm } from "@/components/colony/OrderForm";
-import { Card } from "@/components/ui/Card";
-import { OrderStatusBadge } from "@/components/ui/StatusBadge";
+import { Reveal } from "@/components/motion/Reveal";
+import { EmptyState } from "@/components/ui/Alert";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { getOrders } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
@@ -14,53 +15,53 @@ export function generateMetadata(): Metadata {
   return { title: getDictionary().citizen.orders.title };
 }
 
-export default async function CitizenOrdersPage({
-  searchParams,
-}: {
+export default async function CitizenOrdersPage({ searchParams }: {
   searchParams: { type?: string };
 }) {
   const t = getDictionary();
+  const copy = t.citizen.orders;
   const session = await requirePageRole(["CITIZEN"]);
   const orders = await getOrders({ customerId: session.user.id });
+  const active = orders.filter((order) => !["COMPLETED", "CANCELLED"].includes(order.status));
+  const history = orders.filter((order) => ["COMPLETED", "CANCELLED"].includes(order.status));
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="font-mono text-xl text-foreground">{t.citizen.orders.title}</h1>
-        <p className="text-sm text-muted-foreground">{t.citizen.orders.subtitle}</p>
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-col gap-2 border-b border-border pb-5">
+        <h1 className="font-mono text-2xl">{copy.title}</h1>
+        <p className="text-sm text-muted-foreground">{copy.subtitle}</p>
       </header>
 
-      <Card className="p-4">
-        <SectionHeader title={t.citizen.orders.newOrder} />
-        <OrderForm defaultType={searchParams.type === "FOOD" ? "FOOD" : "TAXI"} />
-      </Card>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <section aria-labelledby="new-order-title" className="min-w-0">
+          <Card>
+            <CardHeader>
+              <h2 id="new-order-title" className="font-mono text-lg">{copy.newOrder}</h2>
+              <p className="text-sm text-muted-foreground">{copy.formHint}</p>
+            </CardHeader>
+            <CardContent>
+              <OrderForm defaultType={searchParams.type === "FOOD" ? "FOOD" : "TAXI"} />
+            </CardContent>
+          </Card>
+        </section>
 
-      <section>
-        <SectionHeader
-          title={t.citizen.orders.history}
-          badge={<span className="font-mono text-[11px] text-muted-foreground">{orders.length}</span>}
-        />
-        {orders.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            {t.citizen.orders.empty}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {orders.map((order) => (
-              <FeedRow
-                key={order.id}
-                icon={order.type === "TAXI" ? "🚡" : "🍜"}
-                title={`${order.reference} · ${order.summary}`}
-                meta={[
-                  order.etaMinutes ? `ETA ${order.etaMinutes} min` : null,
-                  `${order.total} ${t.citizen.wallet.credits}`,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                trailing={<OrderStatusBadge status={order.status} />}
-              />
-            ))}
-          </div>
+        <section aria-labelledby="active-orders-title" className="min-w-0">
+          <h2 id="active-orders-title" className="mb-4 font-mono text-lg">{copy.active} · {active.length}</h2>
+          {active.length === 0 ? <EmptyState title={copy.activeEmpty} /> : (
+            <Reveal className="flex flex-col gap-4">
+              {active.map((order) => <CitizenOrderCard key={order.id} order={order} />)}
+            </Reveal>
+          )}
+        </section>
+      </div>
+
+      <section aria-labelledby="order-history-title">
+        <h2 id="order-history-title" className="mb-2 font-mono text-lg">{copy.history} · {history.length}</h2>
+        <p className="mb-4 text-sm text-muted-foreground">{copy.historyHint}</p>
+        {history.length === 0 ? <EmptyState title={copy.historyEmpty} /> : (
+          <Reveal className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {history.map((order) => <CitizenOrderCard key={order.id} order={order} />)}
+          </Reveal>
         )}
       </section>
     </div>

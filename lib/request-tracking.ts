@@ -11,6 +11,7 @@ export type TrackedRequest = {
   reference: string;
   title: string;
   type?: string;
+  priority?: string | null;
   status: string;
   createdAt: Date;
   updatedAt: Date;

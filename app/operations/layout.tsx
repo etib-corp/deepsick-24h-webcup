@@ -35,7 +35,14 @@ export default async function OperationsLayout({ children }: { children: React.R
     },
     ADMIN_AGENT: {
       home: "/operations/administration",
-      nav: [{ href: "/operations/administration", label: t.ops.nav.administration, icon: "📄" }],
+      nav: [
+        { href: "/operations/administration", label: t.ops.nav.administration, icon: "📄" },
+        {
+          href: "/operations/administration/consultations",
+          label: t.council.consultations.title,
+          icon: "🗣️",
+        },
+      ],
     },
     COUNCIL: {
       home: "/council",
@@ -44,6 +51,7 @@ export default async function OperationsLayout({ children }: { children: React.R
         { href: "/council/users", label: t.council.nav.users, icon: "👥" },
         { href: "/council/announcements", label: t.council.nav.announcements, icon: "📣" },
         { href: "/council/broadcasts", label: t.council.broadcasts.title, icon: "📢" },
+        { href: "/council/consultations", label: t.council.nav.consultations, icon: "🗣️" },
       ],
     },
   };

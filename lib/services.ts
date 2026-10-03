@@ -262,6 +262,91 @@ export async function deleteBroadcast(id: string) {
   return prisma.broadcast.delete({ where: { id } });
 }
 
+/* ------------------------------------------------------------------ *
+ * Consultations & opinions (F66 — citizen participation)
+ * ------------------------------------------------------------------ */
+
+async function uniqueConsultationSlug(title: string) {
+  const root = slugify(title) || "consultation";
+  let slug = root;
+  let suffix = 2;
+  while (await prisma.consultation.findUnique({ where: { slug } })) {
+    slug = `${root}-${suffix++}`;
+  }
+  return slug;
+}
+
+export async function createConsultation(input: {
+  title: string;
+  summary?: string | null;
+  description: string;
+  published?: boolean;
+  opensAt?: Date | null;
+  closesAt?: Date | null;
+  authorId?: string | null;
+}) {
+  return prisma.consultation.create({
+    data: {
+      slug: await uniqueConsultationSlug(input.title),
+      title: input.title.trim(),
+      summary: input.summary?.trim() || null,
+      description: input.description.trim(),
+      status: "OPEN",
+      published: input.published ?? true,
+      opensAt: input.opensAt ?? null,
+      closesAt: input.closesAt ?? null,
+      authorId: input.authorId ?? null,
+    },
+  });
+}
+
+export async function setConsultationPublished(id: string, published: boolean) {
+  return prisma.consultation.update({ where: { id }, data: { published } });
+}
+
+export async function setConsultationStatus(id: string, status: string) {
+  return prisma.consultation.update({ where: { id }, data: { status } });
+}
+
+export async function deleteConsultation(id: string) {
+  return prisma.consultation.delete({ where: { id } });
+}
+
+/** One opinion per citizen and consultation (editable). */
+export async function upsertOpinion(input: {
+  consultationId: string;
+  authorId: string;
+  stance: string;
+  comment: string;
+}) {
+  const existing = await prisma.opinion.findUnique({
+    where: {
+      consultationId_authorId: {
+        consultationId: input.consultationId,
+        authorId: input.authorId,
+      },
+    },
+  });
+
+  if (existing) {
+    return prisma.opinion.update({
+      where: { id: existing.id },
+      data: { stance: input.stance, comment: input.comment.trim() },
+    });
+  }
+
+  const count = await prisma.opinion.count();
+  return prisma.opinion.create({
+    data: {
+      reference: `OPN-${500 + count + 1}`,
+      consultationId: input.consultationId,
+      authorId: input.authorId,
+      stance: input.stance,
+      comment: input.comment.trim(),
+    },
+  });
+}
+
 // ------------------------------------------------------------------
 // Terra Nova ecosystem — reports, police cases, orders, notifications
 // ------------------------------------------------------------------
@@ -442,6 +527,7 @@ export async function createAppointment(
         date: input.date,
         durationMinutes: 30,
         sector: service.sector ?? null,
+        preparation: service.preparation ?? null,
         status: "BOOKED",
       },
     });
