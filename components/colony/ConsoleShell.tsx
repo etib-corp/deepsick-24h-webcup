@@ -107,7 +107,7 @@ export function ConsoleShell({
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
               className={cn(
-                "flex min-w-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition",
+                "flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition",
                 isActive(item.href)
                   ? "bg-muted text-primary underline underline-offset-4"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
