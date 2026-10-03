@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 import { SectionHeader } from "@/components/colony/FeedRow";
 import { RequestStatusForm } from "@/components/colony/RequestStatusForm";
@@ -20,6 +21,7 @@ export default async function AdministrationRequestPage({ params }: { params: { 
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs currentLabel={request.subject} />
       <Link
         href="/operations/administration"
         className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline"

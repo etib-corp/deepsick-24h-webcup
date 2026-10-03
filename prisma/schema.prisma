@@ -31,7 +31,6 @@ model User {
   assigned        ServiceRequest[] @relation("RequestAssignee")
   contactMessages ContactMessage[]
   announcements   Announcement[]
-  broadcasts      Broadcast[]
   reports         Report[]         @relation("ReportAuthor")
   assignedReports Report[]         @relation("ReportAssignee")
   policeCases     PoliceCase[]     @relation("ArrestingOfficer")
@@ -70,23 +69,6 @@ model Announcement {
   body        String    @db.Text
   published   Boolean   @default(false)
   publishedAt DateTime?
-  authorId    String?
-  author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
-
-// A prominent, site-wide general announcement ("broadcast") shown as a banner
-// to every user while it is active and inside its scheduled time window.
-model Broadcast {
-  id          String    @id @default(cuid())
-  title       String
-  message     String
-  actionLabel String?
-  actionHref  String?
-  startsAt    DateTime?
-  endsAt      DateTime?
-  active      Boolean   @default(true)
   authorId    String?
   author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())

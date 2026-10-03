@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { getPublishedServices, getServiceBySlug } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 
@@ -27,6 +28,7 @@ export default async function ServiceDetailPage({ params }: Params) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
+      <Breadcrumbs currentLabel={service.name} />
       <Link href="/services" className="text-sm text-primary hover:underline">
         {t.publicPages.services.backAll}
       </Link>
