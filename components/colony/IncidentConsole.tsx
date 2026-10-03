@@ -101,6 +101,7 @@ export function IncidentConsole({
             key={item.key}
             type="button"
             onClick={() => setChip(item.key)}
+            aria-pressed={chip === item.key}
             className={`rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide transition ${
               chip === item.key
                 ? "border-primary/50 bg-primary/10 text-primary"

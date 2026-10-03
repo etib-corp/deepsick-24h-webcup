@@ -34,13 +34,14 @@ export function PublicHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3">
         <Logo />
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden flex-wrap items-center gap-1 md:flex">
           {LINKS.map((link) => (
             <Link
               key={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
               href={link.href}
               className={cn(
                 "rounded-md px-3 py-2 font-mono text-xs uppercase tracking-wide transition",
@@ -57,7 +58,7 @@ export function PublicHeader({
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden flex-wrap items-center gap-2 md:flex">
           <LocaleSwitcher />
           <ThemePicker />
           {user ? (

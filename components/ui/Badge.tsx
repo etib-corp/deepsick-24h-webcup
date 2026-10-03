@@ -9,8 +9,8 @@ const TONES: Record<Tone, string> = {
   neutral: "border-border text-muted-foreground",
   mars: "border-primary/40 bg-primary/10 text-primary",
   info: "border-info/40 bg-info/10 text-info",
-  success: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
-  warning: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300",
+  success: "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300",
+  warning: "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-300",
   danger: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
