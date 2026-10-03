@@ -18,7 +18,7 @@ export default async function CouncilLayout({ children }: { children: React.Reac
   ];
 
   return (
-    <ConsoleShell station={t.council.station} nav={nav} banner={<BroadcastBanner />}>
+    <ConsoleShell station={t.council.station} nav={nav} banner={<BroadcastBanner />} role="COUNCIL">
       {children}
     </ConsoleShell>
   );

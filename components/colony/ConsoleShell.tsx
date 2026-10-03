@@ -10,6 +10,7 @@ import { SkipLink } from "@/components/layout/SkipLink";
 import { StatusStrip } from "@/components/colony/StatusStrip";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemePicker } from "@/components/layout/ThemePicker";
+import { TourMenu } from "@/components/tour/TourMenu";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { buttonClasses } from "@/components/ui/Button";
 import { useT } from "@/lib/i18n/client";
@@ -28,6 +29,7 @@ export function ConsoleShell({
   children,
   unread = 0,
   bellHref,
+  role,
   banner,
 }: {
   station: string;
@@ -35,6 +37,8 @@ export function ConsoleShell({
   children: ReactNode;
   unread?: number;
   bellHref?: string;
+  /** Signed-in role — decides which tutorials this space offers. */
+  role?: string | null;
   banner?: ReactNode;
 }) {
   const t = useT();
@@ -79,6 +83,7 @@ export function ConsoleShell({
             </Link>
           ) : null}
 
+          <TourMenu role={role} />
           <LocaleSwitcher />
           <ThemePicker />
 
@@ -94,8 +99,8 @@ export function ConsoleShell({
         <StatusStrip />
       </header>
 
-      <nav aria-label={t.accessibility.spaceNavigation} className="border-b border-border bg-card/30">
-        <div className="mx-auto flex max-w-5xl flex-wrap gap-1 px-4 py-2">
+      <nav aria-label={t.accessibility.spaceNavigation} className="border-b border-border bg-card/30" data-tour="console-nav">
+        <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-2">
           {nav.map((item) => (
             <Link
               key={item.href}

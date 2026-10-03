@@ -27,6 +27,9 @@ export function PublicFooter() {
           <Link href="/contact" className="hover:text-primary">
             [ {t.nav.contact} ]
           </Link>
+          <Link href="/guide" className="hover:text-primary" data-tour="footer-guide">
+            [ {t.nav.guide} ]
+          </Link>
           <Link href="/apparence" className="hover:text-primary">
             [ {t.nav.appearance} ]
           </Link>

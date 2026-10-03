@@ -52,6 +52,7 @@ const fr = {
     announcements: "Annonces",
     contact: "Contact",
     appearance: "Apparence",
+    guide: "Guide",
     login: "Connexion",
     register: "Créer un compte",
     mySpace: "Mon espace",
@@ -754,6 +755,269 @@ const fr = {
       tip2:
         "Les agents consultent les messages depuis leur console et y répondent dans les meilleurs délais.",
       tip3: "Urgence ? Contactez directement les services d'urgence de la colonie.",
+    },
+  },
+  guide: {
+    title: "Guide d'utilisation",
+    subtitle:
+      "Choisissez votre profil : chaque parcours détaille, pas à pas, ce que vous pouvez faire sur la plateforme.",
+    basicsTitle: "Les bases, valables pour tous",
+    stepsTitle: "Déroulé pas à pas",
+    whereTitle: "Où ça se passe",
+    openSpace: "Ouvrir cet espace",
+    accountTitle: "Compte de démonstration",
+    noAccount: "Aucun compte requis",
+    tipTitle: "Astuce",
+    pickProfile: "Choisissez un profil",
+    basics: [
+      "Langue : icône globe dans l'en-tête (français, anglais, espagnol) — mémorisée sur cet appareil.",
+      "Thème : icône palette dans l'en-tête, ou la galerie complète sur /apparence (dix thèmes).",
+      "Connexion et déconnexion depuis l'en-tête ; « Quitter » depuis une console.",
+      "Votre rôle décide de l'espace d'arrivée : /citizen, /operations/… ou /council.",
+      "Les consoles se rafraîchissent toutes les 5 secondes : le voyant LIVE confirme la vue à jour.",
+      "Aucun e-mail n'est envoyé dans la démonstration : accusés et codes de suivi s'affichent à l'écran.",
+    ],
+    profiles: {
+      VISITOR: {
+        label: "Visiteur",
+        intro:
+          "Vous découvrez la ville sans compte : tout le site public est consultable, et créer une identité prend une minute.",
+        steps: [
+          "Lisez l'accueil : il indique où vous êtes, ce que vous pouvez faire et mène aux services.",
+          "Parcourez le réseau civique (/services), puis la fiche d'un service pour voir ce qu'il couvre.",
+          "Ouvrez les annonces officielles (/announcements) : changements de service, travaux, campagnes.",
+          "Écrivez à l'administration (/contact) : un code de suivi s'affiche immédiatement.",
+          "Choisissez votre thème et votre langue, puis créez votre identité colon (/register).",
+          "Connectez-vous (/login) : vous arrivez dans l'espace correspondant à votre rôle.",
+        ],
+        tip: "Conservez le code de suivi affiché après un message : il permet de retrouver votre demande.",
+      },
+      CITIZEN: {
+        label: "Citoyen",
+        intro:
+          "Votre espace personnel : suivre vos signalements et vos commandes, joindre la ville et tout garder en mémoire.",
+        steps: [
+          "Connectez-vous : vous arrivez sur /citizen, votre tableau de bord.",
+          "Lisez les indicateurs de la colonie (heure locale, air habitable, radiation) et vos demandes actives.",
+          "Signalez un incident : service concerné, objet, priorité, secteur, description, puis transmettez.",
+          "Suivez-le dans /citizen/reports puis ouvrez-le : statut, unité affectée, chronologie.",
+          "Commandez un service (/citizen/orders) : rover Hermes ou repas Mercator, avec ETA et crédits.",
+          "Surveillez vos notifications (cloche) : chaque changement de statut y apparaît.",
+          "Retrouvez votre solde et vos transactions dans /citizen/wallet.",
+        ],
+        tip: "C'est le service qui fait avancer le statut : votre suivi se met à jour sans rien faire.",
+      },
+      SECURITY: {
+        label: "Sécurité",
+        intro:
+          "Console de sécurité : les signalements vous arrivent routés, les critiques et les urgences en tête.",
+        steps: [
+          "Connectez-vous : la console d'Ares Security Command s'ouvre sur /operations/security.",
+          "Filtrez avec les puces (Tous / Critiques / À traiter / Résolus) et lisez les quatre compteurs.",
+          "Ouvrez un incident : signalement du colon, secteur, radar et chronologie.",
+          "Prenez-le en charge : le dossier est affecté à votre unité.",
+          "Faites évoluer le statut et ajoutez une note d'intervention (le colon la voit).",
+          "Sur un incident de sécurité : renseignez la personne concernée, l'amende et le procès-verbal, puis ouvrez le dossier.",
+        ],
+        tip: "La console se rafraîchit toutes les 5 secondes ; le voyant LIVE indique que vous êtes à jour.",
+      },
+      MEDIC: {
+        label: "Médical",
+        intro:
+          "Les incidents médicaux vous sont routés directement ; le triage se fait dans la même console que la sécurité.",
+        steps: [
+          "Connectez-vous : la console s'ouvre sur /operations/medical.",
+          "Traitez d'abord les critiques (puce et compteur) : ce sont les urgences vitales.",
+          "Ouvrez l'incident, vérifiez le secteur et la description.",
+          "Prenez-le en charge, puis faites évoluer le statut (en route → en cours → résolu) avec une note de soin.",
+        ],
+        tip: "Vous ne voyez que les incidents médicaux : sécurité, maintenance et propreté restent chez leurs services.",
+      },
+      MAINTENANCE: {
+        label: "Maintenance",
+        intro:
+          "Air, énergie, eau et propreté : les incidents techniques des modules vous arrivent ici.",
+        steps: [
+          "Connectez-vous : la console s'ouvre sur /operations/maintenance.",
+          "Vous traitez à la fois les incidents de maintenance et de propreté.",
+          "Ouvrez l'incident : sectorisation, description, chronologie.",
+          "Prenez-le en charge, mettez à jour le statut et laissez une note d'intervention.",
+        ],
+        tip: "Une panne critique se place en tête du filtre « Critiques » : commencez par elle.",
+      },
+      DRIVER: {
+        label: "Transport",
+        intro: "La file des courses de la colonie : rovers et navettes entre les secteurs.",
+        steps: [
+          "Connectez-vous : /operations/transport affiche la file des courses Hermes.",
+          "Repérez les courses en attente (à assigner) et celles qui sont en course.",
+          "Faites avancer chaque course : confirmée → en route → terminée.",
+          "Le colon voit le nouveau statut et l'ETA dans son espace, sans action de sa part.",
+        ],
+        tip: "Changez le statut depuis la liste elle-même : un menu et « Maj » par course.",
+      },
+      MERCHANT: {
+        label: "Commerce",
+        intro: "Cantines et fournitures : préparez, marquez prêt, encaissez (crédits simulés).",
+        steps: [
+          "Connectez-vous : /operations/commerce affiche la file des repas Mercator.",
+          "Suivez « en préparation », « prêtes » et la recette du cycle.",
+          "Faites avancer une commande : confirmée → en préparation → prête → terminée (ou annulée).",
+          "Le colon est prévenu à chaque étape.",
+        ],
+        tip: "Les crédits sont fictifs : la recette sert seulement à montrer l'activité économique.",
+      },
+      ADMIN_AGENT: {
+        label: "Agent administratif",
+        intro: "Démarches des colons : permis, autorisations et documents à instruire.",
+        steps: [
+          "Connectez-vous : /operations/administration ouvre la file des démarches.",
+          "Ouvrez une demande : contenu déposé par le colon, coordonnées et date.",
+          "Faites évoluer le statut : soumise → en examen → en traitement → résolue → clôturée.",
+          "Rédigez la réponse officielle : elle s'ajoute à l'historique lu par le colon.",
+        ],
+        tip: "Chaque changement de statut notifie le colon concerné.",
+      },
+      COUNCIL: {
+        label: "Haut Conseil",
+        intro:
+          "Pilotage de la colonie : contenu, comptes et vue d'ensemble — avec accès à toutes les consoles de service.",
+        steps: [
+          "Connectez-vous : /council affiche la vue d'ensemble (incidents, interventions, services, annonces, colons, commandes).",
+          "Publiez une annonce (/council/announcements) : titre, chapeau, contenu, publication immédiate ou brouillon.",
+          "Gérez les services (/council/services) : ajoutez ou retirez une entrée du réseau civique.",
+          "Changez un rôle (/council/users) : promouvoir un colon en agent ouvre sa console.",
+          "Ouvrez n'importe quelle console de service pour intervenir sur un dossier.",
+          "Suivez les besoins de la compétition dans le panneau développeur (/dev/tickets).",
+        ],
+        tip: "Publier une annonce la fait apparaître immédiatement sur l'accueil public.",
+      },
+    },
+  },
+  tour: {
+    badge: "Visite guidée",
+    launchTitle: "Tutoriel interactif",
+    launchHint:
+      "Une visite guidée à l'écran, comme dans un jeu : l'élément à utiliser est surligné et le reste de la page est bloqué jusqu'à ce que vous fassiez l'action.",
+    launchIntro: "Chaque profil a sa visite : découvrez la ville, traitez un dossier, publiez une annonce…",
+    start: "Lancer la visite",
+    needsAccount: "Compte requis : {account}",
+    step: "Étape {current} / {total}",
+    next: "Suivant",
+    finish: "Terminer",
+    skip: "Quitter la visite",
+    clickHint: "Cliquez sur l'élément surligné",
+    blocked: "Pas si vite : suivez l'élément en surbrillance pour continuer.",
+    waiting: "Préparation de l'écran…",
+    lessons: {
+      PUBLIC: {
+        label: "Découvrir la ville",
+        steps: [
+          {
+            title: "Bienvenue sur Terra Nova",
+            body: "Cette visite vous guide pas à pas : pendant un tutoriel, seuls les éléments surlignés répondent. Comme dans un jeu.",
+          },
+          {
+            title: "Ouvrez le réseau civique",
+            body: "Tous les services municipaux sont derrière cette entrée. Cliquez sur « Services » pour continuer.",
+          },
+          {
+            title: "Un service, une fiche",
+            body: "Les services sont groupés par catégorie. Ouvrez une fiche pour découvrir ce qu'elle couvre et comment la solliciter.",
+          },
+          {
+            title: "Le guide reste à portée",
+            body: "L'entrée « Guide » rouvre cette visite, les parcours écrits et les tutoriels des autres profils. Cliquez dessus.",
+          },
+          {
+            title: "À vous de jouer",
+            body: "Vous connaissez les lieux : créez votre identité colon pour ouvrir votre espace personnel.",
+          },
+        ],
+      },
+      CITIZEN: {
+        label: "Parcours citoyen",
+        steps: [
+          {
+            title: "Votre espace personnel",
+            body: "Vous voici chez vous. Pendant la visite, seule la cible surlignée répond : le reste est verrouillé.",
+          },
+          {
+            title: "Circulez entre vos écrans",
+            body: "Signalements, commandes, portefeuille et carte de la colonie se trouvent dans cette barre.",
+          },
+          {
+            title: "L'état de la colonie",
+            body: "Heure locale, air habitable et radiation : votre environnement en un coup d'œil.",
+          },
+          {
+            title: "Signalez un incident",
+            body: "Cliquez sur « Signaler » dans la barre : le formulaire s'ouvre sur le bon service.",
+          },
+          {
+            title: "Choisissez le service",
+            body: "Sécurité, médical, maintenance ou propreté : le signalement part automatiquement au bon service. Cliquez sur un choix.",
+          },
+          {
+            title: "Il ne reste qu'à envoyer",
+            body: "Objet, priorité, secteur et description, puis « Transmettre le signalement ». Vous suivrez ensuite chaque étape.",
+          },
+        ],
+      },
+      CONSOLE: {
+        label: "Traiter un dossier",
+        steps: [
+          {
+            title: "Votre console de service",
+            body: "Tout ce que votre service doit traiter arrive ici. Suivez la visite : elle vous fait traiter un vrai dossier.",
+          },
+          {
+            title: "Filtrez la file",
+            body: "Ces puces trient les incidents : critiques, à traiter, résolus. Cliquez sur « Tous ».",
+          },
+          {
+            title: "Le radar de la station",
+            body: "Il situe les incidents et balaie en continu ; il ralentit quand un dossier est engagé.",
+          },
+          {
+            title: "Ouvrez un dossier",
+            body: "Cliquez sur le premier incident du journal pour voir son détail complet.",
+          },
+          {
+            title: "Prenez-le en charge",
+            body: "Ce bouton affecte réellement le dossier à votre unité — la visite agit sur les données.",
+          },
+          {
+            title: "Faites avancer le statut",
+            body: "Nouveau statut, note d'intervention visible par le colon, puis « Enregistrer ». C'est le cœur du métier.",
+          },
+        ],
+      },
+      COUNCIL: {
+        label: "Piloter la colonie",
+        steps: [
+          {
+            title: "Vue d'ensemble",
+            body: "Le Haut Conseil voit tout : incidents, services, annonces, colons et commandes. Suivez la visite.",
+          },
+          {
+            title: "Les indicateurs clés",
+            body: "Six compteurs résument l'activité de la colonie ; ils se rafraîchissent tout seuls.",
+          },
+          {
+            title: "Publiez une annonce",
+            body: "Cliquez sur « Annonces » dans la barre pour ouvrir l'atelier éditorial.",
+          },
+          {
+            title: "Rédigez",
+            body: "Titre, chapeau et contenu. Cliquez dans le champ « Titre » pour commencer.",
+          },
+          {
+            title: "Publiez",
+            body: "« Publier l'annonce » la fait apparaître immédiatement sur l'accueil public.",
+          },
+        ],
+      },
     },
   },
   themes: {

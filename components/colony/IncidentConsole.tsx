@@ -95,7 +95,7 @@ export function IncidentConsole({
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </header>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" data-tour="incident-filters">
         {chips.map((item) => (
           <button
             key={item.key}
@@ -140,13 +140,15 @@ export function IncidentConsole({
         />
       </div>
 
-      <RadarCard
-        label={format(t.ops.board.sectorActive, { station })}
-        caption={t.common.simulatedData}
-        blips={blips}
-      />
+      <div data-tour="radar">
+        <RadarCard
+          label={format(t.ops.board.sectorActive, { station })}
+          caption={t.common.simulatedData}
+          blips={blips}
+        />
+      </div>
 
-      <section>
+      <section data-tour="incident-feed">
         <SectionHeader
           title={t.ops.board.feed}
           badge={<LiveBadge label={format(t.ops.board.activeCount, { count: visible.length })} />}

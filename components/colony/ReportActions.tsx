@@ -13,7 +13,7 @@ export async function ReportStatusForm({ reportId, status }: { reportId: string;
   const t = getDictionary();
 
   return (
-    <form action={updateReportStatusAction} className="space-y-4">
+    <form action={updateReportStatusAction} className="space-y-4" data-tour="status-form">
       <input type="hidden" name="reportId" value={reportId} />
 
       <Field label={t.ops.forms.status} htmlFor="status">
@@ -47,7 +47,7 @@ export async function ReportAssignButton({
   const t = getDictionary();
 
   return (
-    <form action={assignReportAction} className="space-y-2">
+    <form action={assignReportAction} className="space-y-2" data-tour="assign">
       <input type="hidden" name="reportId" value={reportId} />
       <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
         {assigneeName ? format(t.ops.forms.unitLabel, { name: assigneeName }) : t.ops.forms.noUnit}
@@ -75,7 +75,7 @@ export async function PoliceCaseForm({
   const t = getDictionary();
 
   return (
-    <form action={filePoliceCaseAction} className="space-y-3">
+    <form action={filePoliceCaseAction} className="space-y-3" data-tour="police-case">
       <input type="hidden" name="reportId" value={reportId} />
 
       <Field label={t.ops.forms.suspect} htmlFor="suspectName">
