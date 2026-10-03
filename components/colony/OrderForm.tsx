@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { TramFront, Utensils } from "lucide-react";
 
 import { SubmissionConfirmation } from "@/components/forms/SubmissionConfirmation";
 import { SubmissionForm } from "@/components/forms/SubmissionForm";
@@ -25,6 +27,9 @@ function SubmitButton() {
 export function OrderForm({ defaultType = "TAXI" }: { defaultType?: string }) {
   const t = useT();
   const [state, formAction] = useFormState(createOrderAction, initialActionState);
+  const [selectedType, setSelectedType] = useState(defaultType === "FOOD" ? "FOOD" : "TAXI");
+  const copy = t.citizen.orders;
+  const isFood = selectedType === "FOOD";
 
   if (state.ok) {
     return (
@@ -38,52 +43,58 @@ export function OrderForm({ defaultType = "TAXI" }: { defaultType?: string }) {
   }
 
   return (
-    <SubmissionForm action={formAction} className="space-y-4">
+    <SubmissionForm action={formAction} className="flex flex-col gap-5">
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
-      <fieldset className="space-y-2">
+      <fieldset className="min-w-0">
         <legend className="font-mono text-xs uppercase tracking-wide text-foreground">
           {t.citizen.orders.type}
         </legend>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {ORDER_TYPES.map((type) => (
             <label
               key={type}
-              className="flex cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-2 transition has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+              className="flex min-w-0 cursor-pointer items-start gap-3 rounded-xl border border-border p-4 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring"
             >
               <input
                 type="radio"
                 name="type"
                 value={type}
-                defaultChecked={type === defaultType}
-                className="accent-primary"
+                checked={type === selectedType}
+                onChange={() => setSelectedType(type)}
+                className="mt-1 shrink-0 accent-primary"
               />
-              <span className="font-mono text-xs uppercase tracking-wide text-foreground">
-                {type === "TAXI" ? `🚡 ${t.orderType.TAXI}` : `🍜 ${t.orderType.FOOD}`}
+              <span className="flex min-w-0 flex-col gap-2">
+                {type === "TAXI" ? <TramFront aria-hidden="true" className="size-5 text-primary" /> : <Utensils aria-hidden="true" className="size-5 text-primary" />}
+                <span className="font-mono text-sm">{type === "TAXI" ? `${t.orderType.TAXI} · Hermes` : `${t.orderType.FOOD} · Mercator`}</span>
+                <span className="text-sm text-muted-foreground">{type === "TAXI" ? copy.taxiHint : copy.foodHint}</span>
               </span>
             </label>
           ))}
         </div>
       </fieldset>
 
-      <Field label={t.citizen.orders.summary} htmlFor="summary">
+      <Field label={isFood ? copy.foodSummary : copy.summary} htmlFor="summary">
         <Input
           id="summary"
           name="summary"
           required
-          placeholder={t.citizen.orders.summaryPlaceholder}
+          minLength={3}
+          maxLength={160}
+          placeholder={isFood ? copy.foodSummaryPlaceholder : copy.summaryPlaceholder}
         />
       </Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t.citizen.orders.origin} htmlFor="origin">
-          <Input id="origin" name="origin" placeholder={t.citizen.orders.originPlaceholder} />
+      <div className="grid grid-cols-1 gap-4">
+        <Field label={isFood ? copy.foodOrigin : copy.origin} htmlFor="origin" hint={copy.optionalHint}>
+          <Input id="origin" name="origin" maxLength={120} placeholder={isFood ? copy.foodOriginPlaceholder : copy.originPlaceholder} />
         </Field>
-        <Field label={t.citizen.orders.destination} htmlFor="destination">
+        <Field label={isFood ? copy.foodDestination : copy.destination} htmlFor="destination" hint={copy.optionalHint}>
           <Input
             id="destination"
             name="destination"
-            placeholder={t.citizen.orders.destinationPlaceholder}
+            maxLength={120}
+            placeholder={isFood ? copy.foodDestinationPlaceholder : copy.destinationPlaceholder}
           />
         </Field>
       </div>
