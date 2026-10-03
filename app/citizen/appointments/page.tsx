@@ -103,7 +103,9 @@ export default async function CitizenAppointmentsPage({
                     <p className="font-mono text-xs uppercase tracking-wide text-foreground">
                       {t.citizen.appointments.preparation}
                     </p>
-                    <p className="text-muted-foreground">{t.citizen.appointments.preparationText}</p>
+                    <p className="text-muted-foreground">
+                      {appointment.preparation ?? t.citizen.appointments.preparationText}
+                    </p>
                     {appointment.sector ? (
                       <p className="text-xs text-muted-foreground">
                         {t.citizen.appointments.location} · {appointment.sector}
