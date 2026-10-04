@@ -1057,6 +1057,7 @@ const fr = {
   broadcast: {
     eyebrow: "Message du Haut Conseil",
     action: "En savoir plus",
+    dismiss: "Fermer ce message",
     previous: "Message précédent",
     next: "Message suivant",
     goTo: "Aller au message {index} sur {total}",
