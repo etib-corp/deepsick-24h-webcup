@@ -30,6 +30,9 @@ model User {
   role            String           @default("CITIZEN")
   sector          String?
   balance         Int              @default(0) // fictional wallet, in credits
+  // F53 — when true, signing in additionally requires a one-time code
+  // (second step) sent after the password check.
+  twoFactorEnabled Boolean         @default(false)
   requests        ServiceRequest[] @relation("RequestAuthor")
   assigned        ServiceRequest[] @relation("RequestAssignee")
   contactMessages ContactMessage[]
@@ -49,6 +52,10 @@ model User {
   feedbacks       ServiceFeedback[]
   requestSupports RequestSupport[]
   requestReplies  RequestReply[]
+  accessCodes     AccessCode[]
+  alerts          ColonyAlert[]    @relation("AlertAuthor")
+  disruptions     TransitDisruption[] @relation("DisruptionAuthor")
+  dataConcerns    DataConcern[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -77,6 +84,7 @@ model MunicipalService {
   plainLanguage String?       @db.Text
   appointments Appointment[]
   feedbacks    ServiceFeedback[]
+  visits       ServiceVisit[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
@@ -523,4 +531,136 @@ model BotGuardToken {
 
   @@index([ip, form, createdAt])
   @@index([createdAt])
+}
+
+// ------------------------------------------------------------------
+// Difficult batch — access codes, crisis alerts, transit disruptions,
+// partners, data concerns, backup drills, service usage (D02, F51, F53,
+// F87, F97, F98, F99, F101)
+// ------------------------------------------------------------------
+
+// A one-time code for passwordless sign-in (D02) or the second step of a
+// two-step login (F53). Only the HMAC of the code is stored; a code is
+// single-use, expires after 5 minutes and dies after a few wrong attempts.
+model AccessCode {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose    String // LOGIN | TWO_STEP
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, purpose, createdAt])
+}
+
+// F101 — a colony incident alert (e.g. the north-sector power outage).
+// Carries the situation and the instructions to follow, targets a sector
+// (null = whole colony) and stays visible until resolved.
+model ColonyAlert {
+  id           String    @id @default(cuid())
+  title        String
+  sector       String?
+  severity     String    @default("WARNING") // ADVISORY | WARNING | CRITICAL
+  situation    String    @db.Text
+  instructions String    @db.Text
+  status       String    @default("ACTIVE") // ACTIVE | RESOLVED
+  startsAt     DateTime?
+  resolvedAt   DateTime?
+  authorId     String?
+  author       User?     @relation("AlertAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, createdAt])
+}
+
+// F97 — an interruption on a shuttle line with the replacement solution
+// residents should use while it lasts.
+model TransitDisruption {
+  id                String    @id @default(cuid())
+  lineId            String
+  title             String
+  message           String    @db.Text
+  alternative       String    @db.Text
+  alternativeLineId String?
+  severity          String    @default("MAJOR") // MINOR | MAJOR | CRITICAL
+  active            Boolean   @default(true)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  authorId          String?
+  author            User?     @relation("DisruptionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([lineId, active])
+}
+
+// F99 — an external partner offering services to residents (opening window
+// drives the "available now / closed" status shown on the public page).
+model Partner {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  category     String?
+  description  String   @db.Text
+  contact      String?
+  actionLabel  String?
+  actionHref   String?  @db.VarChar(255)
+  openMinutes  Int? // minutes since midnight
+  closeMinutes Int?
+  active       Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// F51 — a concern raised by a resident about how their data is used. Kept
+// with a reference and a status so the resident can follow the handling.
+model DataConcern {
+  id          String   @id @default(cuid())
+  reference   String   @unique @default(cuid())
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  subject     String
+  body        String   @db.Text
+  status      String   @default("RECEIVED") // RECEIVED | REVIEWED | ANSWERED
+  response    String?  @db.Text
+  responderId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([authorId])
+}
+
+// F87 — one backup verification drill: the canonical snapshot checksum and
+// the per-dataset report (rows, bytes, checksum, read-back verdict).
+model BackupCheck {
+  id         String   @id @default(cuid())
+  actorId    String?
+  status     String // VERIFIED | FAILED
+  durationMs Int      @default(0)
+  totalRows  Int      @default(0)
+  totalSize  Int      @default(0) // bytes of the canonical snapshot
+  datasets   String   @db.Text // JSON: [{ key, rows, bytes, checksum, ok }]
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// F98 — aggregated service usage: one row per service and per day, an
+// anonymous counter (no user identity is stored).
+model ServiceVisit {
+  id        String           @id @default(cuid())
+  serviceId String
+  service   MunicipalService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  day       DateTime // UTC midnight
+  count     Int              @default(0)
+  updatedAt DateTime         @updatedAt
+
+  @@unique([serviceId, day])
+  @@index([day])
 }

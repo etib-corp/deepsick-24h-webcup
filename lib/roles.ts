@@ -360,3 +360,17 @@ export const IDEA_STATUS_LABELS: Record<IdeaStatus, string> = {
 export function isIdeaStatus(value: unknown): value is IdeaStatus {
   return typeof value === "string" && (IDEA_STATUSES as readonly string[]).includes(value);
 }
+
+// F51 — handling statuses of a data-usage concern raised by a resident.
+export const CONCERN_STATUSES = ["RECEIVED", "REVIEWED", "ANSWERED"] as const;
+export type ConcernStatus = (typeof CONCERN_STATUSES)[number];
+
+export const CONCERN_STATUS_LABELS: Record<ConcernStatus, string> = {
+  RECEIVED: "Reçue",
+  REVIEWED: "En cours d'examen",
+  ANSWERED: "Réponse apportée",
+};
+
+export function isConcernStatus(value: unknown): value is ConcernStatus {
+  return typeof value === "string" && (CONCERN_STATUSES as readonly string[]).includes(value);
+}

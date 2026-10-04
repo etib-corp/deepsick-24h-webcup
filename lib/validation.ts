@@ -158,6 +158,12 @@ export const feedbackSchema = z.object({
   comment: plainText(5, "Écrivez votre commentaire.", 1200),
 });
 
+/** F51 — a resident's concern about how their data is used. */
+export const concernSchema = z.object({
+  subject: plainText(3, "Indiquez le sujet de votre inquiétude.", 160),
+  body: plainText(10, "Décrivez votre inquiétude.", 4000),
+});
+
 /** F84 — an agent's official reply on a citizen request. */
 export const replySchema = z.object({
   body: plainText(3, "Rédigez la réponse.", 4000),

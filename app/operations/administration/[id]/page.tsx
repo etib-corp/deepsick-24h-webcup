@@ -8,18 +8,32 @@ import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { replyToRequestAction } from "@/lib/actions/agent";
-import { getRequestById, getUsers } from "@/lib/data";
+import { getRequestById, getStaffRequests, getUsers } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 import { format, getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
+import { buildSimilarityProfile, findSimilarRequests } from "@/lib/similarity";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdministrationRequestPage({ params }: { params: { id: string } }) {
   const t = getDictionary();
   await requirePageRole(["ADMIN_AGENT", "COUNCIL"]);
-  const [request, users] = await Promise.all([getRequestById(params.id), getUsers()]);
+  const [request, users, allRequests] = await Promise.all([
+    getRequestById(params.id),
+    getUsers(),
+    getStaffRequests(),
+  ]);
   if (!request) notFound();
+
+  // F75 — requests that likely describe the same problem, best match first.
+  const similarEntries = findSimilarRequests(
+    allRequests.map(buildSimilarityProfile),
+    request.id,
+  ).flatMap((match) => {
+    const other = allRequests.find((item) => item.id === match.id);
+    return other ? [{ match, other }] : [];
+  });
 
   // F48 — “who changed what”: every history actor resolves to a readable name.
   const nameById = new Map(
@@ -48,17 +62,58 @@ export default async function AdministrationRequestPage({ params }: { params: { 
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr,1fr]">
-        <Card className="p-4">
-          <SectionHeader title={t.ops.administration.colonRequest} />
-          <p className="whitespace-pre-line text-sm text-foreground">{request.description}</p>
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-            {format(t.ops.administration.depositedOn, {
-              name: request.author?.name ?? t.common.none,
-              email: request.author?.email ?? t.common.none,
-              date: formatDateTime(request.createdAt),
-            })}
-          </p>
-        </Card>
+        <div className="space-y-4">
+          <Card className="p-4">
+            <SectionHeader title={t.ops.administration.colonRequest} />
+            <p className="whitespace-pre-line text-sm text-foreground">{request.description}</p>
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+              {format(t.ops.administration.depositedOn, {
+                name: request.author?.name ?? t.common.none,
+                email: request.author?.email ?? t.common.none,
+                date: formatDateTime(request.createdAt),
+              })}
+            </p>
+          </Card>
+
+          {/* F75 — probable duplicates, with the words that connect them. */}
+          <Card className="p-4" data-tour="similar-requests">
+            <SectionHeader title={t.ops.administration.similarTitle} />
+            {similarEntries.length === 0 ? (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t.ops.administration.similarNone}
+              </p>
+            ) : (
+              <>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t.ops.administration.similarHint}
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {similarEntries.map(({ match, other }) => (
+                    <li key={other.id}>
+                      <Link
+                        href={`/operations/administration/${other.id}`}
+                        className="block rounded-md border border-border p-3 transition hover:border-primary/40"
+                      >
+                        <span className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm text-foreground">
+                            {other.reference} · {other.subject}
+                          </span>
+                          <StatusBadge status={other.status} />
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {format(t.ops.administration.similarWhy, {
+                            score: match.score,
+                            terms: match.terms.join(", "),
+                          })}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Card>
+        </div>
 
         <div className="space-y-4">
           <Card className="p-4">

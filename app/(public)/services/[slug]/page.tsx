@@ -18,6 +18,7 @@ import {
 import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
 import { getAuthSession } from "@/lib/permissions";
+import { recordServiceVisit } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,14 @@ export default async function ServiceDetailPage({ params }: Params) {
   const t = getDictionary();
   const service = await getServiceBySlug(params.slug);
   if (!service) notFound();
+
+  // F98 — anonymous usage counter (one bucket per service and per day).
+  // Best effort: a counting failure must never break the page.
+  try {
+    await recordServiceVisit(service.id);
+  } catch {
+    // Ignore — insights are indicative, not critical.
+  }
 
   const otherServices = await getOtherPublishedServices(service.id);
 

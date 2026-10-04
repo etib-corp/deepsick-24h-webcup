@@ -23,7 +23,7 @@ export type OrientationMatch = {
 };
 
 /** Recognised expressions per service slug (accent-less, lower-case forms). */
-const KEYWORDS: Record<string, readonly string[]> = {
+export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
   securite: [
     "securite",
     "vol",
@@ -138,7 +138,7 @@ export function orientServices(
     let score = 0;
     const terms: string[] = [];
 
-    for (const keyword of KEYWORDS[service.slug] ?? []) {
+    for (const keyword of ORIENTATION_KEYWORDS[service.slug] ?? []) {
       if (normalized.includes(keyword)) {
         score += 3;
         terms.push(keyword);

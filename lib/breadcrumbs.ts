@@ -23,6 +23,8 @@ export function getBreadcrumbs(
     "/guide": t.nav.guide,
     "/transport": t.nav.transport,
     "/projects": t.nav.projects,
+    "/partenaires": t.partners.title,
+    "/alertes": t.alerts.title,
     "/eco": t.nav.eco,
     "/statut": t.nav.status,
     "/contact": t.nav.contact,
@@ -37,11 +39,17 @@ export function getBreadcrumbs(
     "/citizen/map": t.citizen.map.title,
     "/citizen/notifications": t.citizen.notifications.title,
     "/citizen/account": t.citizen.account.title,
+    "/citizen/donnees": t.privacy.title,
   };
   const councilPages: Record<string, string> = {
     "/council/services": t.council.services.title,
     "/council/announcements": t.council.announcements.title,
     "/council/users": t.council.users.title,
+    "/council/donnees": t.privacy.councilTitle,
+    "/council/backups": t.backup.title,
+    "/council/insights": t.insights.title,
+    "/council/partners": t.partners.councilTitle,
+    "/council/alerts": t.alerts.councilTitle,
   };
   const stations: Record<string, string> = {
     "/operations/security": t.ops.security.title,

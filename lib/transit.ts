@@ -101,3 +101,25 @@ export function nextDepartures(
   }
   return departures;
 }
+
+/** F97 — the time window of a disruption row (all fields optional). */
+export type TransitDisruptionWindow = {
+  active: boolean;
+  startsAt: Date | null;
+  endsAt: Date | null;
+};
+
+/**
+ * F97 — a disruption is "live" when it is flagged active and `now` sits
+ * inside its optional window, so a planned interruption appears at the right
+ * moment and disappears once it ends.
+ */
+export function isDisruptionLive(
+  disruption: TransitDisruptionWindow,
+  now: Date = new Date(),
+): boolean {
+  if (!disruption.active) return false;
+  if (disruption.startsAt && disruption.startsAt.getTime() > now.getTime()) return false;
+  if (disruption.endsAt && disruption.endsAt.getTime() < now.getTime()) return false;
+  return true;
+}

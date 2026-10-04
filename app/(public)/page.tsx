@@ -113,7 +113,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Services */}
-      <section className="mx-auto max-w-6xl px-4 pb-10">
+      <section className="cv-auto mx-auto max-w-6xl px-4 pb-10">
         <SectionHeader
           title={t.landing.civicNetwork}
           action={
@@ -138,7 +138,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Announcements */}
-      <section className="mx-auto max-w-6xl px-4 pb-10">
+      <section className="cv-auto mx-auto max-w-6xl px-4 pb-10">
         <SectionHeader
           title={t.landing.latestNews}
           action={
@@ -165,7 +165,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Signalement lifecycle */}
-      <section className="mx-auto max-w-6xl px-4 pb-12">
+      <section className="cv-auto mx-auto max-w-6xl px-4 pb-12">
         <Card className="p-6">
           <SectionHeader title={t.landing.lifecycleTitle} />
           <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t.landing.lifecycleText}</p>

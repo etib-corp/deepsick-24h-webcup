@@ -168,6 +168,125 @@ export function getAllIdeas() {
 }
 
 /* ------------------------------------------------------------------ *
+ * Data-usage concerns (F51)
+ * ------------------------------------------------------------------ */
+
+/** The citizen's own concerns about how their data is used. */
+export function getCitizenDataConcerns(authorId: string) {
+  return prisma.dataConcern.findMany({
+    where: { authorId },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/** All concerns for the Council desk — callers must be COUNCIL. */
+export function getDataConcerns() {
+  return prisma.dataConcern.findMany({
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    include: { author: { select: { name: true, email: true } } },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Backup verification drills (F87)
+ * ------------------------------------------------------------------ */
+
+export function getBackupChecks(limit = 10) {
+  return prisma.backupCheck.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Service usage insights (F98)
+ * ------------------------------------------------------------------ */
+/** Anonymous per-day visit counters since `from` (UTC midnight buckets). */
+export function getServiceVisitsSince(from: Date) {
+  return prisma.serviceVisit.findMany({
+    where: { day: { gte: from } },
+    orderBy: { day: "asc" },
+    select: { serviceId: true, day: true, count: true },
+  });
+}
+
+/** Minimal service index used to label the usage report. */
+export function getServiceIndex() {
+  return prisma.municipalService.findMany({
+    select: { id: true, name: true, slug: true },
+    orderBy: { name: "asc" },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Transit disruptions (F97)
+ * ------------------------------------------------------------------ */
+
+/** Disruptions still flagged active; callers filter the window (F97). */
+export function getActiveTransitDisruptions() {
+  return prisma.transitDisruption.findMany({
+    where: { active: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/** Recent disruptions for the transport console, resolved ones included. */
+export function getAllTransitDisruptions(limit = 12) {
+  return prisma.transitDisruption.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * External partners (F99)
+ * ------------------------------------------------------------------ */
+
+/** Partners visible on the public directory. */
+export function getActivePartners() {
+  return prisma.partner.findMany({
+    where: { active: true },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+  });
+}
+
+/** Every partner for the Council management page. */
+export function getAllPartners() {
+  return prisma.partner.findMany({
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Colony alerts (F101)
+ * ------------------------------------------------------------------ */
+
+/** Alerts still flagged ACTIVE; callers filter the start window. */
+export function getActiveColonyAlerts() {
+  return prisma.colonyAlert.findMany({
+    where: { status: "ACTIVE" },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/** Recent alerts for the Council console, resolved ones included. */
+export function getAllColonyAlerts(limit = 20) {
+  return prisma.colonyAlert.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+}
+
+/** Citizens concerned by an alert (all of them when no sector is targeted). */
+export function getCitizensForSector(sector: string | null) {
+  return prisma.user.findMany({
+    where: { role: "CITIZEN", ...(sector ? { sector } : {}) },
+    select: { id: true },
+    take: 1000,
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * City projects (F67 — public project directory)
  * ------------------------------------------------------------------ */
 

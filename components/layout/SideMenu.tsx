@@ -63,11 +63,13 @@ export function SideMenu({
         { href: "/guide", label: t.nav.guide },
         { href: "/projects", label: t.nav.projects },
         { href: "/transport", label: t.nav.transport },
+        { href: "/partenaires", label: t.partners.title },
       ],
     },
     {
       title: t.sideMenu.info,
       items: [
+        { href: "/alertes", label: t.alerts.title },
         { href: "/apparence", label: t.nav.appearance },
         { href: "/eco", label: t.nav.eco },
         { href: "/statut", label: t.nav.status },
@@ -97,6 +99,7 @@ export function SideMenu({
               { href: "/", label: t.nav.home },
               { href: "/services", label: t.nav.services },
               { href: "/announcements", label: t.nav.announcements },
+              { href: "/partenaires", label: t.partners.title },
               { href: "/guide", label: t.nav.guide },
               { href: "/statut", label: t.nav.status },
             ],

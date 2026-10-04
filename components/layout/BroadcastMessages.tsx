@@ -4,19 +4,39 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { buttonClasses } from "@/components/ui/Button";
-import { getPublicBroadcasts, type PublicBroadcast } from "@/lib/actions/broadcasts";
+import { getPublicFeed, type PublicAlert } from "@/lib/actions/feed";
+import type { PublicBroadcast } from "@/lib/actions/broadcasts";
+import { isAlertSeverity, instructionSteps } from "@/lib/alerts";
 import {
   DISMISSED_BROADCASTS_KEY,
   dismissBroadcast,
   parseDismissedBroadcasts,
   serializeDismissedBroadcasts,
 } from "@/lib/broadcast-dismissals";
+import { format } from "@/lib/i18n/format";
 import { useT } from "@/lib/i18n/client";
 
-/** Refresh only public messages; leave the surrounding page and forms intact. */
-export function BroadcastMessages({ initialMessages }: { initialMessages: PublicBroadcast[] }) {
+/**
+ * Site-wide banner (F73 / F101).
+ *
+ * - Live **colony alerts** appear first, in red, with the instructions to
+ *   follow — they cannot be dismissed.
+ * - High Council **broadcasts** follow, in amber, dismissible per device.
+ *
+ * One polling round-trip refreshes both (every 5 s, paused when the tab is
+ * hidden), so alerts appear without delay everywhere without adding a second
+ * polling channel (F95).
+ */
+export function BroadcastMessages({
+  initialMessages,
+  initialAlerts,
+}: {
+  initialMessages: PublicBroadcast[];
+  initialAlerts: PublicAlert[];
+}) {
   const t = useT();
   const [messages, setMessages] = useState(initialMessages);
+  const [alerts, setAlerts] = useState(initialAlerts);
   const [dismissed, setDismissed] = useState<string[]>([]);
 
   // Restore the messages closed on this device. Runs after hydration:
@@ -33,33 +53,73 @@ export function BroadcastMessages({ initialMessages }: { initialMessages: Public
   useEffect(() => {
     let disposed = false;
     let pending = false;
+    // F95 — the feed is checked every 5 s while it recently changed, then
+    // backs off to 30 s once quiet, and pauses entirely in a hidden tab.
+    let lastChange = Date.now();
+    let timer: number | undefined;
+
     setMessages(initialMessages);
+    setAlerts(initialAlerts);
+
+    function schedule() {
+      if (disposed) return;
+      if (timer) window.clearTimeout(timer);
+      const idleMs = Date.now() - lastChange;
+      const delay =
+        document.visibilityState === "hidden" ? 30_000 : idleMs < 60_000 ? 5000 : 30_000;
+      timer = window.setTimeout(refresh, delay);
+    }
 
     async function refresh() {
-      if (disposed || pending || document.visibilityState === "hidden") return;
+      if (disposed) return;
+      if (pending) {
+        schedule();
+        return;
+      }
       pending = true;
       try {
-        const result = await getPublicBroadcasts();
+        const result = await getPublicFeed();
         if (!disposed && result.ok) {
-          setMessages((previous) => JSON.stringify(previous) === JSON.stringify(result.messages) ? previous : result.messages);
+          setMessages((previous) => {
+            const changed = JSON.stringify(previous) !== JSON.stringify(result.messages);
+            if (changed) lastChange = Date.now();
+            return changed ? result.messages : previous;
+          });
+          setAlerts((previous) => {
+            const changed = JSON.stringify(previous) !== JSON.stringify(result.alerts);
+            if (changed) lastChange = Date.now();
+            return changed ? result.alerts : previous;
+          });
         }
       } catch {
         // Keep the last visible message when the connection is temporarily lost.
       } finally {
         pending = false;
+        schedule();
       }
     }
 
-    const interval = window.setInterval(refresh, 5000);
-    document.addEventListener("visibilitychange", refresh);
-    window.addEventListener("focus", refresh);
+    function onWake() {
+      if (disposed) return;
+      if (document.visibilityState === "hidden") {
+        schedule();
+        return;
+      }
+      // Back on screen (or back on the tab): check immediately, then resume 5 s.
+      lastChange = Date.now();
+      void refresh();
+    }
+
+    schedule();
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", onWake);
     return () => {
       disposed = true;
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", refresh);
-      window.removeEventListener("focus", refresh);
+      if (timer) window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", onWake);
     };
-  }, [initialMessages]);
+  }, [initialMessages, initialAlerts]);
 
   /** Closing a message hides it on this device until the Council sends a new one. */
   function dismiss(id: string) {
@@ -75,7 +135,63 @@ export function BroadcastMessages({ initialMessages }: { initialMessages: Public
   const visible = messages.filter((broadcast) => !dismissed.includes(broadcast.id));
 
   return (
-    <div aria-live="polite" aria-relevant="additions text" className={visible.length > 0 ? "border-b border-amber-500/30 bg-amber-500/10" : undefined}>
+    <>
+      {alerts.length > 0 ? (
+        <div
+          aria-live="assertive"
+          aria-relevant="additions text"
+          className="border-b border-destructive/40 bg-destructive/10"
+        >
+          {alerts.map((alert) => {
+            const steps = instructionSteps(alert.instructions);
+            return (
+              <div
+                key={alert.id}
+                role="alert"
+                aria-label={t.alerts.bannerLabel}
+                className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-destructive">
+                    🚨 {t.alerts.bannerLabel} ·{" "}
+                    {isAlertSeverity(alert.severity)
+                      ? t.alerts.severities[alert.severity]
+                      : alert.severity}
+                  </p>
+                  <p className="mt-0.5 font-mono text-sm font-medium text-foreground">
+                    {alert.title}
+                  </p>
+                  <p className="mt-0.5 whitespace-pre-line text-sm text-muted-foreground">
+                    {alert.situation}
+                  </p>
+                  {steps.length > 0 ? (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      <span className="font-mono uppercase tracking-wide">
+                        {t.alerts.todo} :
+                      </span>{" "}
+                      {steps.slice(0, 2).join(" · ")}
+                      {steps.length > 2 ? " …" : ""}
+                    </p>
+                  ) : null}
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {alert.sector
+                      ? format(t.alerts.sectorChip, { sector: alert.sector })
+                      : t.alerts.wholeColony}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-3">
+                  <Link href="/alertes" className={buttonClasses("secondary", "sm", "shrink-0")}>
+                    {t.alerts.readMore}
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div aria-live="polite" aria-relevant="additions text" className={visible.length > 0 ? "border-b border-amber-500/30 bg-amber-500/10" : undefined}>
       {visible.map((broadcast) => {
         const label = broadcast.actionLabel ?? t.broadcast.action;
         const href = broadcast.actionHref;
@@ -129,6 +245,7 @@ export function BroadcastMessages({ initialMessages }: { initialMessages: Public
           </div>
         );
       })}
-    </div>
+      </div>
+    </>
   );
 }

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 
 import { DataExportCard } from "@/components/forms/DataExportCard";
 import { DeleteAccountForm } from "@/components/forms/DeleteAccountForm";
+import { TwoFactorCard } from "@/components/forms/TwoFactorCard";
 import { Card } from "@/components/ui/Card";
 import { getCitizenDataCounts } from "@/lib/data-export";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,10 @@ export default async function CitizenAccountPage() {
   const t = getDictionary();
   const session = await requirePageRole(["CITIZEN"]);
   const exportSections = await getCitizenDataCounts(session.user.id, t);
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { twoFactorEnabled: true },
+  });
 
   return (
     <div className="space-y-5">
@@ -42,6 +48,8 @@ export default async function CitizenAccountPage() {
       </Card>
 
       <DataExportCard sections={exportSections} />
+
+      <TwoFactorCard enabled={user?.twoFactorEnabled ?? false} />
 
       <Card className="space-y-3 border-destructive/40 p-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-destructive">

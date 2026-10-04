@@ -18,6 +18,11 @@ export default async function CouncilLayout({ children }: { children: React.Reac
     { href: "/council/ideas", label: t.council.nav.ideas, icon: "💡" },
     { href: "/council/projects", label: t.council.nav.projects, icon: "🏗️" },
     { href: "/council/services", label: t.council.nav.services, icon: "🏛️" },
+    { href: "/council/donnees", label: t.privacy.councilNav, icon: "🔐" },
+    { href: "/council/backups", label: t.backup.nav, icon: "💾" },
+    { href: "/council/insights", label: t.insights.nav, icon: "📈" },
+    { href: "/council/partners", label: t.partners.councilTitle, icon: "🤝" },
+    { href: "/council/alerts", label: t.alerts.councilTitle, icon: "🚨" },
     { href: "/council/security", label: t.council.nav.security, icon: "🛡️" },
   ];
 

@@ -25,9 +25,16 @@ export type Motion = Animation;
 /** SSR-safe layout effect: runs before paint in the browser, no server warning. */
 export const useMotionLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+/**
+ * True when animations must not run: the visitor asked for reduced motion,
+ * or the platform is in light mode (F59/F62/F96 — chosen manually or
+ * auto-detected on a slow / data-saver connection). Lite mode hence stops
+ * the animation scripts entirely, not just the CSS effects (F58).
+ */
 export function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return true;
+  if (document.documentElement.dataset.lite === "1") return true;
   return (
-    typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );

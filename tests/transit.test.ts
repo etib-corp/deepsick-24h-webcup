@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isLineRunning, nextDepartures, type TransitLine } from "../lib/transit";
+import { isDisruptionLive, isLineRunning, nextDepartures, type TransitLine } from "../lib/transit";
 
 const LINE: TransitLine = {
   id: "navette-test",
@@ -36,4 +36,25 @@ test("before the first departure the line is not running yet", () => {
 
 test("the line is running inside its time window", () => {
   assert.equal(isLineRunning(LINE, at(8, 0)), true);
+});
+
+test("F97 — a disruption is live only while active and inside its window", () => {
+  const now = at(8, 0);
+  assert.equal(isDisruptionLive({ active: true, startsAt: null, endsAt: null }, now), true);
+  assert.equal(isDisruptionLive({ active: false, startsAt: null, endsAt: null }, now), false);
+  assert.equal(
+    isDisruptionLive({ active: true, startsAt: new Date(2026, 9, 4, 9, 0), endsAt: null }, now),
+    false,
+  );
+  assert.equal(
+    isDisruptionLive({ active: true, startsAt: null, endsAt: new Date(2026, 9, 4, 7, 0) }, now),
+    false,
+  );
+  assert.equal(
+    isDisruptionLive(
+      { active: true, startsAt: new Date(2026, 9, 4, 7, 0), endsAt: new Date(2026, 9, 4, 9, 0) },
+      now,
+    ),
+    true,
+  );
 });

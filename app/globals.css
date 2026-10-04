@@ -595,3 +595,11 @@ button[aria-pressed="true"] { text-decoration: underline; text-underline-offset:
 [data-lite="1"] [class*="animate-in"] { animation: none !important; }
 [data-lite="1"] [data-lite-hide] { display: none !important; }
 [data-lite="1"] .backdrop-blur { backdrop-filter: none !important; }
+
+/* ------------------------------------------------------------------ */
+/* F95 — below-the-fold sections skip layout/paint until scrolled near. */
+/* ------------------------------------------------------------------ */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+}

@@ -9,8 +9,10 @@ import { Card } from "@/components/ui/Card";
 import { PriorityBadge, StatusBadge } from "@/components/ui/StatusBadge";
 import { getStaffRequests } from "@/lib/data";
 import { formatDate } from "@/lib/format";
+import { format } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
+import { buildSimilarityProfile, similarCounts } from "@/lib/similarity";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,9 @@ export default async function AdministrationConsolePage() {
   const t = getDictionary();
   await requirePageRole(["ADMIN_AGENT", "COUNCIL"]);
   const requests = await getStaffRequests();
+
+  // F75 — probable duplicates flagged on the queue itself.
+  const duplicateCounts = similarCounts(requests.map(buildSimilarityProfile));
 
   const actionable = requests.filter((request) =>
     ["SUBMITTED", "IN_REVIEW", "IN_PROGRESS"].includes(request.status),
@@ -107,6 +112,18 @@ export default async function AdministrationConsolePage() {
                   }`}
                   trailing={
                     <div className="flex items-center gap-1.5">
+                      {duplicateCounts.get(request.id) ? (
+                        <span
+                          title={t.ops.administration.similarBadgeHint}
+                          aria-label={t.ops.administration.similarBadgeHint}
+                        >
+                          <Badge tone="warning">
+                            {format(t.ops.administration.similarBadge, {
+                              count: duplicateCounts.get(request.id) ?? 0,
+                            })}
+                          </Badge>
+                        </span>
+                      ) : null}
                       {request._count.supports > 0 ? (
                         <Badge tone="info">🤝 {request._count.supports}</Badge>
                       ) : null}

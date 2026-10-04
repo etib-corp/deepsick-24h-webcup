@@ -19,34 +19,37 @@ export function PublicFooter() {
           {t.common.appName} — {t.nav.platform}
         </p>
         <div className="flex flex-wrap items-center gap-4 font-mono text-xs uppercase tracking-wide">
-          <Link href="/arrivants" className="hover:text-primary">
+          {/* F95 — footer links render on every public page; prefetching all
+              of them would fire ~10 RSC requests per visit for links that
+              are rarely used. Prefetching stays on the main navbar instead. */}
+          <Link href="/arrivants" prefetch={false} className="hover:text-primary">
             [ {t.nav.arrivals} ]
           </Link>
-          <Link href="/services" className="hover:text-primary">
+          <Link href="/services" prefetch={false} className="hover:text-primary">
             [ {t.nav.services} ]
           </Link>
-          <Link href="/transport" className="hover:text-primary">
+          <Link href="/transport" prefetch={false} className="hover:text-primary">
             [ {t.nav.transport} ]
           </Link>
-          <Link href="/projects" className="hover:text-primary">
+          <Link href="/projects" prefetch={false} className="hover:text-primary">
             [ {t.nav.projects} ]
           </Link>
-          <Link href="/announcements" className="hover:text-primary">
+          <Link href="/announcements" prefetch={false} className="hover:text-primary">
             [ {t.nav.announcements} ]
           </Link>
-          <Link href="/contact" className="hover:text-primary">
+          <Link href="/contact" prefetch={false} className="hover:text-primary">
             [ {t.nav.contact} ]
           </Link>
-          <Link href="/guide" className="hover:text-primary" data-tour="footer-guide">
+          <Link href="/guide" prefetch={false} className="hover:text-primary" data-tour="footer-guide">
             [ {t.nav.guide} ]
           </Link>
-          <Link href="/apparence" className="hover:text-primary">
+          <Link href="/apparence" prefetch={false} className="hover:text-primary">
             [ {t.nav.appearance} ]
           </Link>
-          <Link href="/eco" className="hover:text-primary">
+          <Link href="/eco" prefetch={false} className="hover:text-primary">
             [ {t.nav.eco} ]
           </Link>
-          <Link href="/statut" className="hover:text-primary">
+          <Link href="/statut" prefetch={false} className="hover:text-primary">
             [ {t.nav.status} ]
           </Link>
           <LiteModeToggle />

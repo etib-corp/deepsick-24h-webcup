@@ -1,13 +1,15 @@
 import { BroadcastMessages } from "@/components/layout/BroadcastMessages";
-import { getPublicBroadcasts } from "@/lib/actions/broadcasts";
+import { getPublicFeed } from "@/lib/actions/feed";
+
+import type { PublicAlert } from "@/lib/actions/feed";
+import type { PublicBroadcast } from "@/lib/actions/broadcasts";
 
 /** Initial server rendering plus isolated updates for pages already open. */
 export async function BroadcastBanner() {
-  const result = await getPublicBroadcasts();
+  const feed = await getPublicFeed();
 
-  return (
-    <BroadcastMessages
-      initialMessages={result.ok ? result.messages : []}
-    />
-  );
+  const messages: PublicBroadcast[] = feed.ok ? feed.messages : [];
+  const alerts: PublicAlert[] = feed.ok ? feed.alerts : [];
+
+  return <BroadcastMessages initialMessages={messages} initialAlerts={alerts} />;
 }

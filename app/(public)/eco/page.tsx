@@ -83,6 +83,20 @@ export default function EcoPage() {
       </Card>
 
       <Card className="mt-4 p-4">
+        <h2 className="font-mono text-sm text-foreground">{copy.choicesTitle}</h2>
+        <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+          {copy.choices.map((choice) => (
+            <li key={choice} className="flex gap-2">
+              <span aria-hidden className="text-primary">
+                ▸
+              </span>
+              {choice}
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card className="mt-4 p-4">
         <h2 className="font-mono text-sm text-foreground">{copy.liteTitle}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{copy.liteBody}</p>
         <div className="mt-3">

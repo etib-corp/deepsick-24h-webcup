@@ -294,6 +294,10 @@ async function main() {
     { reference: "REQ-2026-0001", subject: "Demande d'attribution — Secteur 05", description: "Nous souhaitons candidater pour un logement familial en phase deux.", category: "Logement", priority: "HIGH", status: "IN_REVIEW" },
     { reference: "REQ-2026-0002", subject: "Permis de conduire rover (classe B)", description: "Demande d'habilitation pour conduire les rovers pressurisés.", category: "Permis", priority: "NORMAL", status: "IN_PROGRESS" },
     { reference: "REQ-2026-0003", subject: "Attestation de résidence", description: "Attestation nécessaire pour un dossier administratif.", category: "Documents", priority: "LOW", status: "RESOLVED" },
+    // F75 — two near-duplicates of REQ-2026-0004 so the "similar requests"
+    // detection has something to flag on a fresh database.
+    { reference: "REQ-2026-0005", subject: "Lampadaire en panne chemin HAB 12", description: "Le lampadaire à l'angle du chemin HAB 12 et de la serre ne s'allume plus depuis plusieurs jours.", category: "Voirie", priority: "NORMAL", status: "SUBMITTED" },
+    { reference: "REQ-2026-0006", subject: "Panne d'éclairage — chemin HAB 12", description: "Toujours aucune lumière sur le chemin entre HAB 12 et la serre : la traversée est dangereuse le soir.", category: "Voirie", priority: "HIGH", status: "SUBMITTED" },
   ];
   for (const request of requests) {
     await prisma.serviceRequest.upsert({
@@ -556,6 +560,155 @@ async function main() {
       data: { ticketId: d19.id, author: "Neisan", kind: "COMMENT", body: "Bloqué en attendant la confirmation de l'API Nova Terra côté organisateurs." },
     });
   }
+
+  /* ---------------------------------------------------------------- */
+  /* Difficult batch — demo data (F51, F97, F98, F99, F101)           */
+  /* ---------------------------------------------------------------- */
+
+  // F101 — the north-sector power outage from the need, live, plus one lifted alert.
+  await prisma.colonyAlert.deleteMany({});
+  await prisma.colonyAlert.createMany({
+    data: [
+      {
+        title: "Panne électrique — secteur nord",
+        sector: "Secteur nord",
+        severity: "CRITICAL",
+        situation:
+          "Une panne électrique touche le secteur nord. Les modules HAB 10 à HAB 14 fonctionnent sur batterie ; les équipes Hephaestus sont sur place et visent un retour à la normale avant 10:00 MTC.",
+        instructions:
+          "- Coupez les appareils non essentiels pour prolonger les batteries\n- Évitez l'ascenseur jusqu'au rétablissement\n- Restez joignable : les transmissions passent par le canal d'urgence",
+        // Started two hours ago, so the alert is live as soon as the DB is seeded.
+        startsAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        status: "ACTIVE",
+        authorId: council.id,
+      },
+      {
+        title: "Recyclage d'air HAB 07 — maintenance terminée",
+        sector: "Secteur 01 · Habitat",
+        severity: "ADVISORY",
+        situation:
+          "Le recyclage d'air du module HAB 07 a été interrompu 40 minutes pour une maintenance planifiée. La qualité de l'air est revenue à la normale.",
+        instructions:
+          "- Réouvrez les volets d'aération du module\n- Signalez toute odeur anormale au 115",
+        startsAt: new Date("2026-10-02T14:00:00Z"),
+        status: "RESOLVED",
+        resolvedAt: new Date("2026-10-02T14:40:00Z"),
+        authorId: council.id,
+      },
+    ],
+  });
+
+  // F97 — one interrupted shuttle line with its replacement solution.
+  await prisma.transitDisruption.deleteMany({});
+  await prisma.transitDisruption.create({
+    data: {
+      lineId: "navette-b",
+      title: "Navette B interrompue — incident technique",
+      message:
+        "Suite à un incident technique sur la voie industrie, la Navette B ne circule pas jusqu'à nouvel ordre. Les équipes Hermes travaillent au rétablissement.",
+      alternative:
+        "Empruntez la Navette A (arrêt Centre civique) jusqu'à la correspondance Planitia ; des rovers à la demande renforcent la ligne industrie aux heures de pointe.",
+      alternativeLineId: "navette-a",
+      severity: "MAJOR",
+      // Started 90 minutes ago, so the disruption is live as soon as seeded.
+      startsAt: new Date(Date.now() - 90 * 60 * 1000),
+      active: true,
+      authorId: council.id,
+    },
+  });
+
+  // F99 — external partners (opening windows drive the "available now" status).
+  await prisma.partner.deleteMany({});
+  await prisma.partner.createMany({
+    data: [
+      {
+        slug: "phoenix-assurance",
+        name: "Phoenix Assurance",
+        category: "Assurance",
+        description:
+          "Couverture des modules habitables, des rovers et des équipements personnels — guichet unique au centre civique.",
+        contact: "guichet Phoenix — Secteur 02 · BioDôme",
+        actionLabel: "Demander un devis",
+        actionHref: "/contact",
+        openMinutes: 9 * 60,
+        closeMinutes: 17 * 60,
+        order: 1,
+        active: true,
+      },
+      {
+        slug: "aqua-vitae-recyclage",
+        name: "Aqua Vitae — recyclage privé",
+        category: "Ressources",
+        description:
+          "Installation privée de recyclage d'eau pour les serres et les ateliers : analyse et affinage à la demande.",
+        contact: "balise 042 · canal ressources",
+        actionLabel: "Prendre rendez-vous",
+        actionHref: "/contact",
+        openMinutes: 6 * 60,
+        closeMinutes: 22 * 60,
+        order: 2,
+        active: true,
+      },
+      {
+        slug: "orbit-express",
+        name: "Orbit Express",
+        category: "Livraison orbitale",
+        description:
+          "Fret express entre la colonie et les navettes orbitales : colis personnels et pièces critiques.",
+        contact: "terminal fret — Secteur 03 · Planitia",
+        actionLabel: "Suivre une expédition",
+        actionHref: "/contact",
+        openMinutes: null,
+        closeMinutes: null,
+        order: 3,
+        active: true,
+      },
+    ],
+  });
+
+  // F98 — plausible usage counters over the last 30 days, so the observatory
+  // already has a readable ranking on a fresh database (anonymous counters).
+  await prisma.serviceVisit.deleteMany({});
+  const visitServices = await prisma.municipalService.findMany({
+    select: { id: true, slug: true },
+  });
+  const VISIT_WEIGHTS: Record<string, number> = {
+    transport: 26,
+    medical: 22,
+    demarches: 18,
+    commerce: 12,
+    maintenance: 9,
+    securite: 6,
+    associations: 3,
+  };
+  const visitRows: { serviceId: string; day: Date; count: number }[] = [];
+  const seedNow = new Date();
+  for (const service of visitServices) {
+    const weight = VISIT_WEIGHTS[service.slug] ?? 4;
+    for (let daysAgo = 0; daysAgo < 30; daysAgo += 1) {
+      const day = new Date(
+        Date.UTC(seedNow.getUTCFullYear(), seedNow.getUTCMonth(), seedNow.getUTCDate() - daysAgo),
+      );
+      // Deterministic pseudo-variation keeps the ranking stable across seeds.
+      const variation = 1 + (((daysAgo * 7 + weight) % 5) - 2) * 0.08;
+      visitRows.push({ serviceId: service.id, day, count: Math.max(1, Math.round(weight * variation)) });
+    }
+  }
+  await prisma.serviceVisit.createMany({ data: visitRows });
+
+  // F51 — one answered data-usage concern so the trace is demonstrable.
+  await prisma.dataConcern.deleteMany({});
+  await prisma.dataConcern.create({
+    data: {
+      authorId: citizen.id,
+      subject: "Qui peut consulter mes signalements ?",
+      body: "Je voudrais savoir quels services voient les signalements que je dépose et pendant combien de temps ils sont conservés.",
+      status: "ANSWERED",
+      response:
+        "Seul le service compétent et le Haut Conseil (audit) accèdent à vos signalements. Ils sont conservés le temps du traitement, puis archivés sous forme minimale.",
+      responderId: council.id,
+    },
+  });
 
   console.log("✅ Terra Nova ecosystem seeded.");
   for (const user of USERS) console.log(`   ${user.email.padEnd(30)} ${user.role}`);

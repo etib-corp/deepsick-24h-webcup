@@ -6,9 +6,12 @@ import bcrypt from "bcryptjs";
 import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";
 import { normalizeIdentifier } from "@/lib/identity";
+import { startOfUtcDay } from "@/lib/insights";
 import { prisma } from "@/lib/prisma";
 import {
+  CONCERN_STATUS_LABELS,
   IDEA_STATUS_LABELS,
+  isConcernStatus,
   isIdeaStatus,
   isOrderStatus,
   isProjectStatus,
@@ -549,6 +552,80 @@ export async function reviewIdea(
           title: `Idée ${current.reference} mise à jour`,
           body: `Nouveau statut : ${IDEA_STATUS_LABELS[status]}`,
           href: "/citizen/ideas",
+        },
+      });
+    }
+
+    return updated;
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Service usage insights (F98)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Counts one consultation of a service detail page. Anonymous: one counter
+ * per service and per day, incremented atomically — no user identity.
+ */
+export async function recordServiceVisit(serviceId: string) {
+  const day = startOfUtcDay(new Date());
+  await prisma.serviceVisit.upsert({
+    where: { serviceId_day: { serviceId, day } },
+    update: { count: { increment: 1 } },
+    create: { serviceId, day, count: 1 },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Data-usage concerns (F51)
+ * ------------------------------------------------------------------ */
+export async function createDataConcern(
+  authorId: string,
+  input: { subject: string; body: string },
+) {
+  return prisma.dataConcern.create({
+    data: {
+      subject: input.subject.trim(),
+      body: input.body.trim(),
+      authorId,
+      status: "RECEIVED",
+    },
+  });
+}
+
+/**
+ * Council handling of a concern: mark it as being examined, or answer it.
+ * The author is notified so the trace is visible in their personal space.
+ */
+export async function reviewDataConcern(
+  id: string,
+  input: { status: string; response?: string | null },
+  responderId: string,
+) {
+  if (!isConcernStatus(input.status)) throw new PublicError("Statut invalide.");
+  const status = input.status;
+
+  return prisma.$transaction(async (tx) => {
+    const current = await tx.dataConcern.findUnique({ where: { id } });
+    if (!current) throw new PublicError("Inquiétude introuvable.");
+
+    const response = input.response?.trim() || null;
+    const updated = await tx.dataConcern.update({
+      where: { id },
+      data: { status, response, responderId },
+    });
+
+    if (current.status !== status || response !== current.response) {
+      await tx.notification.create({
+        data: {
+          userId: current.authorId,
+          title: `Inquiétude ${current.reference} mise à jour`,
+          body:
+            status === "ANSWERED"
+              ? "Une réponse a été apportée à votre inquiétude sur l'usage de vos données."
+              : `Nouveau statut : ${CONCERN_STATUS_LABELS[status]}`,
+          href: "/citizen/donnees",
         },
       });
     }

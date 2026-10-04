@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 
+import { DisruptionForm } from "@/components/colony/DisruptionForm";
 import { FeedRow, LiveBadge, SectionHeader } from "@/components/colony/FeedRow";
 import { OrderStatusForm } from "@/components/colony/OrderStatusForm";
 import { RadarCard } from "@/components/colony/RadarCard";
 import { StatTile } from "@/components/colony/StatTile";
+import { Badge } from "@/components/ui/Badge";
+import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { getOrders } from "@/lib/data";
+import { resolveDisruptionAction } from "@/lib/actions/disruptions";
+import { getAllTransitDisruptions, getOrders } from "@/lib/data";
+import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 
@@ -18,7 +23,10 @@ export function generateMetadata(): Metadata {
 export default async function TransportConsolePage() {
   const t = getDictionary();
   await requirePageRole(["DRIVER", "COUNCIL"]);
-  const orders = await getOrders({ type: "TAXI" });
+  const [orders, disruptions] = await Promise.all([
+    getOrders({ type: "TAXI" }),
+    getAllTransitDisruptions(),
+  ]);
 
   const active = orders.filter((order) => ["CONFIRMED", "IN_TRANSIT"].includes(order.status));
   const pending = orders.filter((order) => order.status === "PENDING");
@@ -67,6 +75,56 @@ export default async function TransportConsolePage() {
           { x: 0.66, y: 0.36, tone: "info" },
         ]}
       />
+
+      {/* F97 — line interruptions and the replacement solutions to show. */}
+      <Card className="space-y-3 p-4">
+        <SectionHeader title={t.disruptions.console.listTitle} />
+        <p className="text-sm text-muted-foreground">{t.disruptions.console.hint}</p>
+
+        {disruptions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t.disruptions.console.empty}</p>
+        ) : (
+          <ul className="space-y-2">
+            {disruptions.map((disruption) => (
+              <li
+                key={disruption.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm text-foreground">{disruption.title}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {disruption.lineId} · {formatDate(disruption.createdAt)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge tone={disruption.active ? "danger" : "neutral"}>
+                    {disruption.active
+                      ? t.disruptions.console.live
+                      : t.disruptions.console.resolved}
+                  </Badge>
+                  {disruption.active ? (
+                    <form action={resolveDisruptionAction}>
+                      <input type="hidden" name="id" value={disruption.id} />
+                      <button type="submit" className={buttonClasses("secondary", "sm")}>
+                        {t.disruptions.console.resolve}
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="border-t border-border pt-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            {t.disruptions.console.createTitle}
+          </p>
+          <div className="mt-3">
+            <DisruptionForm />
+          </div>
+        </div>
+      </Card>
 
       <section>
         <SectionHeader title={t.ops.transport.queue} badge={<LiveBadge label={`${orders.length}`} />} />

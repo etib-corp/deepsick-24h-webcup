@@ -7,26 +7,24 @@ import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { format } from "@/lib/i18n/format";
 import { useT } from "@/lib/i18n/client";
-import {
-  orientServices,
-  type OrientationMatch,
-  type OrientationService,
-} from "@/lib/orientation";
+import { guidedServiceSearch, type GuidedMatch } from "@/lib/fuzzy-search";
+import type { OrientationService } from "@/lib/orientation";
 
 /**
- * F92 — "describe your problem, we point you to the right service". The
- * matching itself is a pure function (`lib/orientation.ts`), so the result is
- * instant, deterministic and explainable.
+ * F92 + D10 — "describe your problem, we point you to the right service".
+ * The matching is a pure function (`lib/fuzzy-search.ts`): curated keywords
+ * plus tolerant text matching, so misspellings and truncated words still
+ * lead to the relevant service. Every result explains which words matched.
  */
 export function ServiceFinder({ services }: { services: OrientationService[] }) {
   const t = useT();
   const copy = t.publicPages.services.orientation;
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<OrientationMatch[] | null>(null);
+  const [results, setResults] = useState<GuidedMatch[] | null>(null);
 
   function search(value: string) {
     setQuery(value);
-    setResults(value.trim().length >= 3 ? orientServices(value, services) : null);
+    setResults(value.trim().length >= 3 ? guidedServiceSearch(value, services) : null);
   }
 
   return (
@@ -57,6 +55,8 @@ export function ServiceFinder({ services }: { services: OrientationService[] }) 
         </button>
       </form>
 
+      <p className="mt-2 text-xs text-muted-foreground">{copy.fuzzyHint}</p>
+
       <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
         <span>{copy.examplesLabel}</span>
         {copy.examples.map((example) => (
@@ -79,28 +79,33 @@ export function ServiceFinder({ services }: { services: OrientationService[] }) 
                 {copy.results}
               </p>
               <ul className="mt-2 space-y-2">
-                {results.map((match) => (
-                  <li key={match.slug}>
-                    <Link
-                      href={`/services/${match.slug}`}
-                      className="block rounded-md border border-border p-3 transition hover:border-primary/40"
-                    >
-                      <span className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-sm text-foreground">{match.name}</span>
-                        {match.category ? (
-                          <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-                            {match.category}
+                {results.map((match) => {
+                  const why = Array.from(
+                    new Set([...match.terms, ...match.fuzzyTerms]),
+                  ).slice(0, 4);
+                  return (
+                    <li key={match.slug}>
+                      <Link
+                        href={`/services/${match.slug}`}
+                        className="block rounded-md border border-border p-3 transition hover:border-primary/40"
+                      >
+                        <span className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm text-foreground">{match.name}</span>
+                          {match.category ? (
+                            <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                              {match.category}
+                            </span>
+                          ) : null}
+                        </span>
+                        {why.length > 0 ? (
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {format(copy.why, { terms: why.join(", ") })}
                           </span>
                         ) : null}
-                      </span>
-                      {match.terms.length > 0 ? (
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          {format(copy.why, { terms: match.terms.join(", ") })}
-                        </span>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : (
