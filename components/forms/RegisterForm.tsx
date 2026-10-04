@@ -34,6 +34,8 @@ export function RegisterForm() {
   const [mode, setMode] = useState<RegisterMode>("email");
   const nameRef = useRef<HTMLInputElement>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
+  // Once the resident edits the identifier themselves, stop suggesting.
+  const usernameTouched = useRef(false);
 
   const tabs = [
     { href: "/login", label: t.auth.loginTab, active: false },
@@ -41,9 +43,13 @@ export function RegisterForm() {
   ];
 
   function chooseMode(next: RegisterMode) {
-    if (next === "identifier" && usernameRef.current && !usernameRef.current.value) {
-      const suggestion = suggestUsername(nameRef.current?.value ?? "");
-      if (suggestion) usernameRef.current.value = suggestion;
+    if (
+      next === "identifier" &&
+      usernameRef.current &&
+      !usernameTouched.current &&
+      !usernameRef.current.value
+    ) {
+      usernameRef.current.value = suggestUsername(nameRef.current?.value ?? "");
     }
     setMode(next);
   }
@@ -93,7 +99,21 @@ export function RegisterForm() {
 
       <form action={formAction} className="space-y-4">
         <Field label={t.auth.register.name} htmlFor="name">
-          <Input ref={nameRef} id="name" name="name" required minLength={2} autoComplete="name" />
+          <Input
+            ref={nameRef}
+            id="name"
+            name="name"
+            required
+            minLength={2}
+            autoComplete="name"
+            onChange={(event) => {
+              // No-email mode: keep the identifier in step with the name until
+              // the resident edits the identifier themselves.
+              if (mode === "identifier" && !usernameTouched.current && usernameRef.current) {
+                usernameRef.current.value = suggestUsername(event.target.value);
+              }
+            }}
+          />
         </Field>
 
         <div className="grid grid-cols-2 gap-2">
@@ -127,6 +147,9 @@ export function RegisterForm() {
               required={mode === "identifier"}
               disabled={mode !== "identifier"}
               autoComplete="username"
+              onChange={() => {
+                usernameTouched.current = true;
+              }}
             />
           </Field>
         </div>
