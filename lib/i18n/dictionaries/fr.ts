@@ -1589,6 +1589,18 @@ const fr = {
     protected: "Protégé contre les envois automatisés.",
     trapLabel: "Ne pas remplir ce champ",
   },
+  quickReport: {
+    button: "Signaler",
+    title: "Signaler un incident",
+    close: "Fermer le formulaire",
+    visitorText:
+      "Le dépôt d'un signalement se fait depuis un compte citoyen : connectez-vous pour décrire l'incident.",
+    login: "Se connecter",
+    staffText:
+      "Les signalements sont déposés par les habitants ; les équipes les traitent depuis leur console.",
+    openConsole: "Ouvrir ma console",
+    emergency: "Urgence ? Consultez les contacts essentiels.",
+  },
   sideMenu: {
     title: "Accès rapides",
     open: "Plus",

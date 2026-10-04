@@ -1580,6 +1580,18 @@ const en: Dictionary = {
     protected: "Protected against automated submissions.",
     trapLabel: "Do not fill this field",
   },
+  quickReport: {
+    button: "Report",
+    title: "Report an incident",
+    close: "Close the form",
+    visitorText:
+      "Reports are filed from a citizen account: sign in to describe the incident.",
+    login: "Sign in",
+    staffText:
+      "Reports are filed by residents; the teams handle them from their console.",
+    openConsole: "Open my console",
+    emergency: "Emergency? See the essential contacts.",
+  },
   sideMenu: {
     title: "Quick links",
     open: "More",

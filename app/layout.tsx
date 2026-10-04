@@ -5,11 +5,13 @@ import { Toaster } from "@/components/shadcn/sonner";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
 import { LiteModeAuto } from "@/components/layout/LiteModeAuto";
 import { OfflineNotice } from "@/components/layout/OfflineNotice";
+import { ReportButton } from "@/components/layout/ReportButton";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TourProvider } from "@/components/tour/TourProvider";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { isLiteMode } from "@/lib/lite-mode";
+import { getAuthSession } from "@/lib/permissions";
 import { DEFAULT_THEME, THEME_IDS } from "@/lib/themes";
 
 export function generateMetadata(): Metadata {
@@ -20,10 +22,11 @@ export function generateMetadata(): Metadata {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
   const dictionary = getDictionary(locale);
   const lite = isLiteMode();
+  const session = await getAuthSession();
 
   return (
     <html lang={locale} data-lite={lite ? "1" : undefined} suppressHydrationWarning>
@@ -44,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <OfflineNotice />
                 {children}
                 <Toaster />
+                <ReportButton role={session?.user?.role ?? null} />
               </TourProvider>
             </TooltipProvider>
           </LocaleProvider>

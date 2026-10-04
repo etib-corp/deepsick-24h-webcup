@@ -1580,6 +1580,18 @@ const es: Dictionary = {
     protected: "Protegido contra envíos automatizados.",
     trapLabel: "No rellenes este campo",
   },
+  quickReport: {
+    button: "Informar",
+    title: "Informar de un incidente",
+    close: "Cerrar el formulario",
+    visitorText:
+      "Los informes se presentan desde una cuenta ciudadana: inicie sesión para describir el incidente.",
+    login: "Iniciar sesión",
+    staffText:
+      "Los informes los presentan los habitantes; los equipos los tramitan desde su consola.",
+    openConsole: "Abrir mi consola",
+    emergency: "¿Urgencia? Consulte los contactos esenciales.",
+  },
   sideMenu: {
     title: "Accesos rápidos",
     open: "Más",
