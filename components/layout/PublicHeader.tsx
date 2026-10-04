@@ -16,6 +16,7 @@ import { cn } from "@/lib/ui";
 
 const LINKS = [
   { href: "/", label: "home" },
+  { href: "/arrivants", label: "arrivals" },
   { href: "/services", label: "services" },
   { href: "/announcements", label: "announcements" },
   { href: "/contact", label: "contact" },

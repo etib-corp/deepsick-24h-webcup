@@ -11,6 +11,7 @@
  *   commerce@terranova.fr        → MERCHANT     (Yuki Tanaka)
  *   administration@terranova.fr  → ADMIN_AGENT  (Claire Fontaine)
  *   conseil@terranova.fr         → COUNCIL      (Elias Marr)
+ *   iris.nouvelle (no email)     → CITIZEN      (Iris Halden, colon identifier)
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -40,6 +41,21 @@ async function main() {
       create: { ...user, passwordHash },
     });
   }
+
+  // A resident who arrived without an email address (F71) — she signs in with
+  // her colon identifier instead. Kept out of the role map on purpose.
+  await prisma.user.upsert({
+    where: { username: "iris.nouvelle" },
+    update: { name: "Iris Halden", role: "CITIZEN" },
+    create: {
+      username: "iris.nouvelle",
+      name: "Iris Halden",
+      role: "CITIZEN",
+      sector: "Secteur 01 · Habitat",
+      balance: 0,
+      passwordHash,
+    },
+  });
 
   const citizen = users.CITIZEN;
   const officer = users.SECURITY;
@@ -265,6 +281,59 @@ async function main() {
     });
   }
 
+  /* --- Security audit trail (F69) --------------------------------------- */
+  // Demo rows so the Council security console has something to analyse on a
+  // fresh database; live events are appended by the platform at runtime.
+  const activeIncident = await prisma.report.findUnique({ where: { reference: "INC-042" } });
+  await prisma.securityEvent.deleteMany({});
+  await prisma.securityEvent.createMany({
+    data: [
+      {
+        type: "LOGIN_FAILED",
+        outcome: "DENIED",
+        detail: "Échec de connexion · inconnu@terranova.fr",
+        ip: "10.42.0.17",
+        userAgent: "Mozilla/5.0 (démo)",
+      },
+      {
+        type: "LOGIN_BLOCKED",
+        outcome: "DENIED",
+        detail: "Connexion bloquée · inconnu@terranova.fr",
+        ip: "10.42.0.17",
+        userAgent: "Mozilla/5.0 (démo)",
+      },
+      {
+        type: "ACCESS_DENIED",
+        outcome: "DENIED",
+        actorId: citizen.id,
+        actorRole: "CITIZEN",
+        detail: "page COUNCIL · rôle CITIZEN",
+        ip: "10.42.0.31",
+        userAgent: "Mozilla/5.0 (démo)",
+      },
+      {
+        type: "INPUT_NEUTRALIZED",
+        outcome: "FLAGGED",
+        detail: "signalement · description",
+        ip: "10.42.0.31",
+        userAgent: "Mozilla/5.0 (démo)",
+      },
+      ...(activeIncident
+        ? [
+            {
+              type: "REPORT_STATUS_CHANGED",
+              outcome: "SUCCESS",
+              actorId: officer.id,
+              actorRole: "SECURITY",
+              targetType: "report",
+              targetId: activeIncident.id,
+              detail: "nouveau statut EN_ROUTE",
+            },
+          ]
+        : []),
+    ],
+  });
+
   /* --- Dev panel: Webcup needs tracked as tickets ---------------------- */
   const tickets = [
     { code: "D01", title: "Inscription / création de compte habitant", difficulty: "Facile", level: 1, xp: 250, status: "DONE", assignee: "Neisan", sortOrder: 1, wave: 0, isAi: false },
@@ -309,6 +378,7 @@ async function main() {
 
   console.log("✅ Terra Nova ecosystem seeded.");
   for (const user of USERS) console.log(`   ${user.email.padEnd(30)} ${user.role}`);
+  console.log(`   ${"iris.nouvelle (sans e-mail)".padEnd(30)} CITIZEN`);
   console.log(`   mot de passe : ${DEMO_PASSWORD}`);
 }
 

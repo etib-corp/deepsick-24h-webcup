@@ -1,9 +1,10 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
-import { authErrorResponse } from "@/lib/api";
+import { authErrorResponse, serverErrorResponse } from "@/lib/api";
 import { getPublishedServices } from "@/lib/data";
 import { requireApiRole } from "@/lib/permissions";
+import { auditActor, recordSecurityEvent } from "@/lib/security";
 import { createMunicipalService } from "@/lib/services";
 import { firstError, serviceSchema } from "@/lib/validation";
 
@@ -15,7 +16,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireApiRole(["ADMIN"]);
+  const auth = await requireApiRole(["COUNCIL"]);
   if (auth.error) return authErrorResponse(auth.error);
 
   const body = await request.json().catch(() => null);
@@ -26,6 +27,22 @@ export async function POST(request: Request) {
 
   const service = await createMunicipalService(parsed.data);
   revalidateTag("public-services");
+  let service;
+  try {
+    service = await createMunicipalService(parsed.data);
+  } catch (error) {
+    return serverErrorResponse("services.create", error);
+  }
+
+  await recordSecurityEvent({
+    type: "CONTENT_CHANGED",
+    outcome: "SUCCESS",
+    ...auditActor(auth.session),
+    targetType: "service",
+    targetId: service.id,
+    detail: "création via API",
+  });
+
   revalidatePath("/services");
   return NextResponse.json({ service }, { status: 201 });
 }

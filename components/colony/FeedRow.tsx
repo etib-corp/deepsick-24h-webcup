@@ -1,8 +1,5 @@
-"use client";
+import type { ReactNode } from "react";
 
-import { useRef, type ReactNode } from "react";
-
-import { revealSelf, useMotionLayoutEffect } from "@/lib/motion";
 import { cn } from "@/lib/ui";
 
 /** Live indicator (green pulse) used in the ops headers. */
@@ -43,7 +40,8 @@ export function SectionHeader({
 /**
  * Row used by every live feed / list in the design.
  *
- * Motion: each row fades in, staggered by its index in the list.
+ * Server component with a CSS-only entrance (no client JS / anime.js), and
+ * `content-visibility` so long lists skip rendering off-screen rows.
  */
 export function FeedRow({
   title,
@@ -60,20 +58,10 @@ export function FeedRow({
   href?: string;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useMotionLayoutEffect(() => {
-    const animation = revealSelf(ref.current, { step: 45, y: 8, duration: 520 });
-    return () => {
-      animation?.revert();
-    };
-  }, []);
-
   const inner = (
     <div
-      ref={ref}
       className={cn(
-        "flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 transition",
+        "flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 transition [content-visibility:auto] [contain-intrinsic-size:auto_3.5rem] motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:duration-300",
         href && "hover:border-primary/50",
         className,
       )}

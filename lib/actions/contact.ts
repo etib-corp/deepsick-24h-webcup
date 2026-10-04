@@ -3,6 +3,7 @@
 import type { ActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
 import { getAuthSession } from "@/lib/permissions";
+import { auditNeutralizedInputs } from "@/lib/security";
 import { createContactMessage } from "@/lib/services";
 import { contactSchema, firstError } from "@/lib/validation";
 
@@ -21,6 +22,16 @@ export async function contactAction(
   }
 
   const session = await getAuthSession();
+
+  await auditNeutralizedInputs(
+    {
+      subject: formData.get("subject"),
+      email: formData.get("email"),
+      body: formData.get("body"),
+    },
+    "contact",
+    session,
+  );
 
   try {
     const message = await createContactMessage({

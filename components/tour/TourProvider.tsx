@@ -11,12 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { animate } from "animejs";
 
 import { buttonClasses } from "@/components/ui/Button";
 import { useT } from "@/lib/i18n/client";
 import { format } from "@/lib/i18n/format";
-import { prefersReducedMotion } from "@/lib/motion";
 import {
   TOUR_STORAGE_KEY,
   findVisible,
@@ -25,6 +23,12 @@ import {
   type TourStep,
 } from "@/lib/tour";
 import { cn } from "@/lib/ui";
+
+/** Local check — avoids pulling the anime.js-based motion module into the root bundle. */
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 type TourState = { lesson: TourLessonId; step: number };
 
@@ -250,7 +254,11 @@ export function TourProvider({ children }: { children: ReactNode }) {
     nudgeTimer.current = window.setTimeout(() => setNudged(false), 1200);
 
     if (ringRef.current && !prefersReducedMotion()) {
-      animate(ringRef.current, { scale: [1, 1.06, 1], duration: 460, ease: "outQuad" });
+      // Web Animations API — native, no anime.js in the root bundle.
+      ringRef.current.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(1.06)" }, { transform: "scale(1)" }],
+        { duration: 460, easing: "ease-in-out" },
+      );
     }
   }, []);
 

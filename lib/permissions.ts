@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { homeForRole } from "@/lib/roles";
+import { auditActor, recordSecurityEvent } from "@/lib/security";
 
 /** Thrown by `requireRole` when the session does not hold the expected role. */
 export class PermissionError extends Error {
@@ -34,12 +35,28 @@ export function getAuthSession(): Promise<Session | null> {
 
 /**
  * Guard a server component: redirects anonymous visitors to /login and
- * authorised-but-wrong-role users to their own dashboard.
+ * authorised-but-wrong-role users to their own dashboard. Every denial is
+ * written to the security audit trail.
  */
 export async function requirePageRole(roles: readonly string[]): Promise<Session> {
   const session = await getServerSession(authOptions);
-  if (!session) redirect("/login");
-  if (!hasAnyRole(session, roles)) redirect(homeForRole(session.user.role));
+  if (!session) {
+    await recordSecurityEvent({
+      type: "ACCESS_DENIED",
+      outcome: "DENIED",
+      detail: `page ${roles.join("/")} · visiteur anonyme`,
+    });
+    redirect("/login");
+  }
+  if (!hasAnyRole(session, roles)) {
+    await recordSecurityEvent({
+      type: "ACCESS_DENIED",
+      outcome: "DENIED",
+      ...auditActor(session),
+      detail: `page ${roles.join("/")} · rôle ${session.user.role}`,
+    });
+    redirect(homeForRole(session.user.role));
+  }
   return session;
 }
 
@@ -50,7 +67,22 @@ export type ApiAuthResult =
 /** Guard a route handler. Callers translate `error` into 401 / 403. */
 export async function requireApiRole(roles: readonly string[]): Promise<ApiAuthResult> {
   const session = await getServerSession(authOptions);
-  if (!session) return { session: null, error: "unauthorized" };
-  if (!hasAnyRole(session, roles)) return { session: null, error: "forbidden" };
+  if (!session) {
+    await recordSecurityEvent({
+      type: "ACCESS_DENIED",
+      outcome: "DENIED",
+      detail: `api ${roles.join("/")} · requête anonyme`,
+    });
+    return { session: null, error: "unauthorized" };
+  }
+  if (!hasAnyRole(session, roles)) {
+    await recordSecurityEvent({
+      type: "ACCESS_DENIED",
+      outcome: "DENIED",
+      ...auditActor(session),
+      detail: `api ${roles.join("/")} · rôle ${session.user.role}`,
+    });
+    return { session: null, error: "forbidden" };
+  }
   return { session, error: null };
 }

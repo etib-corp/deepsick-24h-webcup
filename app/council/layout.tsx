@@ -16,6 +16,7 @@ export default async function CouncilLayout({ children }: { children: React.Reac
     { href: "/council/broadcasts", label: t.council.broadcasts.title, icon: "📢" },
     { href: "/council/consultations", label: t.council.nav.consultations, icon: "🗣️" },
     { href: "/council/services", label: t.council.nav.services, icon: "🏛️" },
+    { href: "/council/security", label: t.council.nav.security, icon: "🛡️" },
   ];
 
   return (

@@ -1,9 +1,12 @@
 import "server-only";
 
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 
+import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";
+import { normalizeIdentifier } from "@/lib/identity";
 import { prisma } from "@/lib/prisma";
 import {
   isOrderStatus,
@@ -17,22 +20,78 @@ import {
  * Accounts
  * ------------------------------------------------------------------ */
 
-export async function registerCitizen(input: { name: string; email: string; password: string }) {
-  const email = input.email.toLowerCase().trim();
-  const existing = await prisma.user.findUnique({ where: { email } });
+export type RegistrationErrorCode = "EMAIL_TAKEN" | "USERNAME_TAKEN";
+
+/** Typed so the action can render a localized message for the resident. */
+export class RegistrationError extends Error {
+  readonly code: RegistrationErrorCode;
+
+  constructor(code: RegistrationErrorCode) {
+    super(code);
+    this.name = "RegistrationError";
+    this.code = code;
+  }
+}
+
+/**
+ * Creates a citizen account (F71). An email or a colon identifier is enough —
+ * new arrivals without an email register with an identifier only.
+ */
+export async function registerCitizen(input: {
+  name: string;
+  email?: string | null;
+  username?: string | null;
+  password: string;
+}) {
+  const name = input.name.trim();
+  const email = input.email ? normalizeIdentifier(input.email) : null;
+  const username = input.username ? normalizeIdentifier(input.username) : null;
+  if (!email && !username) {
+    throw new Error("registerCitizen requires an email or a colon identifier.");
+  }
+
+  const existing = await prisma.user.findFirst({
+    where: {
+      OR: [...(email ? [{ email }] : []), ...(username ? [{ username }] : [])],
+    },
+    select: { email: true },
+  });
   if (existing) {
-    throw new Error("Un compte existe déjà avec cette adresse e-mail.");
+    throw new RegistrationError(existing.email === email && email ? "EMAIL_TAKEN" : "USERNAME_TAKEN");
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
-  return prisma.user.create({
-    data: { name: input.name.trim(), email, passwordHash, role: "CITIZEN" },
-  });
+  try {
+    return await prisma.user.create({
+      data: { name, email, username, passwordHash, role: "CITIZEN" },
+    });
+  } catch (error) {
+    // The unique constraint may still fire if two requests raced.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const target = String(error.meta?.target ?? "");
+      throw new RegistrationError(target.includes("username") ? "USERNAME_TAKEN" : "EMAIL_TAKEN");
+    }
+    throw error;
+  }
 }
 
 export async function setUserRole(userId: string, role: string) {
-  if (!isRole(role)) throw new Error("Rôle invalide.");
-  return prisma.user.update({ where: { id: userId }, data: { role } });
+  if (!isRole(role)) throw new PublicError("Rôle invalide.");
+  const current = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (!current) throw new PublicError("Compte introuvable.");
+  const user = await prisma.user.update({ where: { id: userId }, data: { role } });
+  return { user, previousRole: current.role };
+}
+
+/**
+ * Permanently delete a user account. Citizens own no staff-only rows (e.g.
+ * `PoliceCase`), so every remaining relation cascades or set-nulls cleanly.
+ */
+export async function deleteAccount(userId: string) {
+  return prisma.user.delete({ where: { id: userId } });
 }
 
 /* ------------------------------------------------------------------ *
@@ -99,11 +158,11 @@ export async function updateRequestStatus(
   actorId: string,
   note?: string,
 ) {
-  if (!isRequestStatus(status)) throw new Error("Statut invalide.");
+  if (!isRequestStatus(status)) throw new PublicError("Statut invalide.");
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.serviceRequest.findUnique({ where: { id: requestId } });
-    if (!current) throw new Error("Demande introuvable.");
+    if (!current) throw new PublicError("Demande introuvable.");
 
     const updated = await tx.serviceRequest.update({
       where: { id: requestId },
@@ -380,11 +439,11 @@ export async function updateReportStatus(
   actorId: string,
   note?: string,
 ) {
-  if (!isReportStatus(status)) throw new Error("Statut invalide.");
+  if (!isReportStatus(status)) throw new PublicError("Statut invalide.");
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.report.findUnique({ where: { id: reportId } });
-    if (!current) throw new Error("Incident introuvable.");
+    if (!current) throw new PublicError("Incident introuvable.");
 
     const updated = await tx.report.update({
       where: { id: reportId },
@@ -453,7 +512,7 @@ export async function createOrder(
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  if (!isOrderStatus(status)) throw new Error("Statut de commande invalide.");
+  if (!isOrderStatus(status)) throw new PublicError("Statut de commande invalide.");
   return prisma.order.update({ where: { id: orderId }, data: { status } });
 }
 
@@ -486,13 +545,13 @@ export async function createAppointment(
     // Acquire the row lock before the first consistent read of the slot.
     await tx.$queryRaw`SELECT id FROM MunicipalService WHERE id = ${input.serviceId} FOR UPDATE`;
     const service = await tx.municipalService.findUnique({ where: { id: input.serviceId } });
-    if (!service) throw new Error("Service introuvable.");
+    if (!service) throw new PublicError("Service introuvable.");
 
     // Authoritative re-check: never allow a double-booking of the same slot.
     const clash = await tx.appointment.findFirst({
       where: { serviceId: service.id, status: "BOOKED", date: input.date },
     });
-    if (clash) throw new Error("Ce créneau vient d'être réservé.");
+    if (clash) throw new PublicError("Ce créneau vient d'être réservé.");
 
     const appointment = await tx.appointment.create({
       data: {
@@ -524,8 +583,8 @@ export async function cancelAppointment(id: string, citizenId: string) {
   const appointment = await prisma.appointment.findFirst({
     where: { id, citizenId },
   });
-  if (!appointment) throw new Error("Rendez-vous introuvable.");
-  if (appointment.status !== "BOOKED") throw new Error("Ce rendez-vous ne peut plus être annulé.");
+  if (!appointment) throw new PublicError("Rendez-vous introuvable.");
+  if (appointment.status !== "BOOKED") throw new PublicError("Ce rendez-vous ne peut plus être annulé.");
 
   return prisma.$transaction(async (tx) => {
     const cancelled = await tx.appointment.update({
