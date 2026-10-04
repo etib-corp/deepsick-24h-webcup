@@ -1,9 +1,11 @@
 import "server-only";
 
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";
+import { normalizeIdentifier } from "@/lib/identity";
 import { prisma } from "@/lib/prisma";
 import {
   isOrderStatus,
@@ -17,17 +19,59 @@ import {
  * Accounts
  * ------------------------------------------------------------------ */
 
-export async function registerCitizen(input: { name: string; email: string; password: string }) {
-  const email = input.email.toLowerCase().trim();
-  const existing = await prisma.user.findUnique({ where: { email } });
+export type RegistrationErrorCode = "EMAIL_TAKEN" | "USERNAME_TAKEN";
+
+/** Typed so the action can render a localized message for the resident. */
+export class RegistrationError extends Error {
+  readonly code: RegistrationErrorCode;
+
+  constructor(code: RegistrationErrorCode) {
+    super(code);
+    this.name = "RegistrationError";
+    this.code = code;
+  }
+}
+
+/**
+ * Creates a citizen account (F71). An email or a colon identifier is enough —
+ * new arrivals without an email register with an identifier only.
+ */
+export async function registerCitizen(input: {
+  name: string;
+  email?: string | null;
+  username?: string | null;
+  password: string;
+}) {
+  const name = input.name.trim();
+  const email = input.email ? normalizeIdentifier(input.email) : null;
+  const username = input.username ? normalizeIdentifier(input.username) : null;
+  if (!email && !username) {
+    throw new Error("registerCitizen requires an email or a colon identifier.");
+  }
+
+  const existing = await prisma.user.findFirst({
+    where: {
+      OR: [...(email ? [{ email }] : []), ...(username ? [{ username }] : [])],
+    },
+    select: { email: true },
+  });
   if (existing) {
-    throw new PublicError("Un compte existe déjà avec cette adresse e-mail.");
+    throw new RegistrationError(existing.email === email && email ? "EMAIL_TAKEN" : "USERNAME_TAKEN");
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
-  return prisma.user.create({
-    data: { name: input.name.trim(), email, passwordHash, role: "CITIZEN" },
-  });
+  try {
+    return await prisma.user.create({
+      data: { name, email, username, passwordHash, role: "CITIZEN" },
+    });
+  } catch (error) {
+    // The unique constraint may still fire if two requests raced.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const target = String(error.meta?.target ?? "");
+      throw new RegistrationError(target.includes("username") ? "USERNAME_TAKEN" : "EMAIL_TAKEN");
+    }
+    throw error;
+  }
 }
 
 export async function setUserRole(userId: string, role: string) {

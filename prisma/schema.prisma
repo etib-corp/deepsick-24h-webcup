@@ -20,7 +20,10 @@ datasource db {
 model User {
   id              String           @id @default(cuid())
   name            String?
-  email           String           @unique
+  // New arrivals may not have an email address (F71): sign-in then uses
+  // `username` — the colon identifier (see `lib/identity.ts`).
+  email           String?          @unique
+  username        String?          @unique
   passwordHash    String?
   image           String?
   // CITIZEN | SECURITY | MEDIC | MAINTENANCE | DRIVER | MERCHANT | ADMIN_AGENT | COUNCIL

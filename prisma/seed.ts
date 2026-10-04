@@ -11,6 +11,7 @@
  *   commerce@terranova.fr        → MERCHANT     (Yuki Tanaka)
  *   administration@terranova.fr  → ADMIN_AGENT  (Claire Fontaine)
  *   conseil@terranova.fr         → COUNCIL      (Elias Marr)
+ *   iris.nouvelle (no email)     → CITIZEN      (Iris Halden, colon identifier)
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -40,6 +41,21 @@ async function main() {
       create: { ...user, passwordHash },
     });
   }
+
+  // A resident who arrived without an email address (F71) — she signs in with
+  // her colon identifier instead. Kept out of the role map on purpose.
+  await prisma.user.upsert({
+    where: { username: "iris.nouvelle" },
+    update: { name: "Iris Halden", role: "CITIZEN" },
+    create: {
+      username: "iris.nouvelle",
+      name: "Iris Halden",
+      role: "CITIZEN",
+      sector: "Secteur 01 · Habitat",
+      balance: 0,
+      passwordHash,
+    },
+  });
 
   const citizen = users.CITIZEN;
   const officer = users.SECURITY;
@@ -362,6 +378,7 @@ async function main() {
 
   console.log("✅ Terra Nova ecosystem seeded.");
   for (const user of USERS) console.log(`   ${user.email.padEnd(30)} ${user.role}`);
+  console.log(`   ${"iris.nouvelle (sans e-mail)".padEnd(30)} CITIZEN`);
   console.log(`   mot de passe : ${DEMO_PASSWORD}`);
 }
 
