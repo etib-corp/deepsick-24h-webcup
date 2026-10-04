@@ -7,6 +7,7 @@ import {
 } from "@/components/colony/AppointmentForm";
 import { EmptyState } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
+import { PlainExplanation } from "@/components/ui/PlainExplanation";
 import { getAvailableSlots, getPublishedServices } from "@/lib/data";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
@@ -89,6 +90,9 @@ export default async function NewAppointmentPage({
         <EmptyState title={t.publicPages.services.empty} description={t.publicPages.services.emptyHint} />
       ) : (
         <div className="space-y-6">
+          <PlainExplanation title={t.plain.appointment.title}>
+            {t.plain.appointment.body}
+          </PlainExplanation>
           <section>
             <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
               {t.citizen.appointments.chooseService}

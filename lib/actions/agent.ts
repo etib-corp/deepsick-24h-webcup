@@ -5,8 +5,9 @@ import { revalidatePath } from "next/cache";
 import { requirePageRole } from "@/lib/permissions";
 import { auditActor, recordSecurityEvent } from "@/lib/security";
 import { readId, readText } from "@/lib/sanitize";
-import { assignRequest, updateRequestStatus } from "@/lib/services";
+import { addRequestReply, assignRequest, updateRequestStatus } from "@/lib/services";
 import { isRequestStatus } from "@/lib/roles";
+import { firstError, replySchema } from "@/lib/validation";
 
 /** Démarches administratives: move a citizen request forward and log a note. */
 export async function updateRequestStatusAction(formData: FormData) {
@@ -61,4 +62,34 @@ export async function assignToMeAction(formData: FormData) {
 
   revalidatePath("/operations/administration");
   revalidatePath(`/operations/administration/${requestId}`);
+}
+
+/** F84 — an agent answers the colonist directly from the request file. */
+export async function replyToRequestAction(formData: FormData) {
+  const session = await requirePageRole(["ADMIN_AGENT", "COUNCIL"]);
+  const requestId = readId(formData.get("requestId"));
+  if (!requestId) return;
+
+  const parsed = replySchema.safeParse({ body: readText(formData.get("body"), 4000) });
+  if (!parsed.success) return;
+
+  try {
+    await addRequestReply(requestId, session.user.id, parsed.data.body);
+  } catch {
+    return;
+  }
+
+  await recordSecurityEvent({
+    type: "REQUEST_REPLY_ADDED",
+    outcome: "SUCCESS",
+    ...auditActor(session),
+    targetType: "service-request",
+    targetId: requestId,
+    detail: "réponse au colon",
+  });
+
+  revalidatePath("/operations/administration");
+  revalidatePath(`/operations/administration/${requestId}`);
+  revalidatePath("/citizen");
+  revalidatePath("/citizen/requests");
 }

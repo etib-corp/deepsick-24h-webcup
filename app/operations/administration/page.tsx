@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { StatTile } from "@/components/colony/StatTile";
+import { Badge } from "@/components/ui/Badge";
+import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PriorityBadge, StatusBadge } from "@/components/ui/StatusBadge";
 import { getStaffRequests } from "@/lib/data";
@@ -60,6 +62,31 @@ export default async function AdministrationConsolePage() {
         />
       </div>
 
+      <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+            {t.ops.administration.exportTitle}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.ops.administration.exportHint}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/operations/requests/export"
+            download
+            className={buttonClasses("secondary", "sm")}
+          >
+            {t.ops.administration.exportAll}
+          </a>
+          <a
+            href="/api/operations/requests/export?scope=actionable"
+            download
+            className={buttonClasses("secondary", "sm")}
+          >
+            {t.ops.administration.exportActionable}
+          </a>
+        </div>
+      </Card>
+
       <section>
         <SectionHeader
           title={t.ops.administration.queue}
@@ -80,6 +107,12 @@ export default async function AdministrationConsolePage() {
                   }`}
                   trailing={
                     <div className="flex items-center gap-1.5">
+                      {request._count.supports > 0 ? (
+                        <Badge tone="info">🤝 {request._count.supports}</Badge>
+                      ) : null}
+                      {request._count.replies > 0 ? (
+                        <Badge tone="mars">✉ {request._count.replies}</Badge>
+                      ) : null}
                       <PriorityBadge priority={request.priority} />
                       <StatusBadge status={request.status} />
                     </div>

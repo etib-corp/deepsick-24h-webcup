@@ -10,9 +10,9 @@ import { cn } from "@/lib/ui";
 
 type View = "map" | "list";
 
-export function ServicesView({ services }: { services: MapService[] }) {
+export function ServicesView({ services, lite = false }: { services: MapService[]; lite?: boolean }) {
   const t = useT();
-  const [view, setView] = useState<View>("map");
+  const [view, setView] = useState<View>(lite ? "list" : "map");
 
   const nodes = services
     .filter((service) => service.mapped)
@@ -22,6 +22,7 @@ export function ServicesView({ services }: { services: MapService[] }) {
       icon: service.icon,
       sector: service.sector,
       description: service.description,
+      openingHours: service.openingHours,
       featured: service.featured,
       unavailable: !service.published,
       x: service.x,

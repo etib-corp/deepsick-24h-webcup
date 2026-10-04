@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 
 import { EmptyState } from "@/components/ui/Alert";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { ServiceFinder } from "@/components/public/ServiceFinder";
 import { ServicesView } from "@/components/public/ServicesView";
 import { getAllServices } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
+import { isLiteMode } from "@/lib/lite-mode";
 import { buildMapServices } from "@/lib/map-layout";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +32,17 @@ export default async function ServicesPage() {
           description={t.publicPages.services.emptyHint}
         />
       ) : (
-        <ServicesView services={services} />
+        <>
+          <ServiceFinder
+            services={services.map(({ slug, name, category, description }) => ({
+              slug,
+              name,
+              category,
+              description,
+            }))}
+          />
+          <ServicesView services={services} lite={isLiteMode()} />
+        </>
       )}
     </div>
   );

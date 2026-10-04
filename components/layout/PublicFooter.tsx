@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { LiteModeToggle } from "@/components/layout/LiteModeToggle";
 import { useT } from "@/lib/i18n/client";
 
 export function PublicFooter() {
@@ -24,6 +25,12 @@ export function PublicFooter() {
           <Link href="/services" className="hover:text-primary">
             [ {t.nav.services} ]
           </Link>
+          <Link href="/transport" className="hover:text-primary">
+            [ {t.nav.transport} ]
+          </Link>
+          <Link href="/projects" className="hover:text-primary">
+            [ {t.nav.projects} ]
+          </Link>
           <Link href="/announcements" className="hover:text-primary">
             [ {t.nav.announcements} ]
           </Link>
@@ -36,6 +43,13 @@ export function PublicFooter() {
           <Link href="/apparence" className="hover:text-primary">
             [ {t.nav.appearance} ]
           </Link>
+          <Link href="/eco" className="hover:text-primary">
+            [ {t.nav.eco} ]
+          </Link>
+          <Link href="/statut" className="hover:text-primary">
+            [ {t.nav.status} ]
+          </Link>
+          <LiteModeToggle />
           <LocaleSwitcher />
         </div>
       </div>

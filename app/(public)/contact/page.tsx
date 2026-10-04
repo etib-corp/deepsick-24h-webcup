@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PlainExplanation } from "@/components/ui/PlainExplanation";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { createFormToken } from "@/lib/bot-signals";
 import { getDictionary } from "@/lib/i18n/server";
@@ -19,6 +20,10 @@ export default function ContactPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <PageHeader title={t.publicPages.contact.title} description={t.publicPages.contact.subtitle} />
+
+      <PlainExplanation title={t.plain.contact.title} className="mb-6">
+        {t.plain.contact.body}
+      </PlainExplanation>
 
       <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
         <Card>

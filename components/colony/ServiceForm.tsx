@@ -56,6 +56,14 @@ export function ServiceForm() {
         <Textarea id="description" name="description" required />
       </Field>
 
+      <Field
+        label={t.council.services.form.plainLanguage}
+        htmlFor="plainLanguage"
+        hint={t.council.services.form.plainLanguageHint}
+      >
+        <Textarea id="plainLanguage" name="plainLanguage" className="min-h-24" />
+      </Field>
+
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <input type="checkbox" name="featured" value="true" className="size-4 accent-primary" />
         {t.council.services.form.featured}
@@ -74,6 +82,15 @@ export function ServiceForm() {
           ))}
         </Select>
       </Field>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={t.council.services.form.openingHours} htmlFor="openingHours">
+          <Input id="openingHours" name="openingHours" placeholder="Lun.–Ven. · 09:00–17:00" />
+        </Field>
+        <Field label={t.council.services.form.address} htmlFor="address">
+          <Input id="address" name="address" placeholder="Secteur 03 · Planitia" />
+        </Field>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label={t.council.services.form.mapX} htmlFor="mapX" hint={t.council.services.form.mapHint}>

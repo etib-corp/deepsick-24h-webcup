@@ -22,6 +22,11 @@ export type TrackedRequest = {
   total?: number;
   steps: TrackingStep[];
   hasHistory: boolean;
+  /** F52 — set when the author shares the request on the community board. */
+  sharedForSupport?: boolean;
+  supportCount?: number;
+  /** F84 — official replies written by agents. */
+  replies?: { authorName: string | null; body: string; createdAt: Date }[];
 };
 
 /** Read-only citizen feed. Ownership always comes from the authenticated session. */
@@ -77,9 +82,30 @@ export async function getCitizenRequestDetail(
     case "request": {
       const request = await prisma.serviceRequest.findFirst({
         where: { id, authorId: userId },
-        include: { history: { orderBy: { createdAt: "asc" } } },
+        include: {
+          history: { orderBy: { createdAt: "asc" } },
+          replies: {
+            orderBy: { createdAt: "asc" },
+            include: { author: { select: { name: true } } },
+          },
+          _count: { select: { supports: true } },
+        },
       });
-      return request ? { ...request, kind, title: request.subject, steps: request.history, hasHistory: true } : null;
+      return request
+        ? {
+            ...request,
+            kind,
+            title: request.subject,
+            steps: request.history,
+            hasHistory: true,
+            supportCount: request._count.supports,
+            replies: request.replies.map((reply) => ({
+              authorName: reply.author?.name ?? null,
+              body: reply.body,
+              createdAt: reply.createdAt,
+            })),
+          }
+        : null;
     }
     case "report": {
       const report = await prisma.report.findFirst({

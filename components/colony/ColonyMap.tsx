@@ -12,6 +12,7 @@ export type ColonyMapNode = {
   icon?: string | null;
   sector?: string | null;
   description?: string;
+  openingHours?: string | null;
   featured?: boolean;
   unavailable?: boolean;
   x: number;
@@ -131,6 +132,11 @@ export function ColonyMap({
             {active.description ? (
               <p className="mt-1 text-xs text-muted-foreground">
                 {active.description}
+              </p>
+            ) : null}
+            {active.openingHours ? (
+              <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                {active.openingHours}
               </p>
             ) : null}
             <Link

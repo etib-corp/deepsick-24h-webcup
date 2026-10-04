@@ -13,6 +13,8 @@ export type MapService = {
   sector: string | null;
   featured: boolean;
   published: boolean;
+  /** Opening hours shown to residents (F74). */
+  openingHours: string | null;
   x: number;
   y: number;
   /** True when the service has a real spot on the artwork. */
@@ -31,6 +33,7 @@ type ServiceInput = {
   mapX?: number | null;
   mapY?: number | null;
   sector?: string | null;
+  openingHours?: string | null;
 };
 
 /** Deterministic fallback anchors, one per colony sector. */
@@ -70,6 +73,7 @@ export function buildMapServices(services: ServiceInput[]): MapService[] {
       sector,
       featured: service.featured ?? false,
       published: service.published ?? true,
+      openingHours: service.openingHours ?? null,
       x,
       y,
       mapped: anyCoords ? hasCoords : true,

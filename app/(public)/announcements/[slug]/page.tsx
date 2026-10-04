@@ -44,6 +44,17 @@ export default async function AnnouncementDetailPage({ params }: Params) {
       <div className="mt-8 whitespace-pre-line leading-relaxed text-muted-foreground">
         {announcement.body}
       </div>
+
+      {announcement.plainLanguage ? (
+        <div className="mt-6 rounded-md border border-primary/30 bg-primary/5 p-4">
+          <p className="font-mono text-[11px] uppercase tracking-wide text-primary">
+            {t.publicPages.announcements.plainTitle}
+          </p>
+          <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+            {announcement.plainLanguage}
+          </p>
+        </div>
+      ) : null}
     </article>
   );
 }

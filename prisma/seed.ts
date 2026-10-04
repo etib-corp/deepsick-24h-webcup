@@ -44,7 +44,7 @@ async function main() {
 
   // A resident who arrived without an email address (F71) — she signs in with
   // her colon identifier instead. Kept out of the role map on purpose.
-  await prisma.user.upsert({
+  const iris = await prisma.user.upsert({
     where: { username: "iris.nouvelle" },
     update: { name: "Iris Halden", role: "CITIZEN" },
     create: {
@@ -68,12 +68,13 @@ async function main() {
 
   /* --- Civic services directory (D05) ---------------------------------- */
   const services = [
-    { slug: "securite", name: "Sécurité publique", category: "Protection", icon: "🛡️", order: 1, featured: true, mapX: 0.574, mapY: 0.338, sector: "Secteur 04 · Rempart", description: "Ares Security Command veille sur les secteurs de la colonie : signalements, escorte et coordination des interventions.", preparation: "Munissez-vous de votre badge colon et d'une pièce d'identité." },
-    { slug: "medical", name: "Soins médicaux", category: "Santé", icon: "✚", order: 2, featured: true, mapX: 0.443, mapY: 0.153, sector: "Secteur 02 · BioDôme", description: "Asclepius Medical Net assure le triage des urgences, les soins courants et l'accès aux modules médicaux.", preparation: "Apportez votre dossier médical et votre identifiant colon ; présentez-vous 10 minutes avant l'heure." },
-    { slug: "maintenance", name: "Infrastructure", category: "Technique", icon: "🛠️", order: 3, featured: false, mapX: 0.269, mapY: 0.467, sector: "Secteur 05 · Industrie", description: "Hephaestus Infrastructure maintient le recyclage d'air, l'énergie, l'eau et la propreté des modules.", preparation: "Décrivez précisément la panne et notez les références du module concerné." },
-    { slug: "transport", name: "Transport & logistique", category: "Mobilité", icon: "🚡", order: 4, featured: false, mapX: 0.295, mapY: 0.686, sector: "Secteur 03 · Planitia", description: "Hermes Mobility Net opère les rovers, les navettes et le fret entre les secteurs de Nova Terra.", preparation: "Indiquez votre adresse de départ, votre destination et prévoyez votre carte de transport." },
-    { slug: "commerce", name: "Commerce & restauration", category: "Vie quotidienne", icon: "🍜", order: 5, featured: false, mapX: 0.546, mapY: 0.728, sector: "Secteur 01 · Habitat", description: "Mercator Exchange réunit les cantines et fournisseurs de la colonie : commandes et livraisons.", preparation: "Notez la liste de vos articles et votre numéro de module pour la livraison." },
-    { slug: "demarches", name: "Démarches administratives", category: "Administration", icon: "📄", order: 6, featured: true, mapX: 0.689, mapY: 0.469, sector: "Secteur 03 · Planitia", description: "Permis, autorisations et documents officiels traités par le Bureau des démarches.", preparation: "Rassemblez les justificatifs demandés (identité, attestation de résidence) avant votre venue." },
+    { slug: "securite", name: "Sécurité publique", category: "Protection", icon: "🛡️", order: 1, featured: true, mapX: 0.574, mapY: 0.338, sector: "Secteur 04 · Rempart", description: "Ares Security Command veille sur les secteurs de la colonie : signalements, escorte et coordination des interventions.", preparation: "Munissez-vous de votre badge colon et d'une pièce d'identité.", openingHours: "24 h / 24 — 7 j / 7", address: "Secteur 04 · Rempart — poste central ARES" },
+    { slug: "medical", name: "Soins médicaux", category: "Santé", icon: "✚", order: 2, featured: true, mapX: 0.443, mapY: 0.153, sector: "Secteur 02 · BioDôme", description: "Asclepius Medical Net assure le triage des urgences, les soins courants et l'accès aux modules médicaux.", preparation: "Apportez votre dossier médical et votre identifiant colon ; présentez-vous 10 minutes avant l'heure.", openingHours: "Lun.–Dim. · 07:00–21:00 (urgences 24 h)", address: "Secteur 02 · BioDôme — module médical A2" },
+    { slug: "maintenance", name: "Infrastructure", category: "Technique", icon: "🛠️", order: 3, featured: false, mapX: 0.269, mapY: 0.467, sector: "Secteur 05 · Industrie", description: "Hephaestus Infrastructure maintient le recyclage d'air, l'énergie, l'eau et la propreté des modules.", preparation: "Décrivez précisément la panne et notez les références du module concerné.", openingHours: "Lun.–Ven. · 06:00–20:00", address: "Secteur 05 · Industrie — atelier Hephaestus" },
+    { slug: "transport", name: "Transport & logistique", category: "Mobilité", icon: "🚡", order: 4, featured: false, mapX: 0.295, mapY: 0.686, sector: "Secteur 03 · Planitia", description: "Hermes Mobility Net opère les rovers, les navettes et le fret entre les secteurs de Nova Terra.", preparation: "Indiquez votre adresse de départ, votre destination et prévoyez votre carte de transport.", openingHours: "Lun.–Dim. · 05:30–23:00", address: "Secteur 03 · Planitia — gare des navettes" },
+    { slug: "commerce", name: "Commerce & restauration", category: "Vie quotidienne", icon: "🍜", order: 5, featured: false, mapX: 0.546, mapY: 0.728, sector: "Secteur 01 · Habitat", description: "Mercator Exchange réunit les cantines et fournisseurs de la colonie : commandes et livraisons.", preparation: "Notez la liste de vos articles et votre numéro de module pour la livraison.", openingHours: "Lun.–Dim. · 07:00–22:00", address: "Secteur 01 · Habitat — marché couvert" },
+    { slug: "demarches", name: "Démarches administratives", category: "Administration", icon: "📄", order: 6, featured: true, mapX: 0.689, mapY: 0.469, sector: "Secteur 03 · Planitia", description: "Permis, autorisations et documents officiels traités par le Bureau des démarches.", preparation: "Rassemblez les justificatifs demandés (identité, attestation de résidence) avant votre venue.", openingHours: "Lun.–Ven. · 09:00–17:00", address: "Secteur 03 · Planitia — centre civique, aile B", plainLanguage: "Le Bureau des démarches traite vos papiers : permis, autorisations et attestations. Vous déposez votre demande, puis vous suivez son avancement dans votre espace personnel. Pensez à apporter une pièce d'identité et un justificatif de résidence." },
+    { slug: "associations", name: "Maison des associations", category: "Vie quotidienne", icon: "🤝", order: 7, featured: false, mapX: 0.62, mapY: 0.6, sector: "Secteur 01 · Habitat", description: "Les associations partenaires de la colonie (jardins partagés, entraide, culture) accueillent les habitants et présentent leurs activités.", preparation: "Présentez-vous à l'accueil ; les bénévoles vous orientent vers l'association qui vous convient.", openingHours: "Lun.–Ven. · 14:00–19:00 ; Sam. · 10:00–13:00", address: "Secteur 01 · Habitat — module vie sociale 03" },
   ];
   for (const service of services) {
     await prisma.municipalService.upsert({ where: { slug: service.slug }, update: service, create: service });
@@ -83,7 +84,7 @@ async function main() {
   const announcements = [
     { slug: "colonisation-phase-deux", title: "Phase deux de colonisation : ouverture du Secteur 05", excerpt: "Le Haut Conseil ouvre les attributions de logements du Secteur 05.", body: "Habitants de Nova Terra,\n\nLa phase deux de colonisation ouvre le Secteur 05 aux nouvelles familles. Les demandes d'attribution se font depuis le Bureau des démarches, rubrique Logement.\n\nLe Haut Conseil de Nova Terra.", published: true, publishedAt: new Date("2026-10-01T08:00:00Z") },
     { slug: "maintenance-recyclage-air", title: "Maintenance planifiée du recyclage d'air", excerpt: "Interruption de courte durée sur le module HAB 07.", body: "Une maintenance planifiée du recyclage d'air aura lieu sur le module HAB 07. Les équipes Hephaestus interviendront hors cycle de sommeil.", published: true, publishedAt: new Date("2026-10-02T09:30:00Z") },
-    { slug: "campagne-vaccination", title: "Campagne de vaccination saisonnière", excerpt: "Asclepius Medical Net ouvre des créneaux dans tous les secteurs.", body: "La campagne de vaccination saisonnière débute cette semaine. Présentez-vous au module médical de votre secteur avec votre identifiant colon.", published: true, publishedAt: new Date("2026-10-03T07:15:00Z") },
+    { slug: "campagne-vaccination", title: "Campagne de vaccination saisonnière", excerpt: "Asclepius Medical Net ouvre des créneaux dans tous les secteurs.", body: "La campagne de vaccination saisonnière débute cette semaine. Présentez-vous au module médical de votre secteur avec votre identifiant colon.", plainLanguage: "La ville vaccine contre les maladies de saison. Allez au module médical de votre secteur avec votre identifiant colon : l'injection est gratuite et ne prend que quelques minutes.", published: true, publishedAt: new Date("2026-10-03T07:15:00Z") },
   ];
   for (const announcement of announcements) {
     await prisma.announcement.upsert({
@@ -306,6 +307,124 @@ async function main() {
       },
     });
   }
+
+  /* --- Community support (F52) ------------------------------------------ */
+  await prisma.serviceRequest.upsert({
+    where: { reference: "REQ-2026-0004" },
+    update: { shareForSupport: true },
+    create: {
+      reference: "REQ-2026-0004",
+      subject: "Éclairage du chemin HAB 12",
+      description:
+        "Trois lampadaires du chemin entre HAB 12 et la serre sont hors service depuis une semaine. Merci de rétablir l'éclairage avant la prochaine tempête.",
+      category: "Voirie",
+      priority: "NORMAL",
+      status: "SUBMITTED",
+      shareForSupport: true,
+      authorId: iris.id,
+      history: {
+        create: { status: "SUBMITTED", note: "Demande déposée par la colonne.", actorId: iris.id },
+      },
+    },
+  });
+
+  const [requestOne, requestTwo, requestFour] = await Promise.all([
+    prisma.serviceRequest.findUniqueOrThrow({ where: { reference: "REQ-2026-0001" } }),
+    prisma.serviceRequest.findUniqueOrThrow({ where: { reference: "REQ-2026-0002" } }),
+    prisma.serviceRequest.findUniqueOrThrow({ where: { reference: "REQ-2026-0004" } }),
+  ]);
+  await prisma.serviceRequest.update({
+    where: { id: requestOne.id },
+    data: { shareForSupport: true },
+  });
+
+  await prisma.requestSupport.deleteMany({});
+  await prisma.requestSupport.createMany({
+    data: [
+      { requestId: requestOne.id, userId: iris.id },
+      { requestId: requestFour.id, userId: citizen.id },
+    ],
+  });
+
+  /* --- Agent replies on requests (F84) ---------------------------------- */
+  await prisma.requestReply.deleteMany({});
+  await prisma.requestReply.createMany({
+    data: [
+      {
+        requestId: requestTwo.id,
+        authorId: adminAgent.id,
+        body:
+          "Votre dossier de permis est complet. La session d'évaluation au simulateur rover est programmée au prochain cycle : vous recevrez une convocation.",
+      },
+      {
+        requestId: requestTwo.id,
+        authorId: adminAgent.id,
+        body:
+          "Convocation envoyée : présentez-vous au centre civique, aile B, avec votre badge colon.",
+      },
+    ],
+  });
+
+  /* --- City projects (F67) ---------------------------------------------- */
+  const projects = [
+    { slug: "extension-secteur-05", title: "Extension du Secteur 05", summary: "Phase deux : logements familiaux, serres et voie de liaison avec Planitia.", description: "Le chantier de la phase deux étend le Secteur 05 : 120 logements familiaux, deux serres pressurisées et une voie de liaison directe avec Planitia. Les équipes Hephaestus livrent la première tranche avant la fin du cycle.", sector: "Secteur 05 · Industrie", status: "IN_PROGRESS", progress: 62, order: 1 },
+    { slug: "reseau-eau-nord", title: "Renforcement du réseau d'eau nord", summary: "Doublement de la conduite entre le recyclage central et le secteur nord.", description: "Pour sécuriser l'alimentation du secteur nord, la conduite principale est doublée et deux stations de contrôle sont ajoutées. Les études de terrain sont terminées ; les travaux démarrent au prochain cycle.", sector: "Secteur 02 · BioDôme", status: "PLANNED", progress: 15, order: 2 },
+    { slug: "parc-biodome", title: "Parc ombragé du BioDôme", summary: "Parc public avec ombrières et jardins partagés au cœur du BioDôme.", description: "Le parc ombragé du BioDôme est terminé : ombrières, jardins partagés et aire de repos. Merci aux habitants qui ont participé aux ateliers de plantation.", sector: "Secteur 02 · BioDôme", status: "COMPLETED", progress: 100, order: 3, startsAt: new Date("2026-06-01T08:00:00Z"), endsAt: new Date("2026-09-15T18:00:00Z") },
+  ];
+  for (const project of projects) {
+    await prisma.project.upsert({
+      where: { slug: project.slug },
+      update: project,
+      create: project,
+    });
+  }
+
+  /* --- Citizen ideas (F68) ---------------------------------------------- */
+  await prisma.citizenIdea.deleteMany({});
+  await prisma.citizenIdea.createMany({
+    data: [
+      {
+        reference: "IDEA-2026-0001",
+        title: "Ombrières aux arrêts de navette",
+        body: "Installer des ombrières sur les arrêts de navette les plus fréquentés, en commençant par Habitat et Planitia.",
+        authorId: citizen.id,
+        status: "REVIEWED",
+        response:
+          "Bonne idée : trois ombrières sont commandées pour les arrêts du Secteur 01. Installation prévue avant la prochaine vague de chaleur.",
+        reviewerId: council.id,
+      },
+      {
+        reference: "IDEA-2026-0002",
+        title: "Atelier de réparation citoyen",
+        body: "Un atelier partagé, avec des outils et des bénévoles, pour réparer les petits équipements au lieu de les recycler.",
+        authorId: iris.id,
+        status: "SUBMITTED",
+      },
+    ],
+  });
+
+  /* --- Service feedback (F76) ------------------------------------------- */
+  const [medicalForFeedback, transportForFeedback] = await Promise.all([
+    prisma.municipalService.findUniqueOrThrow({ where: { slug: "medical" } }),
+    prisma.municipalService.findUniqueOrThrow({ where: { slug: "transport" } }),
+  ]);
+  await prisma.serviceFeedback.deleteMany({});
+  await prisma.serviceFeedback.createMany({
+    data: [
+      {
+        serviceId: medicalForFeedback.id,
+        authorId: citizen.id,
+        comment:
+          "Prise en charge rapide et dossier bien suivi. Le rappel avant le rendez-vous est très utile.",
+      },
+      {
+        serviceId: transportForFeedback.id,
+        authorId: iris.id,
+        comment:
+          "Les navettes sont ponctuelles et l'affichage des prochains départs aide beaucoup aux heures de pointe.",
+      },
+    ],
+  });
 
   /* --- Contact message (D04) ------------------------------------------- */
   const messageCount = await prisma.contactMessage.count();

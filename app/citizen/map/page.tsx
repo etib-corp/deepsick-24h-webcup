@@ -28,6 +28,7 @@ export default async function CitizenMapPage() {
       icon: service.icon,
       sector: service.sector,
       description: service.description,
+      openingHours: service.openingHours,
       x: service.x,
       y: service.y,
       href: `/services/${service.slug}`,

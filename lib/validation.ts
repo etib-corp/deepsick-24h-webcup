@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { USERNAME_MAX, isValidUsername } from "@/lib/identity";
-import { OPINION_STANCES, REPORT_PRIORITIES, REPORT_TYPES, REQUEST_PRIORITIES } from "@/lib/roles";
+import { OPINION_STANCES, PROJECT_STATUSES, REPORT_PRIORITIES, REPORT_TYPES, REQUEST_PRIORITIES } from "@/lib/roles";
 import { sanitizePlainText, sanitizeUrl } from "@/lib/sanitize";
 
 export type RegisterMessages = {
@@ -117,13 +117,50 @@ export const serviceSchema = z.object({
   mapY: optionalCoord,
   sector: optionalPlainText(80),
   featured: z.coerce.boolean().optional(),
+  // F74 — opening hours / location shown to residents.
+  openingHours: optionalPlainText(80),
+  address: optionalPlainText(160),
+  // F89 — clear-language version of the essential information.
+  plainLanguage: optionalPlainText(2000),
 });
 
 export const announcementSchema = z.object({
   title: plainText(3, "Indiquez un titre.", 160),
   excerpt: optionalPlainText(280),
   body: plainText(10, "Rédigez le contenu.", 8000),
+  // F89 — clear-language version of the essential information.
+  plainLanguage: optionalPlainText(8000),
   published: z.coerce.boolean().optional(),
+});
+
+/** F67 — city project published by the Council. */
+export const projectSchema = z.object({
+  title: plainText(3, "Indiquez un titre.", 160),
+  summary: optionalPlainText(400),
+  description: plainText(10, "Décrivez le projet.", 4000),
+  sector: optionalPlainText(80),
+  status: z.enum(PROJECT_STATUSES),
+  progress: z.preprocess(
+    (value) =>
+      value === "" || value === null || value === undefined ? undefined : Number(value),
+    z.number().int().min(0).max(100).optional(),
+  ),
+});
+
+/** F68 — free improvement idea proposed by a resident. */
+export const ideaSchema = z.object({
+  title: plainText(3, "Indiquez un titre.", 160),
+  body: plainText(10, "Décrivez votre idée.", 4000),
+});
+
+/** F76 — a resident's comment about a municipal service. */
+export const feedbackSchema = z.object({
+  comment: plainText(5, "Écrivez votre commentaire.", 1200),
+});
+
+/** F84 — an agent's official reply on a citizen request. */
+export const replySchema = z.object({
+  body: plainText(3, "Rédigez la réponse.", 4000),
 });
 
 const optionalDateTime = z.preprocess(

@@ -588,3 +588,10 @@ button[aria-pressed="true"] { text-decoration: underline; text-underline-offset:
   main[data-console] :is(.grid-cols-2, .grid-cols-3) { grid-template-columns: minmax(0, 1fr); }
   header.sticky { position: static; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Light mode (F59/F62/F96): fewer animations, no decorative extras.   */
+/* ------------------------------------------------------------------ */
+[data-lite="1"] [class*="animate-in"] { animation: none !important; }
+[data-lite="1"] [data-lite-hide] { display: none !important; }
+[data-lite="1"] .backdrop-blur { backdrop-filter: none !important; }

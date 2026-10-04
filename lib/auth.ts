@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 
 import { inspectFormSubmission } from "@/lib/bot-guard";
 import { identifierWhere, normalizeIdentifier } from "@/lib/identity";
+import { trackLoginDevice } from "@/lib/login-device";
 import {
   getClientIp,
   getThrottleStatus,
@@ -35,6 +36,9 @@ export const authOptions: NextAuthOptions = {
         const headers = (req as { headers?: Record<string, string | string[] | undefined> } | undefined)
           ?.headers;
         const ip = getClientIp(headers);
+        const rawUserAgent = headers?.["user-agent"];
+        const userAgent =
+          (Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent)?.slice(0, 255) ?? null;
 
         // F81 — invisible bot controls before any credential work: a direct
         // POST without the signed challenge is refused and traced, and the
@@ -81,6 +85,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         await recordLoginSuccess(identifier);
+
+        // F54 — audit the successful login and warn the owner when the
+        // (ip, user-agent) pair was never seen on this account before.
+        await trackLoginDevice({ userId: user.id, role: user.role, ip, userAgent });
 
         return {
           id: user.id,

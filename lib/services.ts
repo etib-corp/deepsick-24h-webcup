@@ -8,7 +8,10 @@ import { formatDateTime, slugify } from "@/lib/format";
 import { normalizeIdentifier } from "@/lib/identity";
 import { prisma } from "@/lib/prisma";
 import {
+  IDEA_STATUS_LABELS,
+  isIdeaStatus,
   isOrderStatus,
+  isProjectStatus,
   isReportStatus,
   isRequestStatus,
   isRole,
@@ -226,6 +229,9 @@ export async function createMunicipalService(input: {
   mapY?: number | null;
   sector?: string | null;
   featured?: boolean;
+  openingHours?: string | null;
+  address?: string | null;
+  plainLanguage?: string | null;
 }) {
   return prisma.municipalService.create({
     data: {
@@ -238,6 +244,9 @@ export async function createMunicipalService(input: {
       mapY: input.mapY ?? null,
       sector: input.sector?.trim() || null,
       featured: input.featured ?? false,
+      openingHours: input.openingHours?.trim() || null,
+      address: input.address?.trim() || null,
+      plainLanguage: input.plainLanguage?.trim() || null,
       published: true,
     },
   });
@@ -298,6 +307,7 @@ export async function createAnnouncement(input: {
   title: string;
   excerpt?: string | null;
   body: string;
+  plainLanguage?: string | null;
   published?: boolean;
   authorId?: string | null;
 }) {
@@ -309,6 +319,7 @@ export async function createAnnouncement(input: {
         title: input.title.trim(),
         excerpt: input.excerpt?.trim() || null,
         body: input.body.trim(),
+        plainLanguage: input.plainLanguage?.trim() || null,
         published,
         publishedAt: published ? new Date() : null,
         authorId: input.authorId ?? null,
@@ -446,6 +457,106 @@ export async function deleteConsultation(id: string) {
   return prisma.consultation.delete({ where: { id } });
 }
 
+/* ------------------------------------------------------------------ *
+ * City projects (F67)
+ * ------------------------------------------------------------------ */
+
+async function uniqueProjectSlug(title: string) {
+  const root = slugify(title) || "projet";
+  let slug = root;
+  let suffix = 2;
+  while (await prisma.project.findUnique({ where: { slug } })) {
+    slug = `${root}-${suffix++}`;
+  }
+  return slug;
+}
+
+export async function createProject(input: {
+  title: string;
+  description: string;
+  summary?: string | null;
+  sector?: string | null;
+  status: string;
+  progress?: number | null;
+}) {
+  if (!isProjectStatus(input.status)) throw new PublicError("Statut invalide.");
+  return prisma.project.create({
+    data: {
+      slug: await uniqueProjectSlug(input.title),
+      title: input.title.trim(),
+      summary: input.summary?.trim() || null,
+      description: input.description.trim(),
+      sector: input.sector?.trim() || null,
+      status: input.status,
+      progress: input.progress ?? 0,
+      published: true,
+    },
+  });
+}
+
+export async function setProjectPublished(id: string, published: boolean) {
+  return prisma.project.update({ where: { id }, data: { published } });
+}
+
+export async function setProjectStatus(id: string, status: string) {
+  if (!isProjectStatus(status)) throw new PublicError("Statut invalide.");
+  return prisma.project.update({ where: { id }, data: { status } });
+}
+
+export async function deleteProject(id: string) {
+  return prisma.project.delete({ where: { id } });
+}
+
+/* ------------------------------------------------------------------ *
+ * Citizen ideas (F68)
+ * ------------------------------------------------------------------ */
+
+export async function createIdea(authorId: string, input: { title: string; body: string }) {
+  return prisma.citizenIdea.create({
+    data: {
+      title: input.title.trim(),
+      body: input.body.trim(),
+      authorId,
+      status: "SUBMITTED",
+    },
+  });
+}
+
+/** Council review of an idea: status + written response, author notified. */
+export async function reviewIdea(
+  id: string,
+  input: { status: string; response?: string | null },
+  reviewerId: string,
+) {
+  if (!isIdeaStatus(input.status)) throw new PublicError("Statut invalide.");
+  const status = input.status;
+
+  return prisma.$transaction(async (tx) => {
+    const current = await tx.citizenIdea.findUnique({ where: { id } });
+    if (!current) throw new PublicError("Idée introuvable.");
+
+    const response = input.response?.trim() || null;
+    const updated = await tx.citizenIdea.update({
+      where: { id },
+      data: { status, response, reviewerId },
+    });
+
+    // The author follows the review from their personal space (F68).
+    if (current.status !== status || response !== current.response) {
+      await tx.notification.create({
+        data: {
+          userId: current.authorId,
+          title: `Idée ${current.reference} mise à jour`,
+          body: `Nouveau statut : ${IDEA_STATUS_LABELS[status]}`,
+          href: "/citizen/ideas",
+        },
+      });
+    }
+
+    return updated;
+  });
+}
+
 /** One opinion per citizen and consultation (editable). */
 export async function upsertOpinion(input: {
   consultationId: string;
@@ -473,6 +584,106 @@ export async function upsertOpinion(input: {
       throw error;
     }
     return prisma.opinion.update({ where, data });
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Community support & agent replies on requests (F52 / F84)
+ * ------------------------------------------------------------------ */
+
+/** F52 — a citizen backs a shared request; toggles, returns the new state. */
+export async function toggleRequestSupport(requestId: string, userId: string) {
+  return prisma.$transaction(async (tx) => {
+    const request = await tx.serviceRequest.findUnique({
+      where: { id: requestId },
+      select: { id: true, reference: true, authorId: true, shareForSupport: true },
+    });
+    if (!request) throw new PublicError("Demande introuvable.");
+    if (!request.shareForSupport) throw new PublicError("Cette demande n'est pas partagée.");
+    if (request.authorId === userId) {
+      throw new PublicError("Vous ne pouvez pas soutenir votre propre demande.");
+    }
+
+    const existing = await tx.requestSupport.findUnique({
+      where: { requestId_userId: { requestId, userId } },
+    });
+
+    if (existing) {
+      await tx.requestSupport.delete({ where: { id: existing.id } });
+      return { supported: false, count: await tx.requestSupport.count({ where: { requestId } }) };
+    }
+
+    await tx.requestSupport.create({ data: { requestId, userId } });
+    await tx.notification.create({
+      data: {
+        userId: request.authorId,
+        title: `Nouveau soutien pour ${request.reference}`,
+        body: "Un habitant soutient votre demande. Retrouvez le nombre de soutiens dans « Demandes du quartier ».",
+        href: "/citizen/soutien",
+      },
+    });
+    return { supported: true, count: await tx.requestSupport.count({ where: { requestId } }) };
+  });
+}
+
+/** F52 — the author opts their request in or out of the community board. */
+export async function setRequestShared(requestId: string, authorId: string, shared: boolean) {
+  const updated = await prisma.serviceRequest.updateMany({
+    where: { id: requestId, authorId },
+    data: { shareForSupport: shared },
+  });
+  if (updated.count === 0) throw new PublicError("Demande introuvable.");
+}
+
+/** F84 — an official reply from an agent; the author is notified. */
+export async function addRequestReply(requestId: string, authorId: string, body: string) {
+  const trimmed = body.trim();
+  return prisma.$transaction(async (tx) => {
+    const request = await tx.serviceRequest.findUnique({
+      where: { id: requestId },
+      select: { id: true, reference: true, authorId: true },
+    });
+    if (!request) throw new PublicError("Demande introuvable.");
+
+    const reply = await tx.requestReply.create({ data: { requestId, authorId, body: trimmed } });
+    await tx.notification.create({
+      data: {
+        userId: request.authorId,
+        title: `Réponse à votre demande ${request.reference}`,
+        body: trimmed.slice(0, 140),
+        href: `/citizen/requests/request/${requestId}`,
+      },
+    });
+    return reply;
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Service feedback (F76)
+ * ------------------------------------------------------------------ */
+
+/** One editable comment per citizen and per service. */
+export async function upsertServiceFeedback(input: {
+  serviceId: string;
+  authorId: string;
+  comment: string;
+}) {
+  const where = {
+    serviceId_authorId: { serviceId: input.serviceId, authorId: input.authorId },
+  };
+  const data = { comment: input.comment.trim() };
+  try {
+    return await prisma.serviceFeedback.upsert({
+      where,
+      update: data,
+      create: { ...data, serviceId: input.serviceId, authorId: input.authorId },
+    });
+  } catch (error) {
+    // Same MySQL compound-upsert caveat as opinions (F66).
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+      throw error;
+    }
+    return prisma.serviceFeedback.update({ where, data });
   }
 }
 

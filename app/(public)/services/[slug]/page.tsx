@@ -6,9 +6,18 @@ import { buttonClasses } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { PlainExplanation } from "@/components/ui/PlainExplanation";
+import { ServiceFeedbackForm } from "@/components/public/ServiceFeedbackForm";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { getOtherPublishedServices, getServiceBySlug } from "@/lib/data";
+import {
+  getFeedbackByAuthorAndService,
+  getFeedbacksByService,
+  getOtherPublishedServices,
+  getServiceBySlug,
+} from "@/lib/data";
+import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
+import { getAuthSession } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +34,14 @@ export default async function ServiceDetailPage({ params }: Params) {
   if (!service) notFound();
 
   const otherServices = await getOtherPublishedServices(service.id);
+
+  // F76 — public comments; the form is shown to signed-in citizens only.
+  const feedbacks = await getFeedbacksByService(service.id);
+  const session = await getAuthSession();
+  const myFeedback =
+    session?.user?.role === "CITIZEN"
+      ? await getFeedbackByAuthorAndService(service.id, session.user.id)
+      : null;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -62,6 +79,38 @@ export default async function ServiceDetailPage({ params }: Params) {
 
       <p className="mt-6 whitespace-pre-line text-muted-foreground">{service.description}</p>
 
+      {service.plainLanguage ? (
+        <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-4">
+          <p className="font-mono text-[11px] uppercase tracking-wide text-primary">
+            {t.publicPages.services.plainTitle}
+          </p>
+          <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+            {service.plainLanguage}
+          </p>
+        </div>
+      ) : null}
+
+      {service.openingHours || service.address ? (
+        <dl className="mt-6 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+          {service.openingHours ? (
+            <div>
+              <dt className="font-mono text-[10px] uppercase tracking-wide text-foreground/70">
+                {t.publicPages.services.hours}
+              </dt>
+              <dd className="mt-0.5">{service.openingHours}</dd>
+            </div>
+          ) : null}
+          {service.address ? (
+            <div>
+              <dt className="font-mono text-[10px] uppercase tracking-wide text-foreground/70">
+                {t.publicPages.services.address}
+              </dt>
+              <dd className="mt-0.5">{service.address}</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : null}
+
       <div className="mt-8 flex flex-wrap gap-3">
         {service.published ? (
           <>
@@ -82,6 +131,66 @@ export default async function ServiceDetailPage({ params }: Params) {
             : t.publicPages.services.unavailableAction}
         </Link>
       </div>
+
+      <PlainExplanation title={t.plain.serviceRequest.title} className="mt-6">
+        {t.plain.serviceRequest.body}
+      </PlainExplanation>
+
+      {service.slug === "transport" ? (
+        <p className="mt-4 text-sm">
+          <Link href="/transport" className="text-primary underline-offset-4 hover:underline">
+            {t.publicPages.transport.link}
+          </Link>
+        </p>
+      ) : null}
+
+      <section className="mt-10" aria-labelledby="service-feedback-title">
+        <h2
+          id="service-feedback-title"
+          className="font-mono text-sm uppercase tracking-wide text-primary"
+        >
+          {t.publicPages.services.feedback.title}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t.publicPages.services.feedback.hint}
+        </p>
+
+        {session?.user?.role === "CITIZEN" ? (
+          <Card className="mt-4 p-4">
+            <ServiceFeedbackForm
+              serviceId={service.id}
+              initialComment={myFeedback?.comment ?? ""}
+            />
+          </Card>
+        ) : (
+          <p className="mt-3 text-sm">
+            <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+              {t.publicPages.services.feedback.login}
+            </Link>
+          </p>
+        )}
+
+        {feedbacks.length > 0 ? (
+          <ul className="mt-4 space-y-2">
+            {feedbacks.map((feedback) => (
+              <li key={feedback.id}>
+                <Card className="p-3">
+                  <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {feedback.author?.name ?? t.common.colon} · {formatDate(feedback.createdAt)}
+                  </p>
+                  <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                    {feedback.comment}
+                  </p>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {t.publicPages.services.feedback.empty}
+          </p>
+        )}
+      </section>
 
       {otherServices.length > 0 ? (
         <section className="mt-12">

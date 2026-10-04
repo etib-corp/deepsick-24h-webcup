@@ -4,8 +4,10 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 import { SectionHeader } from "@/components/colony/FeedRow";
 import { RequestStatusForm } from "@/components/colony/RequestStatusForm";
+import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { replyToRequestAction } from "@/lib/actions/agent";
 import { getRequestById, getUsers } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 import { format, getDictionary } from "@/lib/i18n/server";
@@ -62,6 +64,36 @@ export default async function AdministrationRequestPage({ params }: { params: { 
           <Card className="p-4">
             <SectionHeader title={t.ops.administration.instruction} />
             <RequestStatusForm requestId={request.id} status={request.status} />
+          </Card>
+
+          <Card className="p-4">
+            <SectionHeader title={t.ops.administration.replyTitle} />
+            <form action={replyToRequestAction} className="space-y-2">
+              <input type="hidden" name="requestId" value={request.id} />
+              <textarea
+                name="body"
+                required
+                placeholder={t.ops.administration.replyPlaceholder}
+                className="min-h-24 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60"
+              />
+              <button type="submit" className={buttonClasses("primary", "sm")}>
+                {t.ops.administration.replySubmit}
+              </button>
+            </form>
+            {request.replies.length > 0 ? (
+              <ol className="mt-4 space-y-3">
+                {request.replies.map((reply) => (
+                  <li key={reply.id} className="border-l border-primary/40 pl-3">
+                    <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                      {reply.author?.name ?? t.common.none} · {formatDateTime(reply.createdAt)}
+                    </p>
+                    <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                      {reply.body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
           </Card>
 
           <Card className="p-4">

@@ -95,6 +95,100 @@ export const getAnnouncementBySlug = cache((slug: string) => {
 });
 
 /* ------------------------------------------------------------------ *
+ * Community requests & replies (F52 / F84)
+ * ------------------------------------------------------------------ */
+
+/** Shared requests visible on the community board (F52). */
+export function getSharedRequests() {
+  return prisma.serviceRequest.findMany({
+    where: { shareForSupport: true },
+    orderBy: { createdAt: "desc" },
+    include: {
+      author: { select: { name: true } },
+      _count: { select: { supports: true } },
+    },
+  });
+}
+
+/** The citizen's own requests with their community-support state (F52). */
+export function getOwnRequestsForSharing(userId: string) {
+  return prisma.serviceRequest.findMany({
+    where: { authorId: userId },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+    include: { _count: { select: { supports: true } } },
+  });
+}
+
+export function getSupportedRequestIds(userId: string) {
+  return prisma.requestSupport.findMany({
+    where: { userId },
+    select: { requestId: true },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Service feedback (F76)
+ * ------------------------------------------------------------------ */
+
+/** Latest comments for a service (public). */
+export function getFeedbacksByService(serviceId: string, limit = 10) {
+  return prisma.serviceFeedback.findMany({
+    where: { serviceId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: { author: { select: { name: true } } },
+  });
+}
+
+/** The signed-in citizen's own comment, so the form can be pre-filled. */
+export function getFeedbackByAuthorAndService(serviceId: string, authorId: string) {
+  return prisma.serviceFeedback.findUnique({
+    where: { serviceId_authorId: { serviceId, authorId } },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Citizen ideas (F68)
+ * ------------------------------------------------------------------ */
+
+export function getIdeasByAuthor(authorId: string) {
+  return prisma.citizenIdea.findMany({
+    where: { authorId },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/** All ideas for the Council review desk — callers must be COUNCIL. */
+export function getAllIdeas() {
+  return prisma.citizenIdea.findMany({
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    include: { author: { select: { name: true } } },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * City projects (F67 — public project directory)
+ * ------------------------------------------------------------------ */
+
+export function getPublishedProjects() {
+  return prisma.project.findMany({
+    where: { published: true },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+  });
+}
+
+export function getProjectBySlug(slug: string) {
+  return prisma.project.findUnique({ where: { slug } });
+}
+
+export function getAllProjects() {
+  return prisma.project.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * Broadcasts (general announcements shown site-wide)
  * ------------------------------------------------------------------ */
 
@@ -217,6 +311,11 @@ export function getRequestById(id: string) {
       author: { select: { id: true, name: true, email: true } },
       assignee: { select: { id: true, name: true, email: true } },
       history: { orderBy: { createdAt: "asc" } },
+      replies: {
+        orderBy: { createdAt: "asc" },
+        include: { author: { select: { name: true } } },
+      },
+      _count: { select: { supports: true } },
     },
   });
 }
@@ -229,6 +328,7 @@ export async function getStaffRequests({ actionable = false } = {}) {
     include: {
       author: { select: { name: true, email: true } },
       assignee: { select: { name: true } },
+      _count: { select: { supports: true, replies: true } },
     },
   });
 

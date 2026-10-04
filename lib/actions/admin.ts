@@ -50,6 +50,9 @@ export async function createServiceAction(
     mapY: formData.get("mapY"),
     sector: formData.get("sector"),
     featured: formData.get("featured"),
+    openingHours: formData.get("openingHours"),
+    address: formData.get("address"),
+    plainLanguage: formData.get("plainLanguage"),
   });
   if (!parsed.success) return { ok: false, message: firstError(parsed.error) };
 
@@ -173,6 +176,7 @@ export async function createAnnouncementAction(
     title: formData.get("title"),
     excerpt: formData.get("excerpt"),
     body: formData.get("body"),
+    plainLanguage: formData.get("plainLanguage"),
     published: formData.get("published") === "on" || formData.get("published") === "true",
   });
   if (!parsed.success) return { ok: false, message: firstError(parsed.error) };

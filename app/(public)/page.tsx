@@ -11,6 +11,7 @@ import { colonyClock, COLONY_ARC, COLONY_POPULATION } from "@/lib/colony";
 import { getPublishedAnnouncementSummaries, getPublishedServices } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { format, getDictionary } from "@/lib/i18n/server";
+import { isLiteMode } from "@/lib/lite-mode";
 import { getAuthSession } from "@/lib/permissions";
 import { homeForRole, REPORT_STATUSES } from "@/lib/roles";
 
@@ -34,6 +35,9 @@ export default async function LandingPage() {
   const spaceHref = session?.user ? homeForRole(session.user.role) : "/register";
   const featuredServices = services.slice(0, 4);
   const latestAnnouncements = announcements.slice(0, 2);
+  // F59/F62/F96 — the decorative scene and the tutorial card are the first
+  // things dropped in light mode; the essential content stays identical.
+  const lite = isLiteMode();
 
   return (
     <div>
@@ -41,7 +45,7 @@ export default async function LandingPage() {
           The scene keeps a dark sky on every theme, so its copy uses the
           constant `scene-*` tokens instead of the theme's foreground/muted. */}
       <section className="relative border-b border-border">
-        <ColonyScene className="absolute inset-0" />
+        {lite ? null : <ColonyScene className="absolute inset-0" />}
         <div className="relative mx-auto flex min-h-[560px] max-w-6xl flex-col justify-between px-4 py-6">
           <Reveal self className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.3em]">
             <span className="text-scene-foreground">{t.common.appName}</span>
@@ -83,7 +87,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Interactive tutorials — only the lessons this visitor can actually run */}
-      <section className="mx-auto max-w-6xl px-4 pb-10 py-10">
+      <section className="mx-auto max-w-6xl px-4 pb-10 py-10" data-lite-hide>
         <Card className="p-5">
           <TourLauncher onlyAccessible role={session?.user?.role ?? null} />
         </Card>

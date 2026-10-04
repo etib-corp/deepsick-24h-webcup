@@ -50,6 +50,14 @@ export function AnnouncementForm() {
         <Textarea id="body" name="body" required className="min-h-36" />
       </Field>
 
+      <Field
+        label={t.council.announcements.form.plainLanguage}
+        htmlFor="plainLanguage"
+        hint={t.council.announcements.form.plainLanguageHint}
+      >
+        <Textarea id="plainLanguage" name="plainLanguage" className="min-h-24" />
+      </Field>
+
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <input type="checkbox" name="published" className="size-4 accent-primary" />
         {t.council.announcements.form.publishNow}

@@ -333,3 +333,30 @@ export const OPINION_STANCE_LABELS: Record<OpinionStance, string> = {
 export function isOpinionStance(value: unknown): value is OpinionStance {
   return typeof value === "string" && (OPINION_STANCES as readonly string[]).includes(value);
 }
+
+export const PROJECT_STATUSES = ["PLANNED", "IN_PROGRESS", "COMPLETED"] as const;
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+
+export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
+  PLANNED: "Planifié",
+  IN_PROGRESS: "En cours",
+  COMPLETED: "Terminé",
+};
+
+export function isProjectStatus(value: unknown): value is ProjectStatus {
+  return typeof value === "string" && (PROJECT_STATUSES as readonly string[]).includes(value);
+}
+
+export const IDEA_STATUSES = ["SUBMITTED", "REVIEWED", "PLANNED", "DECLINED"] as const;
+export type IdeaStatus = (typeof IDEA_STATUSES)[number];
+
+export const IDEA_STATUS_LABELS: Record<IdeaStatus, string> = {
+  SUBMITTED: "Reçue",
+  REVIEWED: "Examinée",
+  PLANNED: "Retenue",
+  DECLINED: "Non retenue",
+};
+
+export function isIdeaStatus(value: unknown): value is IdeaStatus {
+  return typeof value === "string" && (IDEA_STATUSES as readonly string[]).includes(value);
+}

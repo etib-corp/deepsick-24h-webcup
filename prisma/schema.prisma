@@ -45,6 +45,10 @@ model User {
   appointments    Appointment[]
   consultations   Consultation[]   @relation("ConsultationAuthor")
   opinions        Opinion[]
+  ideas           CitizenIdea[]
+  feedbacks       ServiceFeedback[]
+  requestSupports RequestSupport[]
+  requestReplies  RequestReply[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -65,10 +69,16 @@ model MunicipalService {
   sector       String?
   // Preparation instructions / required documents shown to residents before
   // their appointment (copied onto the booking when an appointment is made).
-  preparation  String?       @db.Text
+  preparation  String?        @db.Text
+  // Opening hours + physical location shown to residents (F74).
+  openingHours String?
+  address      String?
+  // Clear-language version of the description (F89).
+  plainLanguage String?       @db.Text
   appointments Appointment[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  feedbacks    ServiceFeedback[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model Announcement {
@@ -77,6 +87,8 @@ model Announcement {
   title       String
   excerpt     String?   @db.Text
   body        String    @db.Text
+  // Clear-language version of the essential information (F89).
+  plainLanguage String? @db.Text
   published   Boolean   @default(false)
   publishedAt DateTime?
   authorId    String?
@@ -171,6 +183,11 @@ model ServiceRequest {
   assigneeId  String?
   assignee    User?                @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   history     RequestStatusEvent[]
+  // F52 — when true, the request appears on the community board and other
+  // citizens can support it. Off by default: sharing is opt-in.
+  shareForSupport Boolean           @default(false)
+  replies     RequestReply[]
+  supports    RequestSupport[]
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
@@ -325,6 +342,96 @@ model Appointment {
   @@index([citizenId])
   @@index([serviceId, date])
   @@index([date])
+}
+
+// ------------------------------------------------------------------
+// Participation & community — projects, ideas, support, feedback,
+// agent replies (F52, F67, F68, F76, F84)
+// ------------------------------------------------------------------
+
+// A city project residents can follow (F67). Public read-only directory,
+// managed by the High Council.
+model Project {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String?   @db.Text
+  description String    @db.Text
+  sector      String?
+  status      String    @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETED
+  progress    Int       @default(0) // 0..100
+  startsAt    DateTime?
+  endsAt      DateTime?
+  published   Boolean   @default(true)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+}
+
+// A free improvement idea proposed by a resident (F68), reviewed by the
+// Council with a written response.
+model CitizenIdea {
+  id         String   @id @default(cuid())
+  reference  String   @unique @default(cuid())
+  title      String
+  body       String   @db.Text
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  status     String   @default("SUBMITTED") // SUBMITTED | REVIEWED | PLANNED | DECLINED
+  response   String?  @db.Text
+  reviewerId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status])
+  @@index([authorId])
+}
+
+// One citizen backing a shared request (F52). `@@unique` keeps a single
+// support per citizen and per request, so un-supporting is a delete.
+model RequestSupport {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([requestId, userId])
+  @@index([requestId])
+}
+
+// An official reply written by an agent on a request (F84), visible to the
+// citizen in their tracking space.
+model RequestReply {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String         @db.Text
+  createdAt DateTime       @default(now())
+
+  @@index([requestId])
+}
+
+// A resident's comment about a municipal service they used (F76). One
+// editable comment per citizen and per service.
+model ServiceFeedback {
+  id        String           @id @default(cuid())
+  reference String           @unique @default(cuid())
+  serviceId String
+  service   MunicipalService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comment   String           @db.Text
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([serviceId, authorId])
+  @@index([serviceId])
 }
 
 // ------------------------------------------------------------------

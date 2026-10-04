@@ -71,6 +71,23 @@ export function RequestTrackingCard({ item, detail = false }: { item: TrackedReq
         <p className="text-sm text-muted-foreground">
           {copy.updated}: <time dateTime={item.updatedAt.toISOString()}>{formatDateTime(item.updatedAt)}</time>
         </p>
+        {detail && item.replies && item.replies.length > 0 ? (
+          <>
+            <h3 className="font-mono text-sm">{copy.replies}</h3>
+            <ol className="flex flex-col gap-3">
+              {item.replies.map((reply, index) => (
+                <li key={index} className="border-l border-primary/40 pl-3">
+                  <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {reply.authorName ?? t.common.none} · {formatDateTime(reply.createdAt)}
+                  </p>
+                  <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                    {reply.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : null}
         {!item.hasHistory ? <p className="text-sm text-muted-foreground">{copy.limitedHistory}</p> : null}
       </CardContent>
       {!detail ? (

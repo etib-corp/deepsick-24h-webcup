@@ -19,6 +19,10 @@ export function getBreadcrumbs(
   const publicPages: Record<string, string> = {
     "/services": t.nav.services,
     "/announcements": t.nav.announcements,
+    "/transport": t.nav.transport,
+    "/projects": t.nav.projects,
+    "/eco": t.nav.eco,
+    "/statut": t.nav.status,
     "/contact": t.nav.contact,
     "/apparence": t.nav.appearance,
   };
@@ -63,6 +67,9 @@ export function getBreadcrumbs(
   const current = { href: path, label: currentLabel };
   if (/^\/services\/[^/]+$/.test(path)) {
     return [home, { href: "/services", label: t.nav.services }, current];
+  }
+  if (/^\/projects\/[^/]+$/.test(path)) {
+    return [home, { href: "/projects", label: t.nav.projects }, current];
   }
   if (/^\/announcements\/[^/]+$/.test(path)) {
     return [home, { href: "/announcements", label: t.nav.announcements }, current];
