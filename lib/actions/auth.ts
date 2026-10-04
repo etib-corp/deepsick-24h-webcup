@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import type { ActionState } from "@/lib/action-state";
 
 import { normalizeIdentifier } from "@/lib/identity";
-import { getClientIp, getThrottleStatus, normalizeEmail } from "@/lib/login-throttle";
+import { getClientIp, getThrottleStatus } from "@/lib/login-throttle";
 import { RegistrationError, registerCitizen } from "@/lib/services";
 import { buildRegisterSchema, firstError, registerSchema } from "@/lib/validation";
 
