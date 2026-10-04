@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { buttonClasses } from "@/components/ui/Button";
 import { ReportStatusBadge } from "@/components/ui/StatusBadge";
 import { colonyClock, COLONY_ARC, COLONY_POPULATION } from "@/lib/colony";
-import { getPublishedAnnouncements, getPublishedServices } from "@/lib/data";
+import { getPublishedAnnouncementSummaries, getPublishedServices } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { format, getDictionary } from "@/lib/i18n/server";
 import { getAuthSession } from "@/lib/permissions";
@@ -20,8 +20,8 @@ export default async function LandingPage() {
   const t = getDictionary();
   const [session, services, announcements] = await Promise.all([
     getAuthSession(),
-    getPublishedServices(),
-    getPublishedAnnouncements(),
+    getPublishedServices(4),
+    getPublishedAnnouncementSummaries(2),
   ]);
 
   const quickActions = [

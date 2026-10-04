@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import type { AdminActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
@@ -54,6 +54,7 @@ export async function createServiceAction(
   }
 
   revalidatePath("/council/services");
+  revalidateTag("public-services");
   revalidatePath("/services");
   return { ok: true, message: getDictionary().council.services.form.created };
 }
@@ -64,6 +65,7 @@ export async function deleteServiceAction(formData: FormData) {
   if (!id) return;
   await deleteMunicipalService(id);
   revalidatePath("/council/services");
+  revalidateTag("public-services");
   revalidatePath("/services");
 }
 
@@ -74,6 +76,7 @@ export async function toggleServiceFeaturedAction(formData: FormData) {
   if (!id) return;
   await setServiceFeatured(id, featured);
   revalidatePath("/council/services");
+  revalidateTag("public-services");
   revalidatePath("/services");
 }
 
@@ -98,6 +101,7 @@ export async function createAnnouncementAction(
   }
 
   revalidatePath("/council/announcements");
+  revalidateTag("public-announcements");
   revalidatePath("/announcements");
   return { ok: true, message: getDictionary().council.announcements.form.created };
 }
@@ -109,6 +113,7 @@ export async function toggleAnnouncementAction(formData: FormData) {
   if (!id) return;
   await setAnnouncementPublished(id, published);
   revalidatePath("/council/announcements");
+  revalidateTag("public-announcements");
   revalidatePath("/announcements");
 }
 

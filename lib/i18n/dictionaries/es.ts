@@ -178,6 +178,7 @@ const es: Dictionary = {
       session: "Sesión reforzada · datos biométricos locales · auditado 18:30 MTC",
       registered: "Identidad creada. Ya puedes iniciar sesión.",
       invalid: "ID de colono o contraseña incorrectos.",
+      unavailable: "El inicio de sesión no está disponible temporalmente. Inténtalo de nuevo en un momento.",
       tooManyAttempts: "Demasiados intentos. Inténtalo de nuevo en {minutes} minuto(s).",
     },
     register: {

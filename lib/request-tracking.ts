@@ -67,3 +67,46 @@ export async function getCitizenRequestTracking(userId: string): Promise<Tracked
 
   return items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
+
+/** A detail view reads one category and always applies ownership in the query. */
+export async function getCitizenRequestDetail(
+  userId: string, kind: string, id: string,
+): Promise<TrackedRequest | null> {
+  if (!userId) throw new Error("A citizen identifier is required.");
+  switch (kind) {
+    case "request": {
+      const request = await prisma.serviceRequest.findFirst({
+        where: { id, authorId: userId },
+        include: { history: { orderBy: { createdAt: "asc" } } },
+      });
+      return request ? { ...request, kind, title: request.subject, steps: request.history, hasHistory: true } : null;
+    }
+    case "report": {
+      const report = await prisma.report.findFirst({
+        where: { id, authorId: userId },
+        include: { events: { orderBy: { createdAt: "asc" } } },
+      });
+      return report ? { ...report, kind, steps: report.events, hasHistory: true } : null;
+    }
+    case "order": {
+      const order = await prisma.order.findFirst({ where: { id, customerId: userId } });
+      return order ? { ...order, kind, title: order.summary, steps: [], hasHistory: false } : null;
+    }
+    case "appointment": {
+      const appointment = await prisma.appointment.findFirst({
+        where: { id, citizenId: userId },
+        include: { service: { select: { name: true } } },
+      });
+      return appointment ? {
+        ...appointment, kind, title: appointment.service.name, description: appointment.subject,
+        scheduledAt: appointment.date, steps: [], hasHistory: false,
+      } : null;
+    }
+    case "contact": {
+      const contact = await prisma.contactMessage.findFirst({ where: { id, authorId: userId } });
+      return contact ? { ...contact, kind, title: contact.subject, description: contact.body, steps: [], hasHistory: false } : null;
+    }
+    default:
+      return null;
+  }
+}

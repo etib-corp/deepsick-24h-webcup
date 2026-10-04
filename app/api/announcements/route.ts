@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { authErrorResponse } from "@/lib/api";
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     ...parsed.data,
     authorId: auth.session.user.id,
   });
+  revalidateTag("public-announcements");
   revalidatePath("/announcements");
   return NextResponse.json({ announcement }, { status: 201 });
 }
