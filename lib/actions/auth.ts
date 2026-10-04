@@ -15,7 +15,7 @@ import {
 import { normalizeIdentifier } from "@/lib/identity";
 import { getClientIp, getThrottleStatus } from "@/lib/login-throttle";
 import { RegistrationError, registerCitizen } from "@/lib/services";
-import { buildRegisterSchema, firstError, registerSchema } from "@/lib/validation";
+import { buildRegisterSchema, firstError } from "@/lib/validation";
 
 function formText(formData: FormData, key: string): string | undefined {
   const value = formData.get(key);
@@ -70,6 +70,16 @@ export async function registerAction(
     // Creation failed (duplicate email, DB…) — free the challenge so a
     // corrected retry works from the same page.
     await releaseFormToken(guard.nonce);
+    // Duplicate identity is a controlled, resident-facing outcome (F71).
+    if (error instanceof RegistrationError) {
+      return {
+        ok: false,
+        message:
+          error.code === "EMAIL_TAKEN"
+            ? t.auth.register.errors.emailTaken
+            : t.auth.register.errors.usernameTaken,
+      };
+    }
     // Only PublicError messages (e.g. "account already exists") are shown;
     // anything else maps to the generic copy — no technical details leak.
     return { ok: false, message: userMessage(error, t.errors.registerFailed) };

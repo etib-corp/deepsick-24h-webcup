@@ -82,62 +82,43 @@ export function LoginForm({
     const password = String(formData.get("password") ?? "");
     const botWebsite = String(formData.get(BOT_TRAP_FIELD) ?? "");
 
-    const throttle = await loginThrottleStatusAction({ email });
-    if (throttle.locked) {
-      setLockedUntil(Date.now() + throttle.retryAfterSeconds * 1000);
-      setPending(false);
-      return;
-    }
-
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-      // F81 — the signed challenge and honeypot travel with the credentials;
-      // `authorize` refuses the attempt when they fail (and traces it).
-      botToken,
-      botWebsite,
-    });
-
-    if (!result || result.error) {
-      if (result?.error === "BOT_GUARD_EXPIRED") {
-        setError(t.errors.botExpired);
-        setPending(false);
+    try {
+      const throttle = await loginThrottleStatusAction({ identifier });
+      if (throttle.locked) {
+        setLockedUntil(Date.now() + throttle.retryAfterSeconds * 1000);
         return;
       }
-      if (result?.error === "BOT_GUARD_BLOCKED") {
-        setError(t.errors.botBlocked);
-        setPending(false);
-        return;
-      }
-      // A failure may have just pushed us over the limit; surface it clearly.
-      const after = await loginThrottleStatusAction({ email });
-      if (after.locked) {
-        setLockedUntil(Date.now() + after.retryAfterSeconds * 1000);
-      } else {
-        setError(t.auth.login.invalid);
-      }
+
       const result = await signIn("credentials", {
         redirect: false,
         identifier,
         password,
+        // F81 — the signed challenge and honeypot travel with the credentials;
+        // `authorize` refuses the attempt when they fail (and traces it).
+        botToken,
+        botWebsite,
       });
+
       if (!result || result.error) {
-        // Une tentative échouée peut déclencher le verrouillage.
-        const after = await loginThrottleStatusAction({
-          identifier,
-        });
+        if (result?.error === "BOT_GUARD_EXPIRED") {
+          setError(t.errors.botExpired);
+          return;
+        }
+        if (result?.error === "BOT_GUARD_BLOCKED") {
+          setError(t.errors.botBlocked);
+          return;
+        }
+        // A failure may have just pushed us over the limit; surface it clearly.
+        const after = await loginThrottleStatusAction({ identifier });
         if (after.locked) {
-          setLockedUntil(
-            Date.now() + after.retryAfterSeconds * 1000,
-          );
+          setLockedUntil(Date.now() + after.retryAfterSeconds * 1000);
         } else {
           setError(t.auth.login.invalid);
         }
         return;
       }
-      const session = await getSession();
 
+      const session = await getSession();
       router.push(homeForRole(session?.user?.role));
       router.refresh();
     } catch {

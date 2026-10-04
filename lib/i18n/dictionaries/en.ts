@@ -1361,7 +1361,7 @@ const en: Dictionary = {
   },
   errors: {
     notConnected: "You must be signed in to submit a request.",
-    registerFailed: "The account could not be created.",
+    registerFailed: "Registration could not be completed.",
     requestFailed: "The request could not be saved.",
     reportFailed: "The report could not be sent.",
     orderFailed: "The order could not be created.",
@@ -1370,18 +1370,14 @@ const en: Dictionary = {
     broadcastFailed: "The general message could not be broadcast.",
     exportFailed: "Your data export could not be generated.",
     consultationFailed: "The consultation could not be created.",
-    consultationClosed: "This consultation is closed.",
+    consultationClosed: "This consultation is closed and no longer accepts opinions.",
     opinionFailed: "Your opinion could not be recorded.",
     appointmentFailed: "The appointment could not be created.",
     serviceUnavailable:
       "This service is temporarily unavailable. Choose another one or try again later.",
     appointmentSlotTaken: "This slot was just booked. Please pick another one.",
     appointmentSlotInvalid: "Invalid or past slot.",
-    consultationFailed: "The consultation could not be created.",
     consultationOutcomeFailed: "The outcome could not be saved.",
-    opinionFailed: "Your opinion could not be recorded.",
-    consultationClosed: "This consultation is closed and no longer accepts opinions.",
-    registerFailed: "Registration could not be completed.",
     botBlocked:
       "The submission could not be verified and was blocked by the anti-bot shield. Reload the page, then try again.",
     botExpired: "This form expired for security reasons. Reload the page, then try again.",
