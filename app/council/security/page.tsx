@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { StatTile } from "@/components/colony/StatTile";
+import { SecurityAlertsPanel } from "@/components/council/SecurityAlertsPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getUsers } from "@/lib/data";
@@ -54,6 +55,8 @@ export default async function CouncilSecurityPage() {
         <h1 className="mt-1 font-mono text-xl text-foreground">{t.council.security.title}</h1>
         <p className="text-sm text-muted-foreground">{t.council.security.subtitle}</p>
       </header>
+
+      <SecurityAlertsPanel />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <StatTile

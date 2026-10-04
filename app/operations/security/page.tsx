@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { IncidentStation } from "@/components/colony/IncidentStation";
+import { SecurityAlertsPanel } from "@/components/council/SecurityAlertsPanel";
 import { getDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -10,5 +11,10 @@ export function generateMetadata(): Metadata {
 }
 
 export default function SecurityConsolePage() {
-  return <IncidentStation type="SECURITY" />;
+  return (
+    <div className="space-y-6">
+      <IncidentStation type="SECURITY" />
+      <SecurityAlertsPanel />
+    </div>
+  );
 }
