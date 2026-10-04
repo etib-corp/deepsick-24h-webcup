@@ -4,6 +4,7 @@ Fetch Nova Terra API requests and generate a TODO list grouped by difficulty.
 """
 
 import os
+import re
 import requests
 from collections import defaultdict
 
@@ -11,6 +12,9 @@ API_URL = "https://24h.webcup.fr/wp-json/webcup/v1/requests"
 API_KEY = os.getenv("WEBCUP_API_KEY", "NO_API_KEY_FOUND")
 
 CWD = os.getcwd()
+
+# Matches `- [x] **D01** (…)` lines so re-runs keep the progress already ticked.
+CHECKED_RE = re.compile(r"^- \[[xX]\] \*\*([A-Z]+\d+)\*\*", re.MULTILINE)
 
 if API_KEY == "NO_API_KEY_FOUND":
     raise ValueError("Please set the WEBCUP_API_KEY environment variable.")
@@ -56,7 +60,16 @@ def summarize_request(req: dict) -> str:
     return (msg[:80] + "…") if len(msg) > 80 else msg
 
 
-def generate_todo(data: dict) -> str:
+def read_checked_codes(todo_path: str) -> set:
+    """Codes already ticked in the current TODO file, so re-runs keep progress."""
+    if not os.path.exists(todo_path):
+        return set()
+    with open(todo_path, encoding="utf-8") as f:
+        return set(CHECKED_RE.findall(f.read()))
+
+
+def generate_todo(data: dict, checked_codes: set = None) -> str:
+    checked_codes = checked_codes or set()
     requests_list = data.get("requests", [])
     grouped = defaultdict(list)
 
@@ -77,11 +90,13 @@ def generate_todo(data: dict) -> str:
             xp = req["xp_available"]
             total_xp += xp
             summary = summarize_request(req)
-            lines.append(f"- [ ] **{code}** ({xp} XP) – {summary}")
+            box = "x" if code in checked_codes else " "
+            lines.append(f"- [{box}] **{code}** ({xp} XP) – {summary}")
         lines.append("")
 
     lines.append(f"**Total XP disponibles :** {total_xp} XP\n")
     return "\n".join(lines)
+
 
 def is_in_root_project_dir() -> bool:
     """
@@ -96,13 +111,15 @@ def main():
         print("Error: This script must be run from the root of the project directory.")
         return
 
+    todo_path = os.path.join("docs", "TODO_terra_nova.md")
+    checked_codes = read_checked_codes(todo_path)
+
     data = fetch_requests()
-    todo_md = generate_todo(data)
+    todo_md = generate_todo(data, checked_codes)
     print(todo_md)
 
-
     # Optionally save to file
-    with open("docs/TODO_terra_nova.md", "w", encoding="utf-8") as f:
+    with open(todo_path, "w", encoding="utf-8") as f:
         f.write(todo_md)
 
 
