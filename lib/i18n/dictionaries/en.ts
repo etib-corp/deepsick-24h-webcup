@@ -858,6 +858,8 @@ const en: Dictionary = {
       deniedHint: "24 h · roles",
       neutralized: "Neutralised inputs",
       neutralizedHint: "24 h · filtered content",
+      formBlocked: "Blocked submissions",
+      formBlockedHint: "24 h · anti-bot shield",
       traced: "Traced actions",
       tracedHint: "24 h · log",
       recent: "Recent events",
@@ -876,6 +878,7 @@ const en: Dictionary = {
         RECORD_ASSIGNED: "Taken in charge",
         CASE_FILED: "Security case",
         INPUT_NEUTRALIZED: "Input neutralised",
+        FORM_BLOCKED: "Automated submission blocked",
       },
       outcomes: {
         INFO: "Info",
@@ -1337,8 +1340,13 @@ const en: Dictionary = {
     daylight: { label: "Broad Daylight", description: "Warm paper, full daylight" },
     void: { label: "Absolute Void", description: "Maximum contrast, yellow on black" },
   },
+  botGuard: {
+    protected: "Protected against automated submissions.",
+    trapLabel: "Do not fill this field",
+  },
   errors: {
     notConnected: "You must be signed in to submit a request.",
+    registerFailed: "The account could not be created.",
     requestFailed: "The request could not be saved.",
     reportFailed: "The report could not be sent.",
     orderFailed: "The order could not be created.",
@@ -1354,6 +1362,10 @@ const en: Dictionary = {
       "This service is temporarily unavailable. Choose another one or try again later.",
     appointmentSlotTaken: "This slot was just booked. Please pick another one.",
     appointmentSlotInvalid: "Invalid or past slot.",
+    botBlocked:
+      "The submission could not be verified and was blocked by the anti-bot shield. Reload the page, then try again.",
+    botExpired: "This form expired for security reasons. Reload the page, then try again.",
+    botRateLimited: "Too many submissions from this device. Try again in {minutes} minute(s).",
     registerFailed: "The account could not be created.",
     unexpected: "An unexpected error occurred. Please try again shortly.",
     retry: "Try again",

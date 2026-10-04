@@ -858,6 +858,8 @@ const es: Dictionary = {
       deniedHint: "24 h · roles",
       neutralized: "Entradas neutralizadas",
       neutralizedHint: "24 h · contenido filtrado",
+      formBlocked: "Envíos bloqueados",
+      formBlockedHint: "24 h · escudo anti-robot",
       traced: "Acciones trazadas",
       tracedHint: "24 h · registro",
       recent: "Eventos recientes",
@@ -877,6 +879,7 @@ const es: Dictionary = {
         RECORD_ASSIGNED: "Asignado",
         CASE_FILED: "Expediente de seguridad",
         INPUT_NEUTRALIZED: "Entrada neutralizada",
+        FORM_BLOCKED: "Envío automatizado bloqueado",
       },
       outcomes: {
         INFO: "Info",
@@ -1338,8 +1341,13 @@ const es: Dictionary = {
     daylight: { label: "Pleno Día", description: "Papel cálido, plena luz" },
     void: { label: "Vacío Absoluto", description: "Contraste máximo, amarillo sobre negro" },
   },
+  botGuard: {
+    protected: "Protegido contra envíos automatizados.",
+    trapLabel: "No rellenes este campo",
+  },
   errors: {
     notConnected: "Debes iniciar sesión para crear una solicitud.",
+    registerFailed: "No se pudo crear la cuenta.",
     requestFailed: "No se pudo guardar la solicitud.",
     reportFailed: "No se pudo enviar el informe.",
     orderFailed: "No se pudo crear el pedido.",
@@ -1355,6 +1363,10 @@ const es: Dictionary = {
       "Este servicio no está disponible temporalmente. Elige otro o inténtalo más tarde.",
     appointmentSlotTaken: "Esta franja acaba de reservarse. Elige otra.",
     appointmentSlotInvalid: "Franja no válida o ya pasada.",
+    botBlocked:
+      "El envío no pudo verificarse y fue bloqueado por el escudo anti-robot. Recarga la página e inténtalo de nuevo.",
+    botExpired: "Este formulario caducó por motivos de seguridad. Recarga la página e inténtalo de nuevo.",
+    botRateLimited: "Demasiados envíos desde este dispositivo. Inténtalo de nuevo en {minutes} minuto(s).",
     registerFailed: "No se pudo crear la cuenta.",
     unexpected: "Se ha producido un error inesperado. Vuelve a intentarlo en un momento.",
     retry: "Reintentar",

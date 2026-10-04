@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
+import { inspectFormSubmission } from "@/lib/bot-guard";
 import { identifierWhere, normalizeIdentifier } from "@/lib/identity";
 import {
   getClientIp,
@@ -34,6 +35,21 @@ export const authOptions: NextAuthOptions = {
         const headers = (req as { headers?: Record<string, string | string[] | undefined> } | undefined)
           ?.headers;
         const ip = getClientIp(headers);
+
+        // F81 — invisible bot controls before any credential work: a direct
+        // POST without the signed challenge is refused and traced, and the
+        // honeypot catches automated fillers. NextAuth types only
+        // email/password, so the extra posted fields are read loosely.
+        const extra = credentials as Record<string, string | undefined>;
+        const guard = await inspectFormSubmission({
+          form: "login",
+          token: extra.botToken,
+          trap: extra.botWebsite,
+          ip,
+        });
+        if (!guard.ok) {
+          throw new Error(guard.reason === "expired" ? "BOT_GUARD_EXPIRED" : "BOT_GUARD_BLOCKED");
+        }
 
         // Brute-force protection: refuse before touching the password.
         const throttle = await getThrottleStatus(identifier, ip);

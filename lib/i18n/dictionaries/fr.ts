@@ -862,6 +862,8 @@ const fr = {
       deniedHint: "24 h · rôles",
       neutralized: "Entrées neutralisées",
       neutralizedHint: "24 h · contenu filtré",
+      formBlocked: "Envois bloqués",
+      formBlockedHint: "24 h · protection anti-robot",
       traced: "Actions tracées",
       tracedHint: "24 h · journal",
       recent: "Événements récents",
@@ -881,6 +883,7 @@ const fr = {
         RECORD_ASSIGNED: "Prise en charge",
         CASE_FILED: "Dossier de sécurité",
         INPUT_NEUTRALIZED: "Entrée neutralisée",
+        FORM_BLOCKED: "Envoi automatisé bloqué",
       },
       outcomes: {
         INFO: "Info",
@@ -1344,8 +1347,13 @@ const fr = {
     daylight: { label: "Grand Jour", description: "Papier chaud, plein jour" },
     void: { label: "Vide Absolu", description: "Contraste maximal, jaune sur noir" },
   },
+  botGuard: {
+    protected: "Protégé contre les envois automatisés.",
+    trapLabel: "Ne pas remplir ce champ",
+  },
   errors: {
     notConnected: "Vous devez être connecté pour créer une demande.",
+    registerFailed: "L'inscription n'a pas pu être réalisée.",
     requestFailed: "La demande n'a pas pu être enregistrée.",
     reportFailed: "Le signalement n'a pas pu être transmis.",
     orderFailed: "La commande n'a pas pu être créée.",
@@ -1360,6 +1368,11 @@ const fr = {
     serviceUnavailable: "Ce service est temporairement indisponible. Choisissez-en un autre ou réessayez plus tard.",
     appointmentSlotTaken: "Ce créneau vient d'être réservé. Choisissez-en un autre.",
     appointmentSlotInvalid: "Créneau invalide ou déjà passé.",
+    botBlocked:
+      "L'envoi n'a pas pu être vérifié et a été bloqué par la protection anti-robot. Rechargez la page, puis réessayez.",
+    botExpired:
+      "Ce formulaire a expiré pour des raisons de sécurité. Rechargez la page, puis réessayez.",
+    botRateLimited: "Trop d'envois détectés depuis cet appareil. Réessayez dans {minutes} minute(s).",
     registerFailed: "L'inscription n'a pas pu être réalisée.",
     unexpected: "Une erreur inattendue est survenue. Réessayez dans un instant.",
     retry: "Réessayer",

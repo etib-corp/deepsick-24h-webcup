@@ -4,6 +4,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import type { ActionState } from "@/lib/action-state";
+import {
+  botGuardMessage,
+  consumeFormToken,
+  inspectFormSubmission,
+  readBotFields,
+  releaseFormToken,
+} from "@/lib/bot-guard";
 
 import { normalizeIdentifier } from "@/lib/identity";
 import { getClientIp, getThrottleStatus } from "@/lib/login-throttle";
@@ -24,6 +31,12 @@ export async function registerAction(
 ): Promise<ActionState> {
   // Validation messages follow the language chosen by the arrival (F71).
   const t = getDictionary();
+
+  // F81 — invisible bot controls run before any work: blocked attempts are
+  // traced and replaying them never succeeds.
+  const guard = await inspectFormSubmission({ form: "register", ...readBotFields(formData) });
+  if (!guard.ok) return { ok: false, message: botGuardMessage(guard, t) };
+
   const schema = buildRegisterSchema(t.auth.register.errors);
 
   const parsed = schema.safeParse({
@@ -42,6 +55,10 @@ export async function registerAction(
     "inscription",
   );
 
+  if (!(await consumeFormToken(guard.nonce, "register", guard.ip))) {
+    return { ok: false, message: t.errors.botBlocked };
+  }
+
   try {
     await registerCitizen({
       name: parsed.data.name,
@@ -50,16 +67,12 @@ export async function registerAction(
       password: parsed.data.password,
     });
   } catch (error) {
-    if (error instanceof RegistrationError) {
-      return {
-        ok: false,
-        message:
-          error.code === "EMAIL_TAKEN"
-            ? t.auth.register.errors.emailTaken
-            : t.auth.register.errors.usernameTaken,
-      };
-    }
-    return { ok: false, message: t.auth.register.errors.generic };
+    // Creation failed (duplicate email, DB…) — free the challenge so a
+    // corrected retry works from the same page.
+    await releaseFormToken(guard.nonce);
+    // Only PublicError messages (e.g. "account already exists") are shown;
+    // anything else maps to the generic copy — no technical details leak.
+    return { ok: false, message: userMessage(error, t.errors.registerFailed) };
   }
 
   redirect("/login?inscription=1");

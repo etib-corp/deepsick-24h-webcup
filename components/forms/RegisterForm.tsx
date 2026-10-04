@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { IdCard, LifeBuoy, Mail } from "lucide-react";
 
+import { BotGuardFields } from "@/components/forms/BotGuardFields";
+import { BotGuardNotice } from "@/components/forms/BotGuardNotice";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
@@ -25,7 +27,7 @@ function SubmitButton() {
   );
 }
 
-export function RegisterForm() {
+export function RegisterForm({ botToken }: { botToken: string }) {
   const t = useT();
   const [state, formAction] = useFormState(registerAction, initialActionState);
   // New arrivals may have no email address (F71): they can pick a colon
@@ -98,6 +100,7 @@ export function RegisterForm() {
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <form action={formAction} className="space-y-4">
+        <BotGuardFields form="register" token={botToken} />
         <Field label={t.auth.register.name} htmlFor="name">
           <Input
             ref={nameRef}
@@ -170,6 +173,7 @@ export function RegisterForm() {
         </Field>
 
         <SubmitButton />
+        <BotGuardNotice />
       </form>
 
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">

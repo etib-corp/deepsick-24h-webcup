@@ -22,6 +22,11 @@ creation. No citizen component currently mounts the legacy `createRequestAction`
 the `/demandes` route redirects to tracking. No new form was invented. Account
 registration and administrative content/status forms are outside this ticket.
 
+> Since F81, `/api/contact` additionally requires the invisible anti-bot
+> challenge (`nt-challenge` + empty `website` fields, see
+> [`F81_forms_anti_bot.md`](F81_forms_anti_bot.md)); the success contract is
+> unchanged.
+
 ## Implementation
 
 Report, order and appointment actions now return `ok: true` and the saved
