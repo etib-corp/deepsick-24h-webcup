@@ -118,6 +118,14 @@ export const REQUEST_PRIORITY_LABELS: Record<RequestPriority, string> = {
   URGENT: "Urgente",
 };
 
+/** Lower rank = handled first (F80 — agent queue ordering). */
+export const REQUEST_PRIORITY_RANK: Record<RequestPriority, number> = {
+  URGENT: 0,
+  HIGH: 1,
+  NORMAL: 2,
+  LOW: 3,
+};
+
 export const CONTACT_STATUSES = ["RECEIVED", "READ", "PROCESSED"] as const;
 export type ContactStatus = (typeof CONTACT_STATUSES)[number];
 

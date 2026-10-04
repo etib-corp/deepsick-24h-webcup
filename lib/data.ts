@@ -5,7 +5,12 @@ import { cache } from "react";
 import type { Prisma } from "@prisma/client";
 import { coalesce } from "@/lib/coalesce";
 import { prisma } from "@/lib/prisma";
-import { ACTIONABLE_STATUSES, REPORT_ACTIONABLE } from "@/lib/roles";
+import {
+  ACTIONABLE_STATUSES,
+  REPORT_ACTIONABLE,
+  REQUEST_PRIORITY_RANK,
+  type RequestPriority,
+} from "@/lib/roles";
 
 /* ------------------------------------------------------------------ *
  * Public content
@@ -217,8 +222,8 @@ export function getRequestById(id: string) {
 }
 
 /** Requests list for agents/admins, optionally restricted to actionable items (F22). */
-export function getStaffRequests({ actionable = false } = {}) {
-  return prisma.serviceRequest.findMany({
+export async function getStaffRequests({ actionable = false } = {}) {
+  const requests = await prisma.serviceRequest.findMany({
     where: actionable ? { status: { in: [...ACTIONABLE_STATUSES] } } : undefined,
     orderBy: [{ createdAt: "desc" }],
     include: {
@@ -226,6 +231,15 @@ export function getStaffRequests({ actionable = false } = {}) {
       assignee: { select: { name: true } },
     },
   });
+
+  // F80 — urgent files first, then the most recent, so the queue itself
+  // ranks the work the agents must handle first.
+  return requests.sort(
+    (a, b) =>
+      REQUEST_PRIORITY_RANK[a.priority as RequestPriority] -
+        REQUEST_PRIORITY_RANK[b.priority as RequestPriority] ||
+      b.createdAt.getTime() - a.createdAt.getTime(),
+  );
 }
 
 /* ------------------------------------------------------------------ *

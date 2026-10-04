@@ -108,6 +108,30 @@ async function main() {
         active: true,
         authorId: council.id,
       },
+      // F29 — flood alert in the south district, visible while active.
+      {
+        title: "Alerte crue — secteur sud",
+        message:
+          "Le niveau de l'eau monte anormalement au sud de la colonie. Évitez les niveaux bas et les tunnels du Secteur 05 ; les équipes Hephaestus sont mobilisées. Suivez les consignes de sécurité.",
+        actionLabel: "Consulter les consignes",
+        actionHref: "/announcements",
+        startsAt: new Date("2026-10-03T00:00:00Z"),
+        endsAt: null,
+        active: true,
+        authorId: council.id,
+      },
+      // F31 — heatwave alert with adapted recommendations for vulnerable people.
+      {
+        title: "Vague de chaleur — consignes aux habitants",
+        message:
+          "Une vague de chaleur extrême touche plusieurs secteurs. Hydratez-vous régulièrement, évitez les sorties entre 11 h et 16 h et prenez des nouvelles des habitants vulnérables de votre module.",
+        actionLabel: "Consulter les consignes",
+        actionHref: "/announcements",
+        startsAt: new Date("2026-10-03T00:00:00Z"),
+        endsAt: null,
+        active: true,
+        authorId: council.id,
+      },
     ],
   });
 

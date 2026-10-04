@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/colony/FeedRow";
 import { RequestStatusForm } from "@/components/colony/RequestStatusForm";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getRequestById } from "@/lib/data";
+import { getRequestById, getUsers } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 import { format, getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
@@ -16,8 +16,13 @@ export const dynamic = "force-dynamic";
 export default async function AdministrationRequestPage({ params }: { params: { id: string } }) {
   const t = getDictionary();
   await requirePageRole(["ADMIN_AGENT", "COUNCIL"]);
-  const request = await getRequestById(params.id);
+  const [request, users] = await Promise.all([getRequestById(params.id), getUsers()]);
   if (!request) notFound();
+
+  // F48 — “who changed what”: every history actor resolves to a readable name.
+  const nameById = new Map(
+    users.map((user) => [user.id, user.name ?? user.username ?? user.email ?? t.common.none]),
+  );
 
   return (
     <div className="space-y-5">
@@ -69,6 +74,13 @@ export default async function AdministrationRequestPage({ params }: { params: { 
                     <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
                       {formatDateTime(event.createdAt)}
                     </span>
+                    {event.actorId && nameById.get(event.actorId) ? (
+                      <span className="text-xs text-muted-foreground">
+                        {format(t.ops.administration.changedBy, {
+                          name: nameById.get(event.actorId) as string,
+                        })}
+                      </span>
+                    ) : null}
                   </div>
                   {event.note ? <p className="mt-1 text-sm text-muted-foreground">{event.note}</p> : null}
                 </li>

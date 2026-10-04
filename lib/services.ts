@@ -13,6 +13,7 @@ import {
   isRequestStatus,
   isRole,
   needsAction,
+  REQUEST_STATUS_LABELS,
 } from "@/lib/roles";
 
 /* ------------------------------------------------------------------ *
@@ -175,6 +176,20 @@ export async function updateRequestStatus(
       data: { requestId, status, note: note?.trim() || null, actorId },
     });
 
+    // F49 — the author follows the status change through an in-app
+    // notification (visible in /citizen/notifications). Re-applying the same
+    // status records the event but does not notify again.
+    if (current.status !== status) {
+      await tx.notification.create({
+        data: {
+          userId: current.authorId,
+          title: `Demande ${current.reference} mise à jour`,
+          body: `Nouveau statut : ${REQUEST_STATUS_LABELS[status]}`,
+          href: `/citizen/requests/request/${requestId}`,
+        },
+      });
+    }
+
     return updated;
   });
 }
@@ -258,6 +273,27 @@ async function uniqueAnnouncementSlug(title: string) {
   return slug;
 }
 
+/** F30 — one notification per resident for content that goes public. */
+async function notifyCitizens(
+  db: Prisma.TransactionClient,
+  input: { title: string; body?: string | null; href?: string | null },
+) {
+  const citizens = await db.user.findMany({
+    where: { role: "CITIZEN" },
+    select: { id: true },
+  });
+  if (citizens.length === 0) return;
+
+  await db.notification.createMany({
+    data: citizens.map((citizen) => ({
+      userId: citizen.id,
+      title: input.title,
+      body: input.body ?? null,
+      href: input.href ?? null,
+    })),
+  });
+}
+
 export async function createAnnouncement(input: {
   title: string;
   excerpt?: string | null;
@@ -266,23 +302,52 @@ export async function createAnnouncement(input: {
   authorId?: string | null;
 }) {
   const published = input.published ?? false;
-  return prisma.announcement.create({
-    data: {
-      slug: await uniqueAnnouncementSlug(input.title),
-      title: input.title.trim(),
-      excerpt: input.excerpt?.trim() || null,
-      body: input.body.trim(),
-      published,
-      publishedAt: published ? new Date() : null,
-      authorId: input.authorId ?? null,
-    },
+  return prisma.$transaction(async (tx) => {
+    const announcement = await tx.announcement.create({
+      data: {
+        slug: await uniqueAnnouncementSlug(input.title),
+        title: input.title.trim(),
+        excerpt: input.excerpt?.trim() || null,
+        body: input.body.trim(),
+        published,
+        publishedAt: published ? new Date() : null,
+        authorId: input.authorId ?? null,
+      },
+    });
+
+    if (published) {
+      await notifyCitizens(tx, {
+        title: "Nouvelle annonce municipale",
+        body: announcement.title,
+        href: `/announcements/${announcement.slug}`,
+      });
+    }
+
+    return announcement;
   });
 }
 
 export async function setAnnouncementPublished(id: string, published: boolean) {
-  return prisma.announcement.update({
-    where: { id },
-    data: { published, publishedAt: published ? new Date() : null },
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.announcement.findUnique({ where: { id } });
+    if (!existing) throw new PublicError("Annonce introuvable.");
+
+    const announcement = await tx.announcement.update({
+      where: { id },
+      data: { published, publishedAt: published ? new Date() : null },
+    });
+
+    // F30 — only the draft → published transition notifies the residents;
+    // re-saving an already visible announcement never spams them.
+    if (published && !existing.published) {
+      await notifyCitizens(tx, {
+        title: "Nouvelle annonce municipale",
+        body: announcement.title,
+        href: `/announcements/${announcement.slug}`,
+      });
+    }
+
+    return announcement;
   });
 }
 

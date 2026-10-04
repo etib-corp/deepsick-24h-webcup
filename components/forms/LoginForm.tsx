@@ -83,6 +83,7 @@ export function LoginForm({
     const botWebsite = String(formData.get(BOT_TRAP_FIELD) ?? "");
 
     try {
+      // Pre-login throttle check: clear feedback before hitting NextAuth.
       const throttle = await loginThrottleStatusAction({ identifier });
       if (throttle.locked) {
         setLockedUntil(Date.now() + throttle.retryAfterSeconds * 1000);
