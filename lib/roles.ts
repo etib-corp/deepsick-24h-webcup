@@ -293,3 +293,35 @@ export const CIVIC_SERVICES: readonly CivicService[] = [
   { key: "ANNOUNCEMENTS", label: "Annonces", href: "/announcements", icon: "📣", description: "Communications du Conseil" },
   { key: "MAP", label: "Carte", href: "/citizen/map", icon: "🗺️", description: "Modules et points d'intérêt" },
 ] as const;
+
+/* ------------------------------------------------------------------ *
+ * Consultations & opinions (F66 — citizen participation)
+ * ------------------------------------------------------------------ */
+
+/** Roles allowed to read other citizens' opinions (author + these). */
+export const AGENT_READ_ROLES: readonly Role[] = ["COUNCIL", "ADMIN_AGENT"];
+
+export const CONSULTATION_STATUSES = ["OPEN", "CLOSED"] as const;
+export type ConsultationStatus = (typeof CONSULTATION_STATUSES)[number];
+
+export const CONSULTATION_STATUS_LABELS: Record<ConsultationStatus, string> = {
+  OPEN: "Ouverte",
+  CLOSED: "Clôturée",
+};
+
+export function isConsultationStatus(value: unknown): value is ConsultationStatus {
+  return typeof value === "string" && (CONSULTATION_STATUSES as readonly string[]).includes(value);
+}
+
+export const OPINION_STANCES = ["SUPPORT", "OPPOSE", "NEUTRAL"] as const;
+export type OpinionStance = (typeof OPINION_STANCES)[number];
+
+export const OPINION_STANCE_LABELS: Record<OpinionStance, string> = {
+  SUPPORT: "Favorable",
+  OPPOSE: "Défavorable",
+  NEUTRAL: "Neutre",
+};
+
+export function isOpinionStance(value: unknown): value is OpinionStance {
+  return typeof value === "string" && (OPINION_STANCES as readonly string[]).includes(value);
+}

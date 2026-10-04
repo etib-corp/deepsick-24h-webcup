@@ -2,6 +2,7 @@ import "server-only";
 
 import bcrypt from "bcryptjs";
 
+import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import {
@@ -20,7 +21,7 @@ export async function registerCitizen(input: { name: string; email: string; pass
   const email = input.email.toLowerCase().trim();
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    throw new Error("Un compte existe déjà avec cette adresse e-mail.");
+    throw new PublicError("Un compte existe déjà avec cette adresse e-mail.");
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
@@ -30,8 +31,14 @@ export async function registerCitizen(input: { name: string; email: string; pass
 }
 
 export async function setUserRole(userId: string, role: string) {
-  if (!isRole(role)) throw new Error("Rôle invalide.");
-  return prisma.user.update({ where: { id: userId }, data: { role } });
+  if (!isRole(role)) throw new PublicError("Rôle invalide.");
+  const current = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (!current) throw new PublicError("Compte introuvable.");
+  const user = await prisma.user.update({ where: { id: userId }, data: { role } });
+  return { user, previousRole: current.role };
 }
 
 /**
@@ -106,11 +113,11 @@ export async function updateRequestStatus(
   actorId: string,
   note?: string,
 ) {
-  if (!isRequestStatus(status)) throw new Error("Statut invalide.");
+  if (!isRequestStatus(status)) throw new PublicError("Statut invalide.");
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.serviceRequest.findUnique({ where: { id: requestId } });
-    if (!current) throw new Error("Demande introuvable.");
+    if (!current) throw new PublicError("Demande introuvable.");
 
     const updated = await tx.serviceRequest.update({
       where: { id: requestId },
@@ -263,6 +270,91 @@ export async function deleteBroadcast(id: string) {
   return prisma.broadcast.delete({ where: { id } });
 }
 
+/* ------------------------------------------------------------------ *
+ * Consultations & opinions (F66 — citizen participation)
+ * ------------------------------------------------------------------ */
+
+async function uniqueConsultationSlug(title: string) {
+  const root = slugify(title) || "consultation";
+  let slug = root;
+  let suffix = 2;
+  while (await prisma.consultation.findUnique({ where: { slug } })) {
+    slug = `${root}-${suffix++}`;
+  }
+  return slug;
+}
+
+export async function createConsultation(input: {
+  title: string;
+  summary?: string | null;
+  description: string;
+  published?: boolean;
+  opensAt?: Date | null;
+  closesAt?: Date | null;
+  authorId?: string | null;
+}) {
+  return prisma.consultation.create({
+    data: {
+      slug: await uniqueConsultationSlug(input.title),
+      title: input.title.trim(),
+      summary: input.summary?.trim() || null,
+      description: input.description.trim(),
+      status: "OPEN",
+      published: input.published ?? true,
+      opensAt: input.opensAt ?? null,
+      closesAt: input.closesAt ?? null,
+      authorId: input.authorId ?? null,
+    },
+  });
+}
+
+export async function setConsultationPublished(id: string, published: boolean) {
+  return prisma.consultation.update({ where: { id }, data: { published } });
+}
+
+export async function setConsultationStatus(id: string, status: string) {
+  return prisma.consultation.update({ where: { id }, data: { status } });
+}
+
+export async function deleteConsultation(id: string) {
+  return prisma.consultation.delete({ where: { id } });
+}
+
+/** One opinion per citizen and consultation (editable). */
+export async function upsertOpinion(input: {
+  consultationId: string;
+  authorId: string;
+  stance: string;
+  comment: string;
+}) {
+  const existing = await prisma.opinion.findUnique({
+    where: {
+      consultationId_authorId: {
+        consultationId: input.consultationId,
+        authorId: input.authorId,
+      },
+    },
+  });
+
+  if (existing) {
+    return prisma.opinion.update({
+      where: { id: existing.id },
+      data: { stance: input.stance, comment: input.comment.trim() },
+    });
+  }
+
+  const count = await prisma.opinion.count();
+  return prisma.opinion.create({
+    data: {
+      reference: `OPN-${500 + count + 1}`,
+      consultationId: input.consultationId,
+      authorId: input.authorId,
+      stance: input.stance,
+      comment: input.comment.trim(),
+    },
+  });
+}
+
 // ------------------------------------------------------------------
 // Terra Nova ecosystem — reports, police cases, orders, notifications
 // ------------------------------------------------------------------
@@ -320,11 +412,11 @@ export async function updateReportStatus(
   actorId: string,
   note?: string,
 ) {
-  if (!isReportStatus(status)) throw new Error("Statut invalide.");
+  if (!isReportStatus(status)) throw new PublicError("Statut invalide.");
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.report.findUnique({ where: { id: reportId } });
-    if (!current) throw new Error("Incident introuvable.");
+    if (!current) throw new PublicError("Incident introuvable.");
 
     const updated = await tx.report.update({
       where: { id: reportId },
@@ -393,7 +485,7 @@ export async function createOrder(
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  if (!isOrderStatus(status)) throw new Error("Statut de commande invalide.");
+  if (!isOrderStatus(status)) throw new PublicError("Statut de commande invalide.");
   return prisma.order.update({ where: { id: orderId }, data: { status } });
 }
 
@@ -423,13 +515,13 @@ export async function createAppointment(
 ) {
   return prisma.$transaction(async (tx) => {
     const service = await tx.municipalService.findUnique({ where: { id: input.serviceId } });
-    if (!service) throw new Error("Service introuvable.");
+    if (!service) throw new PublicError("Service introuvable.");
 
     // Authoritative re-check: never allow a double-booking of the same slot.
     const clash = await tx.appointment.findFirst({
       where: { serviceId: service.id, status: "BOOKED", date: input.date },
     });
-    if (clash) throw new Error("Ce créneau vient d'être réservé.");
+    if (clash) throw new PublicError("Ce créneau vient d'être réservé.");
 
     const count = await tx.appointment.count();
     const reference = `APT-${String(count + 1).padStart(4, "0")}`;
@@ -443,6 +535,7 @@ export async function createAppointment(
         date: input.date,
         durationMinutes: 30,
         sector: service.sector ?? null,
+        preparation: service.preparation ?? null,
         status: "BOOKED",
       },
     });
@@ -464,8 +557,8 @@ export async function cancelAppointment(id: string, citizenId: string) {
   const appointment = await prisma.appointment.findFirst({
     where: { id, citizenId },
   });
-  if (!appointment) throw new Error("Rendez-vous introuvable.");
-  if (appointment.status !== "BOOKED") throw new Error("Ce rendez-vous ne peut plus être annulé.");
+  if (!appointment) throw new PublicError("Rendez-vous introuvable.");
+  if (appointment.status !== "BOOKED") throw new PublicError("Ce rendez-vous ne peut plus être annulé.");
 
   return prisma.$transaction(async (tx) => {
     const cancelled = await tx.appointment.update({

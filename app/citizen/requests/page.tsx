@@ -27,7 +27,12 @@ export default async function CitizenRequestTrackingPage() {
           <p className="text-sm text-muted-foreground">{t.citizen.tracking.subtitle}</p>
           <p className="mt-2 text-sm">{format(t.citizen.tracking.count, { count: items.length })}</p>
         </div>
-        <Link href="/citizen/report" className={buttonClasses("primary", "sm")}>{t.citizen.reports.new}</Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <a href="/api/citizen/recap" download className={buttonClasses("secondary", "sm")}>
+            {t.citizen.recap.download}
+          </a>
+          <Link href="/citizen/report" className={buttonClasses("primary", "sm")}>{t.citizen.reports.new}</Link>
+        </div>
       </header>
       {items.length === 0 ? (
         <EmptyState title={t.citizen.tracking.empty} description={t.citizen.tracking.emptyHint} />

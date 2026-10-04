@@ -72,6 +72,80 @@ export function getAllBroadcasts() {
 }
 
 /* ------------------------------------------------------------------ *
+ * Consultations & opinions (F66 — citizen participation)
+ * ------------------------------------------------------------------ */
+
+export function getPublishedConsultations() {
+  return prisma.consultation.findMany({
+    where: { published: true },
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+  });
+}
+
+export function getConsultationBySlug(slug: string) {
+  return prisma.consultation.findUnique({ where: { slug } });
+}
+
+export function getAllConsultations() {
+  return prisma.consultation.findMany({
+    orderBy: [{ createdAt: "desc" }],
+    include: {
+      author: { select: { name: true } },
+      _count: { select: { opinions: true } },
+    },
+  });
+}
+
+export function getConsultationById(id: string) {
+  return prisma.consultation.findUnique({
+    where: { id },
+    include: { author: { select: { name: true } } },
+  });
+}
+
+export function getOpinionByAuthorAndConsultation(consultationId: string, authorId: string) {
+  return prisma.opinion.findUnique({
+    where: { consultationId_authorId: { consultationId, authorId } },
+  });
+}
+
+/** A citizen's own past contributions. */
+export function getOpinionsByAuthor(authorId: string) {
+  return prisma.opinion.findMany({
+    where: { authorId },
+    orderBy: { createdAt: "desc" },
+    include: { consultation: { select: { title: true, slug: true, status: true } } },
+  });
+}
+
+/** All opinions for a consultation — callers must be authorised agents. */
+export function getOpinionsByConsultation(consultationId: string) {
+  return prisma.opinion.findMany({
+    where: { consultationId },
+    orderBy: { createdAt: "desc" },
+    include: { author: { select: { name: true } } },
+  });
+}
+
+export async function getOpinionStats(consultationId: string) {
+  const rows = await prisma.opinion.groupBy({
+    by: ["stance"],
+    where: { consultationId },
+    _count: { _all: true },
+  });
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    counts[row.stance ?? "NEUTRAL"] = row._count._all;
+  }
+  return {
+    total: Object.values(counts).reduce((sum, value) => sum + value, 0),
+    support: counts.SUPPORT ?? 0,
+    oppose: counts.OPPOSE ?? 0,
+    neutral: counts.NEUTRAL ?? 0,
+  };
+}
+
+/* ------------------------------------------------------------------ *
  * Requests
  * ------------------------------------------------------------------ */
 

@@ -6,14 +6,17 @@ import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
+import { auditActor, auditNeutralizedInputs, recordSecurityEvent } from "@/lib/security";
+import { readId } from "@/lib/sanitize";
 import { createOrder, updateOrderStatus } from "@/lib/services";
 import { ORDER_TYPES, STAFF_ROLES, isOrderStatus } from "@/lib/roles";
+import { plainText, optionalPlainText } from "@/lib/validation";
 
 const orderSchema = z.object({
   type: z.enum(ORDER_TYPES),
-  summary: z.string().trim().min(3, "Décrivez la commande.").max(160),
-  origin: z.string().trim().max(120).optional().or(z.literal("")),
-  destination: z.string().trim().max(120).optional().or(z.literal("")),
+  summary: plainText(3, "Décrivez la commande.", 160),
+  origin: optionalPlainText(120),
+  destination: optionalPlainText(120),
 });
 
 function revalidateOrders() {
@@ -39,6 +42,16 @@ export async function createOrderAction(
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
 
+  await auditNeutralizedInputs(
+    {
+      summary: formData.get("summary"),
+      origin: formData.get("origin"),
+      destination: formData.get("destination"),
+    },
+    "commande",
+    session,
+  );
+
   let reference: string;
   try {
     const order = await createOrder(session.user.id, {
@@ -56,11 +69,25 @@ export async function createOrderAction(
 }
 
 export async function updateOrderStatusAction(formData: FormData) {
-  await requirePageRole(STAFF_ROLES);
-  const orderId = String(formData.get("orderId") ?? "");
+  const session = await requirePageRole(STAFF_ROLES);
+  const orderId = readId(formData.get("orderId"));
   const status = String(formData.get("status") ?? "");
   if (!orderId || !isOrderStatus(status)) return;
 
-  await updateOrderStatus(orderId, status);
+  try {
+    await updateOrderStatus(orderId, status);
+  } catch {
+    return;
+  }
+
+  await recordSecurityEvent({
+    type: "ORDER_STATUS_CHANGED",
+    outcome: "SUCCESS",
+    ...auditActor(session),
+    targetType: "order",
+    targetId: orderId,
+    detail: `nouveau statut ${status}`,
+  });
+
   revalidateOrders();
 }

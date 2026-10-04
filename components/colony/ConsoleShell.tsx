@@ -99,15 +99,17 @@ export function ConsoleShell({
         <StatusStrip />
       </header>
 
+      {banner}
+
       <nav aria-label={t.accessibility.spaceNavigation} className="border-b border-border bg-card/30" data-tour="console-nav">
-        <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-2">
+        <div className="mx-auto flex max-w-5xl flex-wrap gap-1 px-4 py-2">
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
               className={cn(
-                "flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition",
+                "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition",
                 isActive(item.href)
                   ? "bg-muted text-primary underline underline-offset-4"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -119,8 +121,6 @@ export function ConsoleShell({
           ))}
         </div>
       </nav>
-
-      {banner}
 
       <main
         id="main-content"

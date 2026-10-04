@@ -40,6 +40,8 @@ model User {
   transactions    WalletTransaction[]
   messages        Message[]
   appointments    Appointment[]
+  consultations   Consultation[]   @relation("ConsultationAuthor")
+  opinions        Opinion[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -58,6 +60,9 @@ model MunicipalService {
   mapX         Float?
   mapY         Float?
   sector       String?
+  // Preparation instructions / required documents shown to residents before
+  // their appointment (copied onto the booking when an appointment is made).
+  preparation  String?       @db.Text
   appointments Appointment[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -92,6 +97,45 @@ model Broadcast {
   author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// A public project opened by the Council for citizen feedback (non-binding).
+model Consultation {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String?   @db.Text
+  description String    @db.Text
+  status      String    @default("OPEN") // OPEN | CLOSED
+  published   Boolean   @default(true)
+  opensAt     DateTime?
+  closesAt    DateTime?
+  authorId    String?
+  author      User?     @relation("ConsultationAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  opinions    Opinion[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+}
+
+// A citizen's opinion on a consultation. Not an official vote; one per
+// citizen/project (editable). Readable by its author and authorised agents.
+model Opinion {
+  id             String       @id @default(cuid())
+  reference      String       @unique @default(cuid())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  stance         String? // SUPPORT | OPPOSE | NEUTRAL
+  comment        String       @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([consultationId, authorId])
+  @@index([authorId])
+  @@index([consultationId])
 }
 
 model ContactMessage {
@@ -328,4 +372,25 @@ model LoginAttempt {
   createdAt  DateTime @default(now())
 
   @@index([identifier, createdAt])
+}
+
+// Append-only audit trail for sensitive operations: authentication events,
+// access denials and privileged actions (roles, content, workflows, case
+// files, neutralised inputs). Read by the High Council's security console to
+// allow after-the-fact analysis; rows are never updated or deleted by the app.
+model SecurityEvent {
+  id         String   @id @default(cuid())
+  type       String // LOGIN_FAILED | LOGIN_BLOCKED | ACCESS_DENIED | ROLE_CHANGED | CONTENT_CHANGED | REQUEST_STATUS_CHANGED | REPORT_STATUS_CHANGED | ORDER_STATUS_CHANGED | RECORD_ASSIGNED | CASE_FILED | INPUT_NEUTRALIZED
+  outcome    String   @default("INFO") // INFO | SUCCESS | DENIED | FLAGGED
+  actorId    String?
+  actorRole  String?
+  targetType String?
+  targetId   String?
+  detail     String?  @db.Text
+  ip         String?
+  userAgent  String?  @db.VarChar(255)
+  createdAt  DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([createdAt])
 }
