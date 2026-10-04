@@ -16,5 +16,5 @@ export default async function CouncilConsultationPage({
   params: { id: string };
 }) {
   await requirePageRole(["COUNCIL"]);
-  return <ConsultationOpinions id={params.id} />;
+  return <ConsultationOpinions id={params.id} canManage />;
 }

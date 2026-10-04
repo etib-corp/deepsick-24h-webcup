@@ -1,7 +1,15 @@
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
+/**
+ * `NEXT_DIST_DIR` lets a second `next dev` use its own build directory, so
+ * parallel dev servers on the same clone stop overwriting each other's
+ * artifacts in `.next` (which shows up as random 404s and stale chunks).
+ */
+const distDir = process.env.NEXT_DIST_DIR;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(distDir ? { distDir } : {}),
   reactStrictMode: true,
   // Isolate verification builds from an already-running development server.
   distDir: process.env.NEXT_DIST_DIR || ".next",

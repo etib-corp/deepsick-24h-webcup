@@ -64,6 +64,16 @@ export function ConsultationForm() {
         {t.council.consultations.form.published}
       </label>
 
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input type="checkbox" name="anonymous" className="size-4 accent-primary" />
+          {t.council.consultations.form.anonymous}
+        </label>
+        <p className="pl-6 text-xs text-muted-foreground">
+          {t.council.consultations.form.anonymousHint}
+        </p>
+      </div>
+
       <SubmitButton />
     </form>
   );

@@ -111,6 +111,10 @@ model Consultation {
   description String    @db.Text
   status      String    @default("OPEN") // OPEN | CLOSED
   published   Boolean   @default(true)
+  // When true, staff views hide which citizen wrote each contribution.
+  anonymous   Boolean   @default(false)
+  // Public, readable outcome written by the Council (shown once closed).
+  outcome     String?   @db.Text
   opensAt     DateTime?
   closesAt    DateTime?
   authorId    String?

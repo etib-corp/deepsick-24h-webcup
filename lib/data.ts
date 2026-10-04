@@ -123,7 +123,8 @@ export function getAllBroadcasts() {
 export function getPublishedConsultations() {
   return prisma.consultation.findMany({
     where: { published: true },
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    // Open consultations first, then the most recent (closed ones stay consultable).
+    orderBy: [{ status: "desc" }, { createdAt: "desc" }],
   });
 }
 
@@ -159,7 +160,9 @@ export function getOpinionsByAuthor(authorId: string) {
   return prisma.opinion.findMany({
     where: { authorId },
     orderBy: { createdAt: "desc" },
-    include: { consultation: { select: { title: true, slug: true, status: true } } },
+    include: {
+      consultation: { select: { title: true, slug: true, status: true, anonymous: true } },
+    },
   });
 }
 

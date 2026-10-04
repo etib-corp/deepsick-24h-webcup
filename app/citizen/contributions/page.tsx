@@ -45,9 +45,12 @@ export default async function CitizenContributionsPage() {
                 <FeedRow
                   className="border-0 bg-transparent p-0"
                   title={opinion.consultation.title}
-                  meta={formatDate(opinion.createdAt)}
+                  meta={`${opinion.reference} · ${formatDate(opinion.createdAt)}`}
                   trailing={
                     <div className="flex items-center gap-2">
+                      {opinion.consultation.anonymous ? (
+                        <Badge tone="warning">{t.citizen.consultations.anonymous}</Badge>
+                      ) : null}
                       {opinion.stance ? (
                         <Badge tone="info">
                           {t.citizen.consultations.stance[opinion.stance as OpinionStance] ??

@@ -111,7 +111,7 @@ async function main() {
     ],
   });
 
-  /* --- Consultations & opinions (F66) ---------------------------------- */
+  /* --- Consultations & opinions (F65) ---------------------------------- */
   await prisma.opinion.deleteMany({});
   await prisma.consultation.deleteMany({});
   const consultation = await prisma.consultation.create({
@@ -123,6 +123,7 @@ async function main() {
         "Le Haut Conseil étudie l'extension des modules d'habitation du Secteur 05 pour accueillir de nouvelles familles. Donnez votre avis : ce retour est consultatif et n'a pas valeur de vote officiel.",
       status: "OPEN",
       published: true,
+      anonymous: false,
       authorId: council.id,
     },
   });
@@ -134,6 +135,33 @@ async function main() {
       stance: "SUPPORT",
       comment:
         "Je suis favorable à l'extension : de nouvelles familles dynamiseront le secteur et les services de proximité.",
+    },
+  });
+
+  // A closed consultation: contributions anonymised, outcome readable.
+  const closedConsultation = await prisma.consultation.create({
+    data: {
+      slug: "regulation-vols-drones",
+      title: "Régulation des vols de drones",
+      summary: "Faut-il restreindre les vols de drones de loisir au-dessus des quartiers habités ?",
+      description:
+        "Le Haut Conseil a consulté les habitants sur la régulation des vols de drones au-dessus des modules d'habitation. La consultation est désormais clôturée : le résultat retenu est publié ci-dessous.",
+      status: "CLOSED",
+      published: true,
+      anonymous: true,
+      outcome:
+        "Après analyse des avis, le Haut Conseil restreint les vols de drones de loisir au-dessus des quartiers habités et maintient une voie d'accès prioritaire pour les services d'urgence. La règle entre en vigueur au prochain cycle.",
+      authorId: council.id,
+    },
+  });
+  await prisma.opinion.create({
+    data: {
+      reference: "OPN-502",
+      consultationId: closedConsultation.id,
+      authorId: citizen.id,
+      stance: "SUPPORT",
+      comment:
+        "Les nuisances sonores sont réelles : une restriction des vols de loisir me semble raisonnable.",
     },
   });
 
