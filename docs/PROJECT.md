@@ -70,8 +70,9 @@ A second, parallel flow handles **démarches administratives** (`ServiceRequest`
 | `/services`, `/services/[slug]` | Public | Services directory (D05) |
 | `/announcements`, `/announcements/[slug]` | Public | Council publications (D06) |
 | `/contact` | Public | Contact + acknowledgement (D04) |
+| `/arrivants` | Public | New-arrivals onboarding — no-email sign-up, fr/en/es, simple copy (F71) |
 | `/guide` | Public | In-app tutorial, one walkthrough per profile |
-| `/login`, `/register` | Public | Auth (D03 / D01) |
+| `/login`, `/register` | Public | Auth (D03 / D01) — email or colon identifier (F71) |
 | `/citizen` | Citizen | Dashboard |
 | `/citizen/report`, `/citizen/reports`, `/citizen/reports/[id]` | Citizen | Signalements |
 | `/citizen/orders`, `/citizen/wallet`, `/citizen/map`, `/citizen/notifications` | Citizen | Services & profile |

@@ -1,15 +1,51 @@
 import { z } from "zod";
 
+import { USERNAME_MAX, isValidUsername } from "@/lib/identity";
 import { OPINION_STANCES, REQUEST_PRIORITIES } from "@/lib/roles";
 
-export const registerSchema = z.object({
-  name: z.string().trim().min(2, "Indiquez votre nom complet.").max(80),
-  email: z.string().trim().email("Adresse e-mail invalide.").max(160),
-  password: z
-    .string()
-    .min(8, "Le mot de passe doit contenir au moins 8 caractères.")
-    .max(100),
-});
+export type RegisterMessages = {
+  name: string;
+  identity: string;
+  email: string;
+  username: string;
+  password: string;
+};
+
+/**
+ * Register form validation (F71). Messages come from the active locale, and a
+ * resident may register with an email **or** a colon identifier — not
+ * necessarily both.
+ */
+export function buildRegisterSchema(messages: RegisterMessages) {
+  return z
+    .object({
+      name: z.string().trim().min(2, messages.name).max(80),
+      email: z
+        .union([z.literal(""), z.string().trim().email(messages.email).max(160)])
+        .optional(),
+      username: z.string().trim().max(USERNAME_MAX).optional(),
+      password: z.string().min(8, messages.password).max(100),
+    })
+    .superRefine((data, ctx) => {
+      const email = data.email ?? "";
+      const username = data.username ?? "";
+      if (!email && !username) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: messages.identity,
+          path: ["username"],
+        });
+        return;
+      }
+      if (username && !isValidUsername(username)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: messages.username,
+          path: ["username"],
+        });
+      }
+    });
+}
 
 export const contactSchema = z.object({
   subject: z.string().trim().min(3, "Indiquez un objet.").max(120),

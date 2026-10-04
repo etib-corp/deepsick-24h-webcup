@@ -47,21 +47,21 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "");
+    const identifier = String(formData.get("identifier") ?? "");
     const password = String(formData.get("password") ?? "");
 
-    const throttle = await loginThrottleStatusAction({ email });
+    const throttle = await loginThrottleStatusAction({ identifier });
     if (throttle.locked) {
       setLockedUntil(Date.now() + throttle.retryAfterSeconds * 1000);
       setPending(false);
       return;
     }
 
-    const result = await signIn("credentials", { redirect: false, email, password });
+    const result = await signIn("credentials", { redirect: false, identifier, password });
 
     if (!result || result.error) {
       // A failure may have just pushed us over the limit; surface it clearly.
-      const after = await loginThrottleStatusAction({ email });
+      const after = await loginThrottleStatusAction({ identifier });
       if (after.locked) {
         setLockedUntil(Date.now() + after.retryAfterSeconds * 1000);
       } else {
@@ -113,16 +113,16 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label={t.auth.login.identifier} htmlFor="email">
+        <Field label={t.auth.login.identifier} htmlFor="identifier" hint={t.auth.login.identifierHint}>
           <div className="relative">
             <IdCard className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              id="email"
-              name="email"
-              type="email"
+              id="identifier"
+              name="identifier"
+              type="text"
               required
-              autoComplete="email"
-              placeholder="AK-2048-TRN"
+              autoComplete="username"
+              placeholder="elodie.martin"
               className="pl-9"
             />
           </div>
@@ -177,6 +177,7 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
         <p className="font-mono uppercase tracking-wide text-foreground">{t.auth.demo.title}</p>
         <p className="mt-1">citoyen@terranova.fr · securite@terranova.fr · medical@terranova.fr · conseil@terranova.fr</p>
         <p className="mt-0.5">maintenance@ · transport@ · commerce@ · administration@terranova.fr</p>
+        <p className="mt-0.5">{t.auth.demo.noEmail}</p>
         <p className="mt-0.5">{t.auth.demo.password}</p>
       </div>
     </div>

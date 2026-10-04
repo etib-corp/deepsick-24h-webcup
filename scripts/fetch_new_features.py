@@ -35,6 +35,7 @@ SUMMARY_KEYWORDS = {
     "D09": "Permissions / accès différenciés",
     "D19": "Espace agents avec vue sur les données API",
     "F22": "Vue des demandes habitants avec états",
+    "F71": "Nouveaux arrivants : accès sans e-mail et multilingue",
 }
 
 

@@ -161,6 +161,7 @@ All currently visible needs belong to the **Socle** group (the foundation).
 | `D09` | Permissions | `lib/permissions.ts`, `middleware.ts`, API guards |
 | `D19` | Agent workspace | `app/agents` |
 | `F22` | Requests view with statuses | `app/agents/demandes` |
+| `F71` | New-arrivals onboarding — accounts without email, fr/en/es, simple copy | `app/(public)/arrivants`, `lib/identity.ts`, `components/forms/{Register,Login}Form.tsx` |
 
 ## Troubleshooting
 

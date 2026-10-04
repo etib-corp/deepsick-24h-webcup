@@ -18,6 +18,9 @@ export function PublicFooter() {
           {t.common.appName} — {t.nav.platform}
         </p>
         <div className="flex flex-wrap items-center gap-4 font-mono text-xs uppercase tracking-wide">
+          <Link href="/arrivants" className="hover:text-primary">
+            [ {t.nav.arrivals} ]
+          </Link>
           <Link href="/services" className="hover:text-primary">
             [ {t.nav.services} ]
           </Link>
