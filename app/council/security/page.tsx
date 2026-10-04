@@ -55,7 +55,7 @@ export default async function CouncilSecurityPage() {
         <p className="text-sm text-muted-foreground">{t.council.security.subtitle}</p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <StatTile
           label={t.council.security.blocked}
           value={stats.blocked}
@@ -73,6 +73,12 @@ export default async function CouncilSecurityPage() {
           value={stats.neutralized}
           hint={t.council.security.neutralizedHint}
           tone="info"
+        />
+        <StatTile
+          label={t.council.security.formBlocked}
+          value={stats.formBlocked}
+          hint={t.council.security.formBlockedHint}
+          tone="warning"
         />
         <StatTile
           label={t.council.security.traced}

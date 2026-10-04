@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 
+import { BotGuardFields } from "@/components/forms/BotGuardFields";
+import { BotGuardNotice } from "@/components/forms/BotGuardNotice";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
@@ -20,7 +22,7 @@ function SubmitButton() {
   );
 }
 
-export function RegisterForm() {
+export function RegisterForm({ botToken }: { botToken: string }) {
   const t = useT();
   const [state, formAction] = useFormState(registerAction, initialActionState);
 
@@ -57,6 +59,7 @@ export function RegisterForm() {
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <form action={formAction} className="space-y-4">
+        <BotGuardFields form="register" token={botToken} />
         <Field label={t.auth.register.name} htmlFor="name">
           <Input id="name" name="name" required minLength={2} autoComplete="name" />
         </Field>
@@ -81,6 +84,7 @@ export function RegisterForm() {
         </Field>
 
         <SubmitButton />
+        <BotGuardNotice />
       </form>
 
       <p className="text-sm text-muted-foreground">

@@ -270,6 +270,7 @@ async function main() {
   // fresh database; live events are appended by the platform at runtime.
   const activeIncident = await prisma.report.findUnique({ where: { reference: "INC-042" } });
   await prisma.securityEvent.deleteMany({});
+  await prisma.botGuardToken.deleteMany({});
   await prisma.securityEvent.createMany({
     data: [
       {
@@ -301,6 +302,15 @@ async function main() {
         detail: "signalement · description",
         ip: "10.42.0.31",
         userAgent: "Mozilla/5.0 (démo)",
+      },
+      {
+        type: "FORM_BLOCKED",
+        outcome: "FLAGGED",
+        targetType: "form",
+        targetId: "contact",
+        detail: "Envoi bloqué · contact · raison tooFast",
+        ip: "10.42.0.99",
+        userAgent: "python-requests/2.32",
       },
       ...(activeIncident
         ? [

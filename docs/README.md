@@ -10,6 +10,7 @@ Index of the project documentation.
 | [`NEEDS.md`](NEEDS.md) | Competition needs — the fetch script, the Webcup API and how needs are tracked |
 | [`F69_security.md`](F69_security.md) | F69 — sensitive-data protection: access control, neutralisation, error hygiene, audit trail |
 | [`F69_justification.md`](F69_justification.md) | F69 — submission-format answer (what was built / where to test / how to verify, in French) |
+| [`F81_forms_anti_bot.md`](F81_forms_anti_bot.md) | F81 — anti-bot protection for public forms: honeypot, signed challenge, replay ledger, rate limits, traces |
 | [`TODO_terra_nova.md`](TODO_terra_nova.md) | **Auto-generated** needs checklist (do not edit by hand) |
 | [`CLOSED_ISSUES.md`](CLOSED_ISSUES.md) | Snapshot of the closed GitHub issues, with the need code each one covers |
 | [`CLOSED_ISSUES_FORMS.md`](CLOSED_ISSUES_FORMS.md) | **Jury evidence forms** (FR) — one pre-filled form per closed issue |

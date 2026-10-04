@@ -6,15 +6,26 @@ import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { Fingerprint, IdCard, LockKeyhole } from "lucide-react";
 
+import { BotGuardFields } from "@/components/forms/BotGuardFields";
+import { BotGuardNotice } from "@/components/forms/BotGuardNotice";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
 import { loginThrottleStatusAction } from "@/lib/actions/auth";
+import { BOT_TRAP_FIELD } from "@/lib/bot-fields";
 import { format } from "@/lib/i18n/format";
 import { useT } from "@/lib/i18n/client";
 import { homeForRole } from "@/lib/roles";
 
-export function LoginForm({ registered = false, deleted = false }: { registered?: boolean; deleted?: boolean }) {
+export function LoginForm({
+  botToken,
+  registered = false,
+  deleted = false,
+}: {
+  botToken: string;
+  registered?: boolean;
+  deleted?: boolean;
+}) {
   const t = useT();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +60,7 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
+    const botWebsite = String(formData.get(BOT_TRAP_FIELD) ?? "");
 
     const throttle = await loginThrottleStatusAction({ email });
     if (throttle.locked) {
@@ -57,9 +69,27 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
       return;
     }
 
-    const result = await signIn("credentials", { redirect: false, email, password });
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      // F81 — the signed challenge and honeypot travel with the credentials;
+      // `authorize` refuses the attempt when they fail (and traces it).
+      botToken,
+      botWebsite,
+    });
 
     if (!result || result.error) {
+      if (result?.error === "BOT_GUARD_EXPIRED") {
+        setError(t.errors.botExpired);
+        setPending(false);
+        return;
+      }
+      if (result?.error === "BOT_GUARD_BLOCKED") {
+        setError(t.errors.botBlocked);
+        setPending(false);
+        return;
+      }
       // A failure may have just pushed us over the limit; surface it clearly.
       const after = await loginThrottleStatusAction({ email });
       if (after.locked) {
@@ -115,6 +145,7 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <BotGuardFields form="login" token={botToken} />
         <Field label={t.auth.login.identifier} htmlFor="email">
           <div className="relative">
             <IdCard className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -158,6 +189,7 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
         <Button type="submit" disabled={pending || locked} className="w-full">
           {pending ? t.auth.login.submitting : t.auth.login.submit}
         </Button>
+        <BotGuardNotice />
       </form>
 
       <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
