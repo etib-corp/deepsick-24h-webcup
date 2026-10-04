@@ -1,7 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
-
 import type { ActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
 import { getAuthSession } from "@/lib/permissions";
@@ -32,5 +30,10 @@ export async function deleteAccountAction(
     return { ok: false, message: t.failed };
   }
 
-  redirect("/api/auth/signout?callbackUrl=/login?deleted=1");
+  // Success is reported to the client, which clears the session on the current
+  // host and lands on `/login?deleted=1` (see DeleteAccountForm /
+  // lib/client-sign-out.ts). A server redirect through the NextAuth signout
+  // endpoint would resolve against NEXTAUTH_URL and could send the visitor to
+  // another host (e.g. localhost on a deployed instance).
+  return { ok: true };
 }

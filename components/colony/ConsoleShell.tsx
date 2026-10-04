@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { Bell } from "lucide-react";
 
 import { SkipLink } from "@/components/layout/SkipLink";
@@ -14,6 +13,7 @@ import { ThemePicker } from "@/components/layout/ThemePicker";
 import { TourMenu } from "@/components/tour/TourMenu";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { buttonClasses } from "@/components/ui/Button";
+import { signOutTo } from "@/lib/client-sign-out";
 import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/ui";
 
@@ -90,7 +90,7 @@ export function ConsoleShell({
 
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOutTo("/")}
             className={buttonClasses("ghost", "sm")}
           >
             {t.common.quit}

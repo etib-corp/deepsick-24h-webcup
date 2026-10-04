@@ -3,13 +3,13 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { Logo } from "@/components/layout/Logo";
 import { ThemePicker } from "@/components/layout/ThemePicker";
 import { buttonClasses } from "@/components/ui/Button";
+import { signOutTo } from "@/lib/client-sign-out";
 import { useT } from "@/lib/i18n/client";
 import { homeForRole } from "@/lib/roles";
 import { cn } from "@/lib/ui";
@@ -76,7 +76,7 @@ export function PublicHeader({
               </Link>
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => signOutTo("/")}
                 className={buttonClasses("ghost", "sm")}
               >
                 {t.nav.signOut}
@@ -141,7 +141,7 @@ export function PublicHeader({
                 </Link>
                 <button
                   type="button"
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={() => signOutTo("/")}
                   className={buttonClasses("ghost", "sm")}
                 >
                   {t.nav.signOut}

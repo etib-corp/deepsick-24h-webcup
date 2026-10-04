@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 
 import { Button as ShadcnButton } from "@/components/shadcn/button";
@@ -18,6 +18,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Field, Input } from "@/components/ui/Field";
 import { deleteAccountAction } from "@/lib/actions/account";
 import { initialActionState } from "@/lib/action-state";
+import { signOutTo } from "@/lib/client-sign-out";
 import { useT } from "@/lib/i18n/client";
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
@@ -42,6 +43,13 @@ export function DeleteAccountForm() {
   const [open, setOpen] = useState(false);
 
   const ready = confirmValue.trim() === t.citizen.account.confirmPhrase;
+
+  // The account is gone: end the session on the current host and land on the
+  // confirmation message — without a NextAuth server redirect, which would
+  // resolve against NEXTAUTH_URL and could point at another host.
+  useEffect(() => {
+    if (state.ok) void signOutTo("/login?deleted=1");
+  }, [state.ok]);
 
   return (
     <div className="space-y-3">
