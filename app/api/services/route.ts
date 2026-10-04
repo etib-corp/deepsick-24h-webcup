@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { authErrorResponse, serverErrorResponse } from "@/lib/api";
@@ -25,6 +25,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: firstError(parsed.error) }, { status: 400 });
   }
 
+  const service = await createMunicipalService(parsed.data);
+  revalidateTag("public-services");
   let service;
   try {
     service = await createMunicipalService(parsed.data);

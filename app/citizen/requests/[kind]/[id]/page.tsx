@@ -6,12 +6,11 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { RequestTrackingCard } from "@/components/colony/RequestTrackingCard";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
-import { getCitizenRequestTracking } from "@/lib/request-tracking";
+import { getCitizenRequestDetail } from "@/lib/request-tracking";
 
 export default async function CitizenRequestDetailPage({ params }: { params: { kind: string; id: string } }) {
   const session = await requirePageRole(["CITIZEN"]);
-  const items = await getCitizenRequestTracking(session.user.id);
-  const item = items.find((entry) => entry.kind === params.kind && entry.id === params.id);
+  const item = await getCitizenRequestDetail(session.user.id, params.kind, params.id);
   if (!item) notFound();
 
   return (

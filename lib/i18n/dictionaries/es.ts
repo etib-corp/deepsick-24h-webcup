@@ -181,6 +181,7 @@ const es: Dictionary = {
       registered: "Identidad creada. Ya puedes iniciar sesión.",
       deleted: "Cuenta eliminada. Tu identidad cívica se ha retirado de la red.",
       invalid: "ID de colono o contraseña incorrectos.",
+      unavailable: "El inicio de sesión no está disponible temporalmente. Inténtalo de nuevo en un momento.",
       tooManyAttempts: "Demasiados intentos. Inténtalo de nuevo en {minutes} minuto(s).",
     },
     register: {

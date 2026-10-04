@@ -8,6 +8,7 @@ Index of the project documentation.
 | [`PROJECT.md`](PROJECT.md) | Product & architecture overview — roles, routes, data model, security, conventions |
 | [`TUTORIAL.md`](TUTORIAL.md) | Complete tutorial by type of user — walkthroughs, permissions, demo script (mirrors `/guide`) |
 | [`NEEDS.md`](NEEDS.md) | Competition needs — the fetch script, the Webcup API and how needs are tracked |
+| [`F78.md`](F78.md) | Stability improvements, measured load results, concurrency checks and reproduction |
 | [`F69_security.md`](F69_security.md) | F69 — sensitive-data protection: access control, neutralisation, error hygiene, audit trail |
 | [`F69_justification.md`](F69_justification.md) | F69 — submission-format answer (what was built / where to test / how to verify, in French) |
 | [`TODO_terra_nova.md`](TODO_terra_nova.md) | **Auto-generated** needs checklist (do not edit by hand) |

@@ -2,6 +2,7 @@ import "server-only";
 
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 
 import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";
@@ -371,44 +372,32 @@ export async function upsertOpinion(input: {
   stance: string;
   comment: string;
 }) {
-  const existing = await prisma.opinion.findUnique({
-    where: {
-      consultationId_authorId: {
-        consultationId: input.consultationId,
-        authorId: input.authorId,
-      },
-    },
-  });
-
-  if (existing) {
-    return prisma.opinion.update({
-      where: { id: existing.id },
-      data: { stance: input.stance, comment: input.comment.trim() },
-    });
-  }
-
-  const count = await prisma.opinion.count();
-  return prisma.opinion.create({
-    data: {
-      reference: `OPN-${500 + count + 1}`,
+  const where = {
+    consultationId_authorId: {
       consultationId: input.consultationId,
       authorId: input.authorId,
-      stance: input.stance,
-      comment: input.comment.trim(),
     },
-  });
+  };
+  const data = { stance: input.stance, comment: input.comment.trim() };
+  try {
+    return await prisma.opinion.upsert({
+      where,
+      update: data,
+      create: { ...data, consultationId: input.consultationId, authorId: input.authorId },
+    });
+  } catch (error) {
+    // Prisma 5 can implement this compound upsert as read + insert on MySQL.
+    // A competing insert is safe to resolve against the same unique owner key.
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+      throw error;
+    }
+    return prisma.opinion.update({ where, data });
+  }
 }
 
 // ------------------------------------------------------------------
 // Terra Nova ecosystem — reports, police cases, orders, notifications
 // ------------------------------------------------------------------
-
-const REPORT_PREFIX: Record<string, string> = {
-  SECURITY: "INC",
-  MEDICAL: "MED",
-  MAINTENANCE: "MNT",
-  CLEANLINESS: "CLN",
-};
 
 export async function createReport(
   authorId: string,
@@ -420,14 +409,8 @@ export async function createReport(
     sector?: string | null;
   },
 ) {
-  // Readable, design-style reference (INC-501, MED-502, …).
-  const prefix = REPORT_PREFIX[input.type] ?? "REQ";
-  const count = await prisma.report.count({ where: { type: input.type } });
-  const reference = `${prefix}-${500 + count + 1}`;
-
   return prisma.report.create({
     data: {
-      reference,
       type: input.type,
       title: input.title.trim(),
       description: input.description.trim(),
@@ -558,6 +541,9 @@ export async function createAppointment(
   input: { serviceId: string; subject?: string | null; date: Date },
 ) {
   return prisma.$transaction(async (tx) => {
+    // MySQL: serialize bookings for this service across all app instances.
+    // Acquire the row lock before the first consistent read of the slot.
+    await tx.$queryRaw`SELECT id FROM MunicipalService WHERE id = ${input.serviceId} FOR UPDATE`;
     const service = await tx.municipalService.findUnique({ where: { id: input.serviceId } });
     if (!service) throw new PublicError("Service introuvable.");
 
@@ -567,12 +553,8 @@ export async function createAppointment(
     });
     if (clash) throw new PublicError("Ce créneau vient d'être réservé.");
 
-    const count = await tx.appointment.count();
-    const reference = `APT-${String(count + 1).padStart(4, "0")}`;
-
     const appointment = await tx.appointment.create({
       data: {
-        reference,
         serviceId: service.id,
         subject: input.subject?.trim() || null,
         citizenId,
@@ -635,11 +617,23 @@ export async function ensureAppointmentReminders(citizenId: string): Promise<num
       reminderSent: false,
       date: { gt: now, lte: horizon },
     },
-    include: { service: { select: { name: true } } },
+    orderBy: { id: "asc" },
+    select: { id: true, date: true, service: { select: { name: true } } },
   });
 
+  let sent = 0;
   for (const appointment of upcoming) {
-    await prisma.$transaction(async (tx) => {
+    const delivered = await prisma.$transaction(async (tx) => {
+      // Conditional UPDATE claims the reminder atomically. If creation fails,
+      // rollback releases the claim so a later page load can deliver it.
+      const claimed = await tx.appointment.updateMany({
+        where: {
+          id: appointment.id, citizenId, status: "BOOKED", reminderSent: false,
+          date: { gt: now, lte: horizon },
+        },
+        data: { reminderSent: true },
+      });
+      if (claimed.count === 0) return false;
       await tx.notification.create({
         data: {
           userId: citizenId,
@@ -648,14 +642,12 @@ export async function ensureAppointmentReminders(citizenId: string): Promise<num
           href: "/citizen/appointments",
         },
       });
-      await tx.appointment.update({
-        where: { id: appointment.id },
-        data: { reminderSent: true },
-      });
+      return true;
     });
+    if (delivered) sent++;
   }
 
-  return upcoming.length;
+  return sent;
 }
 
 export async function isAppointmentSlotTaken(serviceId: string, date: Date): Promise<boolean> {

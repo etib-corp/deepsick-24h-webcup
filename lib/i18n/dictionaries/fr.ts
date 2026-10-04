@@ -183,6 +183,7 @@ const fr = {
       registered: "Identité créée. Vous pouvez vous connecter.",
       deleted: "Compte supprimé. Votre identité civique a été retirée du réseau.",
       invalid: "Identifiant colon ou mot de passe incorrect.",
+      unavailable: "Connexion momentanément indisponible. Réessayez dans un instant.",
       tooManyAttempts: "Trop de tentatives. Réessayez dans {minutes} minute(s).",
     },
     register: {

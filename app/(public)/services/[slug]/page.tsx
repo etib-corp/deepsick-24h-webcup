@@ -6,7 +6,7 @@ import { buttonClasses } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { getPublishedServices, getServiceBySlug } from "@/lib/data";
+import { getOtherPublishedServices, getServiceBySlug } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -23,9 +23,7 @@ export default async function ServiceDetailPage({ params }: Params) {
   const service = await getServiceBySlug(params.slug);
   if (!service || !service.published) notFound();
 
-  const otherServices = (await getPublishedServices())
-    .filter((item) => item.id !== service.id)
-    .slice(0, 3);
+  const otherServices = await getOtherPublishedServices(service.id);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">

@@ -181,6 +181,7 @@ const en: Dictionary = {
       registered: "Identity created. You can sign in.",
       deleted: "Account deleted. Your civic identity has been removed from the network.",
       invalid: "Incorrect colonist ID or password.",
+      unavailable: "Sign-in is temporarily unavailable. Please try again shortly.",
       tooManyAttempts: "Too many attempts. Try again in {minutes} minute(s).",
     },
     register: {
