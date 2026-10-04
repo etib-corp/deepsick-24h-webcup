@@ -1,53 +1,36 @@
-"use client";
+import type { ReactNode } from "react";
 
-import { useRef, type ReactNode } from "react";
-
-import { revealChildren, revealSelf, useMotionLayoutEffect } from "@/lib/motion";
 import { cn } from "@/lib/ui";
 
 /**
- * Client wrapper that fades its content in once it is mounted.
+ * Lightweight entrance animation using CSS only (no JS, no anime.js), so it
+ * costs nothing on low-powered devices and content is always visible if the
+ * animation does not run. `motion-safe:` respects reduced-motion automatically.
  *
- * - default — the **children** are staggered (grids of cards, lists of rows)
- * - `self` — the wrapper itself animates in (single blocks, hero rows)
- *
- * Server components can wrap their JSX with it: the children stay
- * server-rendered and are simply handed to this client boundary.
+ * Extra props (`self`, `stagger`, `delay`, `y`) are accepted for call-site
+ * compatibility but the effect is a single fade + rise of the container.
  */
 export function Reveal({
   children,
   className,
-  self = false,
-  stagger = 70,
-  delay = 0,
-  y = 12,
   dataTour,
 }: {
   children: ReactNode;
   className?: string;
   self?: boolean;
-  /** Delay per child, in ms (ignored when `self` is set). */
   stagger?: number;
   delay?: number;
-  /** Vertical distance the content travels from, in px. */
   y?: number;
-  /** Optional `data-tour` hook so the interactive tutorial can spotlight it. */
   dataTour?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useMotionLayoutEffect(() => {
-    const animation = self
-      ? revealSelf(ref.current, { delay, y })
-      : revealChildren(ref.current, { delay, step: stagger, y });
-
-    return () => {
-      animation?.revert();
-    };
-  }, [self, stagger, delay, y]);
-
   return (
-    <div ref={ref} className={cn(className)} data-tour={dataTour}>
+    <div
+      data-tour={dataTour}
+      className={cn(
+        "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-500",
+        className,
+      )}
+    >
       {children}
     </div>
   );
