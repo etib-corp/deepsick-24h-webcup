@@ -3,6 +3,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";
 import { normalizeIdentifier } from "@/lib/identity";
 import { prisma } from "@/lib/prisma";
@@ -74,8 +75,22 @@ export async function registerCitizen(input: {
 }
 
 export async function setUserRole(userId: string, role: string) {
-  if (!isRole(role)) throw new Error("Rôle invalide.");
-  return prisma.user.update({ where: { id: userId }, data: { role } });
+  if (!isRole(role)) throw new PublicError("Rôle invalide.");
+  const current = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (!current) throw new PublicError("Compte introuvable.");
+  const user = await prisma.user.update({ where: { id: userId }, data: { role } });
+  return { user, previousRole: current.role };
+}
+
+/**
+ * Permanently delete a user account. Citizens own no staff-only rows (e.g.
+ * `PoliceCase`), so every remaining relation cascades or set-nulls cleanly.
+ */
+export async function deleteAccount(userId: string) {
+  return prisma.user.delete({ where: { id: userId } });
 }
 
 /* ------------------------------------------------------------------ *
@@ -142,11 +157,11 @@ export async function updateRequestStatus(
   actorId: string,
   note?: string,
 ) {
-  if (!isRequestStatus(status)) throw new Error("Statut invalide.");
+  if (!isRequestStatus(status)) throw new PublicError("Statut invalide.");
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.serviceRequest.findUnique({ where: { id: requestId } });
-    if (!current) throw new Error("Demande introuvable.");
+    if (!current) throw new PublicError("Demande introuvable.");
 
     const updated = await tx.serviceRequest.update({
       where: { id: requestId },
@@ -441,11 +456,11 @@ export async function updateReportStatus(
   actorId: string,
   note?: string,
 ) {
-  if (!isReportStatus(status)) throw new Error("Statut invalide.");
+  if (!isReportStatus(status)) throw new PublicError("Statut invalide.");
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.report.findUnique({ where: { id: reportId } });
-    if (!current) throw new Error("Incident introuvable.");
+    if (!current) throw new PublicError("Incident introuvable.");
 
     const updated = await tx.report.update({
       where: { id: reportId },
@@ -514,7 +529,7 @@ export async function createOrder(
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  if (!isOrderStatus(status)) throw new Error("Statut de commande invalide.");
+  if (!isOrderStatus(status)) throw new PublicError("Statut de commande invalide.");
   return prisma.order.update({ where: { id: orderId }, data: { status } });
 }
 
@@ -544,13 +559,13 @@ export async function createAppointment(
 ) {
   return prisma.$transaction(async (tx) => {
     const service = await tx.municipalService.findUnique({ where: { id: input.serviceId } });
-    if (!service) throw new Error("Service introuvable.");
+    if (!service) throw new PublicError("Service introuvable.");
 
     // Authoritative re-check: never allow a double-booking of the same slot.
     const clash = await tx.appointment.findFirst({
       where: { serviceId: service.id, status: "BOOKED", date: input.date },
     });
-    if (clash) throw new Error("Ce créneau vient d'être réservé.");
+    if (clash) throw new PublicError("Ce créneau vient d'être réservé.");
 
     const count = await tx.appointment.count();
     const reference = `APT-${String(count + 1).padStart(4, "0")}`;
@@ -586,8 +601,8 @@ export async function cancelAppointment(id: string, citizenId: string) {
   const appointment = await prisma.appointment.findFirst({
     where: { id, citizenId },
   });
-  if (!appointment) throw new Error("Rendez-vous introuvable.");
-  if (appointment.status !== "BOOKED") throw new Error("Ce rendez-vous ne peut plus être annulé.");
+  if (!appointment) throw new PublicError("Rendez-vous introuvable.");
+  if (appointment.status !== "BOOKED") throw new PublicError("Ce rendez-vous ne peut plus être annulé.");
 
   return prisma.$transaction(async (tx) => {
     const cancelled = await tx.appointment.update({

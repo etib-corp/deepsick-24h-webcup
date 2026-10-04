@@ -11,6 +11,7 @@ import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 import { isReportType } from "@/lib/roles";
+import { getSecurityStats } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,11 @@ export function generateMetadata(): Metadata {
 export default async function CouncilPage() {
   const t = getDictionary();
   await requirePageRole(["COUNCIL"]);
-  const [stats, reports] = await Promise.all([getCouncilStats(), getReports()]);
+  const [stats, reports, security] = await Promise.all([
+    getCouncilStats(),
+    getReports(),
+    getSecurityStats(),
+  ]);
 
   const byType = reports.reduce<Record<string, number>>((acc, report) => {
     acc[report.type] = (acc[report.type] ?? 0) + 1;
@@ -86,6 +91,36 @@ export default async function CouncilPage() {
               className="rounded-md border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-foreground"
             >
               {isReportType(type) ? t.reportType[type] : type} · {count}
+            </span>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <SectionHeader
+          title={t.council.security.title}
+          action={
+            <Link
+              href="/council/security"
+              className="font-mono text-[11px] uppercase tracking-wide text-primary hover:underline"
+            >
+              {t.council.security.open}
+            </Link>
+          }
+        />
+        <p className="text-sm text-muted-foreground">{t.council.security.overviewHint}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {[
+            { label: t.council.security.blocked, value: security.blocked },
+            { label: t.council.security.denied, value: security.denied },
+            { label: t.council.security.neutralized, value: security.neutralized },
+            { label: t.council.security.traced, value: security.traced },
+          ].map((item) => (
+            <span
+              key={item.label}
+              className="rounded-md border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-foreground"
+            >
+              {item.label} · {item.value}
             </span>
           ))}
         </div>

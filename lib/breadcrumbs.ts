@@ -30,6 +30,7 @@ export function getBreadcrumbs(
     "/citizen/appointments": appointments.label,
     "/citizen/map": t.citizen.map.title,
     "/citizen/notifications": t.citizen.notifications.title,
+    "/citizen/account": t.citizen.account.title,
   };
   const councilPages: Record<string, string> = {
     "/council/services": t.council.services.title,

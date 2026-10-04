@@ -37,9 +37,12 @@ export function IncidentConsole({
   const [chip, setChip] = useState<Chip>("ACTION");
   const router = useRouter();
 
-  // Short polling (~5 s) so the console stays live during the demo.
+  // Short polling (~5 s) so the console stays live during the demo. Skipped
+  // while the tab is hidden so background tabs never do heavy work.
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 5000);
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 5000);
     return () => clearInterval(interval);
   }, [router]);
 

@@ -42,16 +42,21 @@ export default async function CitizenDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          {format(t.citizen.dashboard.colonStatus, { id: session.user.id.slice(-6).toUpperCase() })}
-        </p>
-        <div className="mt-1 flex items-center gap-2">
-          <h1 className="font-mono text-xl text-foreground">
-            {format(t.citizen.dashboard.greeting, { name: firstName })}
-          </h1>
-          <Badge tone="info">{t.citizen.dashboard.tier}</Badge>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            {format(t.citizen.dashboard.colonStatus, { id: session.user.id.slice(-6).toUpperCase() })}
+          </p>
+          <div className="mt-1 flex items-center gap-2">
+            <h1 className="font-mono text-xl text-foreground">
+              {format(t.citizen.dashboard.greeting, { name: firstName })}
+            </h1>
+            <Badge tone="info">{t.citizen.dashboard.tier}</Badge>
+          </div>
         </div>
+        <a href="/api/citizen/recap" download className={buttonClasses("secondary", "sm")}>
+          {t.citizen.recap.download}
+        </a>
       </header>
 
       <div className="grid grid-cols-3 gap-3" data-tour="citizen-stats">

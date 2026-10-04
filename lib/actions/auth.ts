@@ -4,16 +4,19 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import type { ActionState } from "@/lib/action-state";
-import { getDictionary } from "@/lib/i18n/server";
+
 import { normalizeIdentifier } from "@/lib/identity";
-import { getClientIp, getThrottleStatus } from "@/lib/login-throttle";
+import { getClientIp, getThrottleStatus, normalizeEmail } from "@/lib/login-throttle";
 import { RegistrationError, registerCitizen } from "@/lib/services";
-import { buildRegisterSchema, firstError } from "@/lib/validation";
+import { buildRegisterSchema, firstError, registerSchema } from "@/lib/validation";
 
 function formText(formData: FormData, key: string): string | undefined {
   const value = formData.get(key);
   return typeof value === "string" ? value : undefined;
 }
+import { userMessage } from "@/lib/errors";
+import { getDictionary } from "@/lib/i18n/server";
+import { auditNeutralizedInputs } from "@/lib/security";
 
 export async function registerAction(
   _previous: ActionState,
@@ -33,6 +36,11 @@ export async function registerAction(
   if (!parsed.success) {
     return { ok: false, message: firstError(parsed.error) };
   }
+
+  await auditNeutralizedInputs(
+    { name: formData.get("name"), email: formData.get("email") },
+    "inscription",
+  );
 
   try {
     await registerCitizen({
