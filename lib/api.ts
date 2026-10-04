@@ -7,3 +7,12 @@ export function authErrorResponse(error: "unauthorized" | "forbidden") {
     { status: error === "unauthorized" ? 401 : 403 },
   );
 }
+
+/**
+ * Generic failure for route handlers. The technical error stays in the server
+ * logs — never in the response — so a failure cannot leak internals.
+ */
+export function serverErrorResponse(context: string, error?: unknown) {
+  console.error(`[api] ${context}`, error);
+  return NextResponse.json({ error: "Une erreur interne est survenue." }, { status: 500 });
+}
