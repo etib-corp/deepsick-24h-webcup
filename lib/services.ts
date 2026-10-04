@@ -41,6 +41,14 @@ export async function setUserRole(userId: string, role: string) {
   return { user, previousRole: current.role };
 }
 
+/**
+ * Permanently delete a user account. Citizens own no staff-only rows (e.g.
+ * `PoliceCase`), so every remaining relation cascades or set-nulls cleanly.
+ */
+export async function deleteAccount(userId: string) {
+  return prisma.user.delete({ where: { id: userId } });
+}
+
 /* ------------------------------------------------------------------ *
  * Contact (D04)
  * ------------------------------------------------------------------ */

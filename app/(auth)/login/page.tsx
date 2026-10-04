@@ -10,7 +10,12 @@ export function generateMetadata(): Metadata {
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { inscription?: string };
+  searchParams: { inscription?: string; deleted?: string };
 }) {
-  return <LoginForm registered={searchParams.inscription === "1"} />;
+  return (
+    <LoginForm
+      registered={searchParams.inscription === "1"}
+      deleted={searchParams.deleted === "1"}
+    />
+  );
 }

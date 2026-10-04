@@ -14,7 +14,7 @@ import { format } from "@/lib/i18n/format";
 import { useT } from "@/lib/i18n/client";
 import { homeForRole } from "@/lib/roles";
 
-export function LoginForm({ registered = false }: { registered?: boolean }) {
+export function LoginForm({ registered = false, deleted = false }: { registered?: boolean; deleted?: boolean }) {
   const t = useT();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +102,8 @@ export function LoginForm({ registered = false }: { registered?: boolean }) {
       </div>
 
       {registered ? <Alert tone="success">{t.auth.login.registered}</Alert> : null}
+      {deleted ? <Alert tone="success">{t.auth.login.deleted}</Alert> : null}
+      {error ? <Alert tone="error">{error}</Alert> : null}
       {locked ? (
         <Alert tone="error">
           {format(t.auth.login.tooManyAttempts, {
