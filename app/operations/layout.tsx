@@ -42,6 +42,7 @@ export default async function OperationsLayout({ children }: { children: React.R
           label: t.council.consultations.title,
           icon: "🗣️",
         },
+        { href: "/operations/report", label: t.report.nav, icon: "📊" },
       ],
     },
     COUNCIL: {
