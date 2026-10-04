@@ -494,7 +494,7 @@ model LoginAttempt {
 // allow after-the-fact analysis; rows are never updated or deleted by the app.
 model SecurityEvent {
   id         String   @id @default(cuid())
-  type       String // LOGIN_FAILED | LOGIN_BLOCKED | ACCESS_DENIED | ROLE_CHANGED | CONTENT_CHANGED | REQUEST_STATUS_CHANGED | REPORT_STATUS_CHANGED | ORDER_STATUS_CHANGED | RECORD_ASSIGNED | CASE_FILED | INPUT_NEUTRALIZED | FORM_BLOCKED
+  type       String // LOGIN_FAILED | LOGIN_BLOCKED | ACCESS_DENIED | ROLE_CHANGED | CONTENT_CHANGED | REQUEST_STATUS_CHANGED | REPORT_STATUS_CHANGED | ORDER_STATUS_CHANGED | RECORD_ASSIGNED | CASE_FILED | INPUT_NEUTRALIZED | FORM_BLOCKED | ANOMALY_DETECTED | ALERT_REVIEWED
   outcome    String   @default("INFO") // INFO | SUCCESS | DENIED | FLAGGED
   actorId    String?
   actorRole  String?
@@ -507,6 +507,31 @@ model SecurityEvent {
 
   @@index([type, createdAt])
   @@index([createdAt])
+}
+
+// Correlated security alerts produced by the automatic sentinel (F85): unusual
+// activity bursts / baseline spikes over `SecurityEvent`, plus inconsistent
+// records. Deduplicated by `fingerprint`; reviewed by the High Council and the
+// security station. Auto-resolved when the underlying condition disappears.
+model SecurityAlert {
+  id           String    @id @default(cuid())
+  fingerprint  String    @unique // kind:rule:sourceType:sourceId
+  kind         String // ANOMALY | INCONSISTENCY
+  rule         String // e.g. BURST_LOGIN_FAILED, REQUEST_STATUS_MISMATCH
+  severity     String    @default("WARNING") // INFO | WARNING | CRITICAL
+  status       String    @default("OPEN") // OPEN | REVIEWED | RESOLVED
+  title        String
+  detail       String?   @db.Text
+  sourceType   String? // ip | actor | request | report | appointment | announcement
+  sourceId     String?
+  detectedAt   DateTime  @default(now())
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, severity, detectedAt])
+  @@index([kind, detectedAt])
 }
 
 // Anti-bot ledger for public forms (F81). The primary key is the random nonce

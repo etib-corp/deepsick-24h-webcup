@@ -205,3 +205,41 @@ export function toTicketRow(ticket: TicketLike): TicketRowDto {
     updatedAt: ticket.updatedAt.toISOString(),
   };
 }
+
+export type SecurityAlertDto = {
+  id: string;
+  kind: string;
+  rule: string;
+  severity: string;
+  status: string;
+  detail: string | null;
+  sourceType: string | null;
+  sourceId: string | null;
+  detectedAt: string;
+};
+
+type SecurityAlertLike = {
+  id: string;
+  kind: string;
+  rule: string;
+  severity: string;
+  status: string;
+  detail: string | null;
+  sourceType: string | null;
+  sourceId: string | null;
+  detectedAt: Date;
+};
+
+export function toSecurityAlertDto(alert: SecurityAlertLike): SecurityAlertDto {
+  return {
+    id: alert.id,
+    kind: alert.kind,
+    rule: alert.rule,
+    severity: alert.severity,
+    status: alert.status,
+    detail: alert.detail,
+    sourceType: alert.sourceType,
+    sourceId: alert.sourceId,
+    detectedAt: alert.detectedAt.toISOString(),
+  };
+}

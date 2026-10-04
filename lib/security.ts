@@ -31,6 +31,8 @@ export const SECURITY_EVENT_TYPES = [
   "CASE_FILED",
   "INPUT_NEUTRALIZED",
   "FORM_BLOCKED",
+  "ANOMALY_DETECTED",
+  "ALERT_REVIEWED",
 ] as const;
 export type SecurityEventType = (typeof SECURITY_EVENT_TYPES)[number];
 
