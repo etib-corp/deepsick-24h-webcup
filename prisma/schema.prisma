@@ -20,7 +20,10 @@ datasource db {
 model User {
   id              String           @id @default(cuid())
   name            String?
-  email           String           @unique
+  // New arrivals may not have an email address (F71): sign-in then uses
+  // `username` — the colon identifier (see `lib/identity.ts`).
+  email           String?          @unique
+  username        String?          @unique
   passwordHash    String?
   image           String?
   // CITIZEN | SECURITY | MEDIC | MAINTENANCE | DRIVER | MERCHANT | ADMIN_AGENT | COUNCIL
@@ -384,7 +387,7 @@ model LoginAttempt {
 // allow after-the-fact analysis; rows are never updated or deleted by the app.
 model SecurityEvent {
   id         String   @id @default(cuid())
-  type       String // LOGIN_FAILED | LOGIN_BLOCKED | ACCESS_DENIED | ROLE_CHANGED | CONTENT_CHANGED | REQUEST_STATUS_CHANGED | REPORT_STATUS_CHANGED | ORDER_STATUS_CHANGED | RECORD_ASSIGNED | CASE_FILED | INPUT_NEUTRALIZED
+  type       String // LOGIN_FAILED | LOGIN_BLOCKED | ACCESS_DENIED | ROLE_CHANGED | CONTENT_CHANGED | REQUEST_STATUS_CHANGED | REPORT_STATUS_CHANGED | ORDER_STATUS_CHANGED | RECORD_ASSIGNED | CASE_FILED | INPUT_NEUTRALIZED | FORM_BLOCKED
   outcome    String   @default("INFO") // INFO | SUCCESS | DENIED | FLAGGED
   actorId    String?
   actorRole  String?
@@ -396,5 +399,21 @@ model SecurityEvent {
   createdAt  DateTime @default(now())
 
   @@index([type, createdAt])
+  @@index([createdAt])
+}
+
+// Anti-bot ledger for public forms (F81). The primary key is the random nonce
+// carried by the signed form challenge: a submission stores its nonce as
+// CONSUMED (accepted) or BLOCKED (refused), so replaying a blocked payload —
+// or reusing an accepted challenge — is refused for good. `ip` backs the
+// per-address rate limit; rows older than the challenge TTL are pruned.
+model BotGuardToken {
+  nonce     String   @id
+  form      String // contact | register | login
+  status    String // CONSUMED | BLOCKED
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([ip, form, createdAt])
   @@index([createdAt])
 }

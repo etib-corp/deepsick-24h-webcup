@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { authErrorResponse, serverErrorResponse } from "@/lib/api";
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return serverErrorResponse("services.create", error);
   }
+  revalidateTag("public-services");
 
   await recordSecurityEvent({
     type: "CONTENT_CHANGED",

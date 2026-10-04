@@ -9,19 +9,26 @@ import type { MapService } from "@/lib/map-layout";
 
 function ServiceCard({ service, featured = false }: { service: MapService; featured?: boolean }) {
   const t = useT();
+  const unavailable = !service.published;
   return (
     <Link key={service.id} href={`/services/${service.slug}`} className="group">
       <Card
         className={
-          featured
-            ? "h-full border-primary/40 bg-primary/5 transition group-hover:border-primary/70"
-            : "h-full transition group-hover:border-primary/50"
+          unavailable
+            ? "h-full border-dashed border-warning/50 bg-card/60 opacity-80 transition group-hover:border-warning"
+            : featured
+              ? "h-full border-primary/40 bg-primary/5 transition group-hover:border-primary/70"
+              : "h-full transition group-hover:border-primary/50"
         }
       >
         <div className="flex items-center gap-2">
           <span aria-hidden>{service.icon ?? "🏛️"}</span>
           <h3 className="font-mono text-sm text-foreground">{service.name}</h3>
-          {featured ? <Badge tone="mars">{t.publicPages.services.featuredBadge}</Badge> : null}
+          {unavailable ? (
+            <Badge tone="danger">{t.publicPages.services.unavailableBadge}</Badge>
+          ) : featured ? (
+            <Badge tone="mars">{t.publicPages.services.featuredBadge}</Badge>
+          ) : null}
         </div>
         <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
           {service.description}

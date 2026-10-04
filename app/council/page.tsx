@@ -114,6 +114,7 @@ export default async function CouncilPage() {
             { label: t.council.security.blocked, value: security.blocked },
             { label: t.council.security.denied, value: security.denied },
             { label: t.council.security.neutralized, value: security.neutralized },
+            { label: t.council.security.formBlocked, value: security.formBlocked },
             { label: t.council.security.traced, value: security.traced },
           ].map((item) => (
             <span

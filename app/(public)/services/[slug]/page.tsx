@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { buttonClasses } from "@/components/ui/Button";
+import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { getPublishedServices, getServiceBySlug } from "@/lib/data";
+import { getOtherPublishedServices, getServiceBySlug } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -21,11 +22,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ServiceDetailPage({ params }: Params) {
   const t = getDictionary();
   const service = await getServiceBySlug(params.slug);
-  if (!service || !service.published) notFound();
+  if (!service) notFound();
 
-  const otherServices = (await getPublishedServices())
-    .filter((item) => item.id !== service.id)
-    .slice(0, 3);
+  const otherServices = await getOtherPublishedServices(service.id);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -46,27 +45,41 @@ export default async function ServiceDetailPage({ params }: Params) {
           ) : null}
           <h1 className="mt-1 flex flex-wrap items-center gap-2 font-mono text-3xl text-foreground">
             {service.name}
-            {service.featured ? (
+            {!service.published ? (
+              <Badge tone="danger">{t.publicPages.services.unavailableBadge}</Badge>
+            ) : service.featured ? (
               <Badge tone="mars">{t.publicPages.services.featuredBadge}</Badge>
             ) : null}
           </h1>
         </div>
       </header>
 
+      {!service.published ? (
+        <Alert tone="error" title={t.publicPages.services.unavailableTitle} className="mt-6">
+          {t.publicPages.services.unavailableBody}
+        </Alert>
+      ) : null}
+
       <p className="mt-6 whitespace-pre-line text-muted-foreground">{service.description}</p>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/citizen/report" className={buttonClasses("primary")}>
-          {t.publicPages.services.createRequest}
-        </Link>
-        <Link
-          href={`/citizen/appointments/nouveau?service=${service.id}`}
-          className={buttonClasses("secondary")}
-        >
-          {t.publicPages.services.bookAppointment}
-        </Link>
+        {service.published ? (
+          <>
+            <Link href="/citizen/report" className={buttonClasses("primary")}>
+              {t.publicPages.services.createRequest}
+            </Link>
+            <Link
+              href={`/citizen/appointments/nouveau?service=${service.id}`}
+              className={buttonClasses("secondary")}
+            >
+              {t.publicPages.services.bookAppointment}
+            </Link>
+          </>
+        ) : null}
         <Link href="/contact" className={buttonClasses("secondary")}>
-          {t.publicPages.services.askQuestion}
+          {service.published
+            ? t.publicPages.services.askQuestion
+            : t.publicPages.services.unavailableAction}
         </Link>
       </div>
 

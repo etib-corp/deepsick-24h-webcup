@@ -59,6 +59,7 @@ export const TICKET_TITLES: Record<string, string> = {
   D09: "Permissions / accès différenciés",
   D19: "Espace agents avec vue sur les données API",
   F22: "Vue des demandes habitants avec états",
+  F71: "Nouveaux arrivants : accès sans e-mail et multilingue",
 };
 
 export function ticketTitle(code: string, message: string): string {

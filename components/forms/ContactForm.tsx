@@ -2,6 +2,8 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 
+import { BotGuardFields } from "@/components/forms/BotGuardFields";
+import { BotGuardNotice } from "@/components/forms/BotGuardNotice";
 import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -20,7 +22,7 @@ function SubmitButton() {
   );
 }
 
-export function ContactForm() {
+export function ContactForm({ botToken }: { botToken: string }) {
   const t = useT();
   const [state, formAction] = useFormState(contactAction, initialActionState);
 
@@ -41,6 +43,7 @@ export function ContactForm() {
 
   return (
     <SubmissionForm action={formAction} className="space-y-4">
+      <BotGuardFields form="contact" token={botToken} />
       {state.message ? <Alert tone="error">{state.message}</Alert> : null}
 
       <Field label={t.publicPages.contact.subject} htmlFor="subject">
@@ -72,6 +75,7 @@ export function ContactForm() {
       </Field>
 
       <SubmitButton />
+      <BotGuardNotice />
     </SubmissionForm>
   );
 }

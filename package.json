@@ -5,8 +5,10 @@
   "description": "Nova Terra — citizen services platform (24h Webcup)",
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma migrate deploy && next build",
+    "build": "npx prisma migrate deploy && npx prisma generate && next build",
     "start": "next start",
+    "test:f78": "node --require ./scripts/f78-test-env.cjs --import tsx --test tests/f78.test.ts tests/coalesce.test.ts tests/breadcrumbs.test.ts",
+    "benchmark:f78": "node --require ./scripts/f78-test-env.cjs --import tsx scripts/benchmark-f78.ts",
     "db:migrate": "npx prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",

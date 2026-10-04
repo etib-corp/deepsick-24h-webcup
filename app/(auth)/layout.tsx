@@ -1,4 +1,5 @@
 import { getDictionary } from "@/lib/i18n/server";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { ColonyScene } from "@/components/colony/ColonyScene";
 import { Logo } from "@/components/layout/Logo";
@@ -20,7 +21,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </Reveal>
         </div>
 
-        <div className="flex items-center justify-center px-4 py-12">
+        <div className="relative flex items-center justify-center px-4 py-12">
+          {/* New arrivals may not read the current language (F71): switch here,
+              mid-journey, without losing what is already typed in the form. */}
+          <div className="absolute right-4 top-4 z-10">
+            <LocaleSwitcher />
+          </div>
           <Reveal self delay={120} className="w-full max-w-md">
             <div className="mb-6 lg:hidden">
               <Logo />

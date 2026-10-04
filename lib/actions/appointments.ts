@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { ActionState } from "@/lib/action-state";
+import { getServiceById } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 import {
@@ -49,6 +50,11 @@ export async function createAppointmentAction(
 
   let reference: string;
   try {
+    const service = await getServiceById(parsed.data.serviceId);
+    if (!service || !service.published) {
+      return { ok: false, message: t.errors.serviceUnavailable };
+    }
+
     if (await isAppointmentSlotTaken(parsed.data.serviceId, date)) {
       return { ok: false, message: t.errors.appointmentSlotTaken };
     }

@@ -12,6 +12,7 @@ export type MapService = {
   icon: string | null;
   sector: string | null;
   featured: boolean;
+  published: boolean;
   x: number;
   y: number;
   /** True when the service has a real spot on the artwork. */
@@ -26,6 +27,7 @@ type ServiceInput = {
   category: string | null;
   icon: string | null;
   featured?: boolean | null;
+  published?: boolean | null;
   mapX?: number | null;
   mapY?: number | null;
   sector?: string | null;
@@ -67,6 +69,7 @@ export function buildMapServices(services: ServiceInput[]): MapService[] {
       icon: service.icon,
       sector,
       featured: service.featured ?? false,
+      published: service.published ?? true,
       x,
       y,
       mapped: anyCoords ? hasCoords : true,

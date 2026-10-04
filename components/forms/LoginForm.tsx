@@ -6,17 +6,29 @@ import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { Fingerprint, IdCard, LockKeyhole } from "lucide-react";
 
+import { BotGuardFields } from "@/components/forms/BotGuardFields";
+import { BotGuardNotice } from "@/components/forms/BotGuardNotice";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
 import { loginThrottleStatusAction } from "@/lib/actions/auth";
+import { BOT_TRAP_FIELD } from "@/lib/bot-fields";
 import { format } from "@/lib/i18n/format";
 import { useT } from "@/lib/i18n/client";
 import { homeForRole } from "@/lib/roles";
 
-export function LoginForm({ registered = false, deleted = false }: { registered?: boolean; deleted?: boolean }) {
+export function LoginForm({
+  botToken,
+  registered = false,
+  deleted = false,
+}: {
+  botToken: string;
+  registered?: boolean;
+  deleted?: boolean;
+}) {
   const t = useT();
   const router = useRouter();
+
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
@@ -24,21 +36,40 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
 
   useEffect(() => {
     if (!lockedUntil) return;
+
     const tick = () => {
-      const remaining = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
+      const remaining = Math.max(
+        0,
+        Math.ceil((lockedUntil - Date.now()) / 1000),
+      );
+
       setSecondsLeft(remaining);
-      if (remaining <= 0) setLockedUntil(null);
+
+      if (remaining <= 0) {
+        setLockedUntil(null);
+      }
     };
+
     tick();
+
     const id = setInterval(tick, 1000);
+
     return () => clearInterval(id);
   }, [lockedUntil]);
 
   const locked = secondsLeft > 0;
 
   const tabs = [
-    { href: "/login", label: t.auth.loginTab, active: true },
-    { href: "/register", label: t.auth.registerTab, active: false },
+    {
+      href: "/login",
+      label: t.auth.loginTab,
+      active: true,
+    },
+    {
+      href: "/register",
+      label: t.auth.registerTab,
+      active: false,
+    },
   ];
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -47,8 +78,9 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "");
+    const identifier = String(formData.get("identifier") ?? "");
     const password = String(formData.get("password") ?? "");
+    const botWebsite = String(formData.get(BOT_TRAP_FIELD) ?? "");
 
     const throttle = await loginThrottleStatusAction({ email });
     if (throttle.locked) {
@@ -57,9 +89,27 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
       return;
     }
 
-    const result = await signIn("credentials", { redirect: false, email, password });
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      // F81 — the signed challenge and honeypot travel with the credentials;
+      // `authorize` refuses the attempt when they fail (and traces it).
+      botToken,
+      botWebsite,
+    });
 
     if (!result || result.error) {
+      if (result?.error === "BOT_GUARD_EXPIRED") {
+        setError(t.errors.botExpired);
+        setPending(false);
+        return;
+      }
+      if (result?.error === "BOT_GUARD_BLOCKED") {
+        setError(t.errors.botBlocked);
+        setPending(false);
+        return;
+      }
       // A failure may have just pushed us over the limit; surface it clearly.
       const after = await loginThrottleStatusAction({ email });
       if (after.locked) {
@@ -67,13 +117,34 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
       } else {
         setError(t.auth.login.invalid);
       }
-      setPending(false);
-      return;
-    }
+      const result = await signIn("credentials", {
+        redirect: false,
+        identifier,
+        password,
+      });
+      if (!result || result.error) {
+        // Une tentative échouée peut déclencher le verrouillage.
+        const after = await loginThrottleStatusAction({
+          identifier,
+        });
+        if (after.locked) {
+          setLockedUntil(
+            Date.now() + after.retryAfterSeconds * 1000,
+          );
+        } else {
+          setError(t.auth.login.invalid);
+        }
+        return;
+      }
+      const session = await getSession();
 
-    const session = await getSession();
-    router.push(homeForRole(session?.user?.role));
-    router.refresh();
+      router.push(homeForRole(session?.user?.role));
+      router.refresh();
+    } catch {
+      setError(t.auth.login.unavailable);
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -83,8 +154,13 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
       </span>
 
       <header>
-        <h1 className="font-mono text-2xl leading-tight text-foreground">{t.auth.login.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.auth.login.subtitle}</p>
+        <h1 className="font-mono text-2xl leading-tight text-foreground">
+          {t.auth.login.title}
+        </h1>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t.auth.login.subtitle}
+        </p>
       </header>
 
       <div className="grid grid-cols-2 rounded-lg border border-border p-1">
@@ -93,7 +169,9 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
             key={tab.href}
             href={tab.href}
             className={`rounded-md py-2 text-center font-mono text-xs uppercase tracking-wide transition ${
-              tab.active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+              tab.active
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {tab.label}
@@ -101,38 +179,61 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
         ))}
       </div>
 
-      {registered ? <Alert tone="success">{t.auth.login.registered}</Alert> : null}
-      {deleted ? <Alert tone="success">{t.auth.login.deleted}</Alert> : null}
-      {error ? <Alert tone="error">{error}</Alert> : null}
+      {registered ? (
+        <Alert tone="success">
+          {t.auth.login.registered}
+        </Alert>
+      ) : null}
+
+      {deleted ? (
+        <Alert tone="success">
+          {t.auth.login.deleted}
+        </Alert>
+      ) : null}
+
       {locked ? (
         <Alert tone="error">
           {format(t.auth.login.tooManyAttempts, {
-            minutes: Math.max(1, Math.ceil(secondsLeft / 60)),
+            minutes: Math.max(
+              1,
+              Math.ceil(secondsLeft / 60),
+            ),
           })}
         </Alert>
       ) : error ? (
-        <Alert tone="error">{error}</Alert>
+        <Alert tone="error">
+          {error}
+        </Alert>
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label={t.auth.login.identifier} htmlFor="email">
+        <BotGuardFields form="login" token={botToken} />
+        <Field
+          label={t.auth.login.identifier}
+          htmlFor="identifier"
+          hint={t.auth.login.identifierHint}
+        >
           <div className="relative">
             <IdCard className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              id="email"
-              name="email"
-              type="email"
+              id="identifier"
+              name="identifier"
+              type="text"
               required
-              autoComplete="email"
-              placeholder="AK-2048-TRN"
+              autoComplete="username"
+              placeholder="elodie.martin"
               className="pl-9"
             />
           </div>
         </Field>
 
-        <Field label={t.auth.login.password} htmlFor="password">
+        <Field
+          label={t.auth.login.password}
+          htmlFor="password"
+        >
           <div className="relative">
             <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
             <Input
               id="password"
               name="password"
@@ -144,10 +245,13 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
             />
           </div>
         </Field>
-
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <input type="checkbox" className="size-4 accent-primary" />
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+            />
+
             {t.auth.login.trust}
           </label>
           <span className="font-mono text-[11px] uppercase tracking-wide text-[var(--info)]">
@@ -155,31 +259,52 @@ export function LoginForm({ registered = false, deleted = false }: { registered?
           </span>
         </div>
 
-        <Button type="submit" disabled={pending || locked} className="w-full">
-          {pending ? t.auth.login.submitting : t.auth.login.submit}
+        <Button
+          type="submit"
+          disabled={pending || locked}
+          className="w-full"
+        >
+          {pending
+            ? t.auth.login.submitting
+            : t.auth.login.submit}
         </Button>
+        <BotGuardNotice />
       </form>
-
       <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         <span className="h-px flex-1 bg-border" />
         {t.auth.login.or}
         <span className="h-px flex-1 bg-border" />
       </div>
-
-      <Button type="button" variant="secondary" className="w-full" disabled>
+      <Button
+        type="button"
+        variant="secondary"
+        className="w-full"
+        disabled
+      >
         <Fingerprint data-icon="inline-start" />
         {t.auth.login.biometric}
       </Button>
-
       <p className="rounded-lg border border-border bg-card p-3 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
         {t.auth.login.session}
       </p>
-
       <div className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
-        <p className="font-mono uppercase tracking-wide text-foreground">{t.auth.demo.title}</p>
-        <p className="mt-1">citoyen@terranova.fr · securite@terranova.fr · medical@terranova.fr · conseil@terranova.fr</p>
-        <p className="mt-0.5">maintenance@ · transport@ · commerce@ · administration@terranova.fr</p>
-        <p className="mt-0.5">{t.auth.demo.password}</p>
+        <p className="font-mono uppercase tracking-wide text-foreground">
+          {t.auth.demo.title}
+        </p>
+        <p className="mt-1">
+          citoyen@terranova.fr · securite@terranova.fr ·
+          medical@terranova.fr · conseil@terranova.fr
+        </p>
+        <p className="mt-0.5">
+          maintenance@ · transport@ · commerce@ ·
+          administration@terranova.fr
+        </p>
+        <p className="mt-0.5">
+          {t.auth.demo.noEmail}
+        </p>
+        <p className="mt-0.5">
+          {t.auth.demo.password}
+        </p>
       </div>
     </div>
   );

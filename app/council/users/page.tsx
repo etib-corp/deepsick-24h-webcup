@@ -56,7 +56,9 @@ export default async function CouncilUsersPage() {
                     <input type="hidden" name="userId" value={user.id} />
                     <select
                       name="role"
-                      aria-label={format(t.accessibility.roleFor, { name: user.name ?? user.email })}
+                      aria-label={format(t.accessibility.roleFor, {
+                        name: user.name ?? user.email ?? user.username ?? t.council.users.unnamed,
+                      })}
                       defaultValue={user.role}
                       className="h-8 w-auto rounded-md border border-input bg-transparent px-2 font-mono text-xs text-foreground"
                     >

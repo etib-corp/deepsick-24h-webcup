@@ -1,5 +1,5 @@
 import { IncidentConsole } from "@/components/colony/IncidentConsole";
-import { getReports } from "@/lib/data";
+import { getIncidentReports } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 import { toReportRow } from "@/lib/serialize";
@@ -25,11 +25,8 @@ export async function IncidentStation({ type }: { type: ReportType }) {
   const t = getDictionary();
   await requirePageRole([ROLES[type], "COUNCIL"]);
 
-  const all = await getReports();
-  const reports = all.filter((report) =>
-    type === "MAINTENANCE"
-      ? report.type === "MAINTENANCE" || report.type === "CLEANLINESS"
-      : report.type === type,
+  const reports = await getIncidentReports(
+    type === "MAINTENANCE" ? ["MAINTENANCE", "CLEANLINESS"] : [type],
   );
 
   const copy =

@@ -13,6 +13,7 @@ export type ColonyMapNode = {
   sector?: string | null;
   description?: string;
   featured?: boolean;
+  unavailable?: boolean;
   x: number;
   y: number;
   href: string;
@@ -78,18 +79,24 @@ export function ColonyMap({
                 className={cn(
                   "absolute size-11 rounded-full border-2 transition",
                   isActive
-                    ? "border-primary opacity-100 motion-safe:animate-pulse"
+                    ? node.unavailable
+                      ? "border-destructive opacity-100 motion-safe:animate-pulse"
+                      : "border-primary opacity-100 motion-safe:animate-pulse"
                     : "border-transparent opacity-0",
                 )}
               />
               <span
                 className={cn(
-                  "absolute size-3 rounded-full bg-primary transition",
+                  "absolute size-3 rounded-full transition",
+                  node.unavailable ? "bg-destructive" : "bg-primary",
                   isActive ? "scale-100 opacity-100" : "scale-0 opacity-0",
                 )}
               />
-              {node.featured ? (
+              {node.featured && !node.unavailable ? (
                 <span className="absolute size-2 rounded-full border border-primary bg-primary/80" />
+              ) : null}
+              {node.unavailable ? (
+                <span className="absolute -right-1 -top-1 size-2.5 rounded-full border border-background bg-destructive" />
               ) : null}
               <span className="sr-only">{node.label}</span>
             </Link>

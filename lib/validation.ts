@@ -1,7 +1,52 @@
 import { z } from "zod";
 
+import { USERNAME_MAX, isValidUsername } from "@/lib/identity";
 import { OPINION_STANCES, REPORT_PRIORITIES, REPORT_TYPES, REQUEST_PRIORITIES } from "@/lib/roles";
 import { sanitizePlainText, sanitizeUrl } from "@/lib/sanitize";
+
+export type RegisterMessages = {
+  name: string;
+  identity: string;
+  email: string;
+  username: string;
+  password: string;
+};
+
+/**
+ * Register form validation (F71). Messages come from the active locale, and a
+ * resident may register with an email **or** a colon identifier — not
+ * necessarily both.
+ */
+export function buildRegisterSchema(messages: RegisterMessages) {
+  return z
+    .object({
+      name: z.string().trim().min(2, messages.name).max(80),
+      email: z
+        .union([z.literal(""), z.string().trim().email(messages.email).max(160)])
+        .optional(),
+      username: z.string().trim().max(USERNAME_MAX).optional(),
+      password: z.string().min(8, messages.password).max(100),
+    })
+    .superRefine((data, ctx) => {
+      const email = data.email ?? "";
+      const username = data.username ?? "";
+      if (!email && !username) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: messages.identity,
+          path: ["username"],
+        });
+        return;
+      }
+      if (username && !isValidUsername(username)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: messages.username,
+          path: ["username"],
+        });
+      }
+    });
+}
 
 /**
  * Bounded free text — trimmed and neutralised (markup and control characters

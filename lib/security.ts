@@ -28,6 +28,7 @@ export const SECURITY_EVENT_TYPES = [
   "RECORD_ASSIGNED",
   "CASE_FILED",
   "INPUT_NEUTRALIZED",
+  "FORM_BLOCKED",
 ] as const;
 export type SecurityEventType = (typeof SECURITY_EVENT_TYPES)[number];
 
@@ -135,7 +136,7 @@ export function getSecurityEvents(limit = 60) {
 /** Counts for the last 24 h, shown as tiles on the security console. */
 export async function getSecurityStats() {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const [blocked, denied, neutralized, traced] = await Promise.all([
+  const [blocked, denied, neutralized, traced, formBlocked] = await Promise.all([
     prisma.securityEvent.count({
       where: { type: "LOGIN_BLOCKED", createdAt: { gte: since } },
     }),
@@ -146,6 +147,9 @@ export async function getSecurityStats() {
     prisma.securityEvent.count({
       where: { outcome: { in: ["INFO", "SUCCESS"] }, createdAt: { gte: since } },
     }),
+    prisma.securityEvent.count({
+      where: { type: "FORM_BLOCKED", createdAt: { gte: since } },
+    }),
   ]);
-  return { blocked, denied, neutralized, traced };
+  return { blocked, denied, neutralized, traced, formBlocked };
 }

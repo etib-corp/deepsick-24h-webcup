@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
+import { DataExportCard } from "@/components/forms/DataExportCard";
 import { DeleteAccountForm } from "@/components/forms/DeleteAccountForm";
 import { Card } from "@/components/ui/Card";
+import { getCitizenDataCounts } from "@/lib/data-export";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 
@@ -14,6 +16,7 @@ export function generateMetadata(): Metadata {
 export default async function CitizenAccountPage() {
   const t = getDictionary();
   const session = await requirePageRole(["CITIZEN"]);
+  const exportSections = await getCitizenDataCounts(session.user.id, t);
 
   return (
     <div className="space-y-5">
@@ -37,6 +40,8 @@ export default async function CitizenAccountPage() {
           </div>
         </dl>
       </Card>
+
+      <DataExportCard sections={exportSections} />
 
       <Card className="space-y-3 border-destructive/40 p-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-destructive">

@@ -1,5 +1,9 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
+import type { Prisma } from "@prisma/client";
+import { coalesce } from "@/lib/coalesce";
 import { prisma } from "@/lib/prisma";
 import { ACTIONABLE_STATUSES, REPORT_ACTIONABLE } from "@/lib/roles";
 
@@ -7,11 +11,20 @@ import { ACTIONABLE_STATUSES, REPORT_ACTIONABLE } from "@/lib/roles";
  * Public content
  * ------------------------------------------------------------------ */
 
-export function getPublishedServices() {
+const readPublishedServices = unstable_cache(coalesce(async (limit?: number) => {
   return prisma.municipalService.findMany({
     where: { published: true },
     orderBy: [{ featured: "desc" }, { order: "asc" }, { name: "asc" }],
+    ...(limit === undefined ? {} : { take: limit }),
   });
+}), ["public-services"], { revalidate: 60, tags: ["public-services"] });
+
+export async function getPublishedServices(limit?: number) {
+  const services = await readPublishedServices(limit);
+  // Next's persistent cache uses JSON; preserve the Date contract on hits.
+  return services.map((service) => ({
+    ...service, createdAt: new Date(service.createdAt), updatedAt: new Date(service.updatedAt),
+  }));
 }
 
 export function getAllServices() {
@@ -20,8 +33,21 @@ export function getAllServices() {
   });
 }
 
-export function getServiceBySlug(slug: string) {
+export const getServiceBySlug = cache((slug: string) => {
   return prisma.municipalService.findUnique({ where: { slug } });
+});
+
+export function getOtherPublishedServices(id: string) {
+  return prisma.municipalService.findMany({
+    where: { published: true, id: { not: id } },
+    orderBy: [{ featured: "desc" }, { order: "asc" }, { name: "asc" }],
+    take: 3,
+    select: { id: true, slug: true, name: true, description: true },
+  });
+}
+
+export function getServiceById(id: string) {
+  return prisma.municipalService.findUnique({ where: { id } });
 }
 
 export function getPublishedAnnouncements() {
@@ -31,6 +57,24 @@ export function getPublishedAnnouncements() {
   });
 }
 
+const readAnnouncementSummaries = unstable_cache(coalesce(async (limit?: number) => {
+  return prisma.announcement.findMany({
+    where: { published: true },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    ...(limit === undefined ? {} : { take: limit }),
+    select: { id: true, slug: true, title: true, excerpt: true, publishedAt: true, createdAt: true },
+  });
+}), ["public-announcement-summaries"], { revalidate: 60, tags: ["public-announcements"] });
+
+export async function getPublishedAnnouncementSummaries(limit?: number) {
+  const announcements = await readAnnouncementSummaries(limit);
+  return announcements.map((announcement) => ({
+    ...announcement,
+    createdAt: new Date(announcement.createdAt),
+    publishedAt: announcement.publishedAt ? new Date(announcement.publishedAt) : null,
+  }));
+}
+
 export function getAllAnnouncements() {
   return prisma.announcement.findMany({
     orderBy: [{ createdAt: "desc" }],
@@ -38,12 +82,12 @@ export function getAllAnnouncements() {
   });
 }
 
-export function getAnnouncementBySlug(slug: string) {
+export const getAnnouncementBySlug = cache((slug: string) => {
   return prisma.announcement.findUnique({
     where: { slug },
     include: { author: { select: { name: true } } },
   });
-}
+});
 
 /* ------------------------------------------------------------------ *
  * Broadcasts (general announcements shown site-wide)
@@ -60,6 +104,7 @@ export function getActiveBroadcasts(now = new Date()) {
       ],
     },
     orderBy: [{ createdAt: "desc" }],
+    select: { id: true, title: true, message: true, actionLabel: true, actionHref: true },
   });
 }
 
@@ -190,7 +235,7 @@ export function getStaffRequests({ actionable = false } = {}) {
 export function getUsers() {
   return prisma.user.findMany({
     orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
+    select: { id: true, name: true, email: true, username: true, role: true, createdAt: true },
   });
 }
 
@@ -304,6 +349,20 @@ export function getReports(
       author: { select: { name: true, sector: true } },
       assignee: { select: { name: true } },
     },
+  });
+}
+
+/** Read exactly the fields the live incident board displays, for its unit only. */
+export function getIncidentReports(types: readonly string[]) {
+  return prisma.report.findMany({
+    where: { type: { in: [...types] } },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true, reference: true, type: true, title: true, priority: true,
+      status: true, sector: true, unit: true, createdAt: true,
+      author: { select: { name: true } },
+      assignee: { select: { name: true } },
+    } satisfies Prisma.ReportSelect,
   });
 }
 
@@ -452,4 +511,3 @@ export async function getCouncilStats() {
   ]);
   return { openReports, inProgress, services, announcements, users, orders };
 }
-
