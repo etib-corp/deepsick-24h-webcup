@@ -233,6 +233,14 @@ export async function setServiceFeatured(id: string, featured: boolean) {
   return prisma.municipalService.update({ where: { id }, data: { featured } });
 }
 
+/**
+ * F63 — enable or disable a service without deleting it. Existing appointments
+ * and requests are preserved; only availability changes.
+ */
+export async function setServicePublished(id: string, published: boolean) {
+  return prisma.municipalService.update({ where: { id }, data: { published } });
+}
+
 export async function deleteMunicipalService(id: string) {
   return prisma.municipalService.delete({ where: { id } });
 }
@@ -546,6 +554,8 @@ export async function createAppointment(
     await tx.$queryRaw`SELECT id FROM MunicipalService WHERE id = ${input.serviceId} FOR UPDATE`;
     const service = await tx.municipalService.findUnique({ where: { id: input.serviceId } });
     if (!service) throw new PublicError("Service introuvable.");
+    // F63 — a disabled service can never be booked, even via a stale link.
+    if (!service.published) throw new PublicError("Service indisponible.");
 
     // Authoritative re-check: never allow a double-booking of the same slot.
     const clash = await tx.appointment.findFirst({

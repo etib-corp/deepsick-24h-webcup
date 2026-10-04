@@ -46,6 +46,10 @@ export function getOtherPublishedServices(id: string) {
   });
 }
 
+export function getServiceById(id: string) {
+  return prisma.municipalService.findUnique({ where: { id } });
+}
+
 export function getPublishedAnnouncements() {
   return prisma.announcement.findMany({
     where: { published: true },

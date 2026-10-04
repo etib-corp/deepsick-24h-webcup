@@ -41,7 +41,7 @@ export const authOptions: NextAuthOptions = {
           await recordSecurityEvent({
             type: "LOGIN_BLOCKED",
             outcome: "DENIED",
-            detail: `Connexion bloquée · ${email}`,
+            detail: `Connexion bloquée · ${identifier}`,
             ip,
           });
           throw new Error("TOO_MANY_ATTEMPTS");
@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
           await recordSecurityEvent({
             type: "LOGIN_FAILED",
             outcome: "DENIED",
-            detail: `Échec de connexion · ${email}`,
+            detail: `Échec de connexion · ${identifier}`,
             ip,
           });
           return null;
