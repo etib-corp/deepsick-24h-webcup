@@ -43,8 +43,11 @@ export default async function LandingPage() {
     <div>
       {/* Hero — mirrors the desktop frame of the ui-v1 design.
           The scene keeps a dark sky on every theme, so its copy uses the
-          constant `scene-*` tokens instead of the theme's foreground/muted. */}
-      <section className="relative border-b border-border">
+          constant `scene-*` tokens instead of the theme's foreground/muted.
+          In lite mode the canvas is not rendered: `hero-scene` then remaps
+          those tokens to the page palette (see globals.css) so the copy stays
+          readable on light themes. */}
+      <section className="hero-scene relative border-b border-border">
         {lite ? null : <ColonyScene className="absolute inset-0" />}
         <div className="relative mx-auto flex min-h-[560px] max-w-6xl flex-col justify-between px-4 py-6">
           <Reveal self className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.3em]">

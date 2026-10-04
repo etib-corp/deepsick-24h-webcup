@@ -34,6 +34,13 @@ export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
     "police",
     "danger",
     "incident",
+    "bruit",
+    "nuisance",
+    "tapage",
+    "voisin",
+    "fumee",
+    "incendie",
+    "feu",
   ],
   medical: [
     "sante",
@@ -47,6 +54,10 @@ export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
     "hopital",
     "soin",
     "medical",
+    "secours",
+    "chute",
+    "medicament",
+    "infirmerie",
   ],
   maintenance: [
     "lampadaire",
@@ -61,6 +72,13 @@ export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
     "poubelle",
     "propre",
     "casse",
+    "chauffage",
+    "climatisation",
+    "clim",
+    "ascenseur",
+    "coupure",
+    "electricite",
+    "odeur",
   ],
   transport: [
     "transport",
@@ -74,6 +92,9 @@ export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
     "colis",
     "livraison",
     "conduire",
+    "retard",
+    "horaire",
+    "gare",
   ],
   commerce: [
     "repas",
@@ -81,7 +102,7 @@ export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
     "nourriture",
     "restaurant",
     "commerce",
-    "marche",
+    "marche couvert",
     "courses",
     "commander",
     "livraison",
@@ -99,8 +120,39 @@ export const ORIENTATION_KEYWORDS: Record<string, readonly string[]> = {
     "carte",
     "residence",
     "certificat",
+    "mairie",
+    "rendez-vous",
+    "accueil",
+    "guichet",
+  ],
+  associations: [
+    "association",
+    "activite",
+    "enfant",
+    "club",
+    "atelier",
+    "loisir",
+    "culture",
   ],
 };
+
+/**
+ * F92/D10 — idioms whose words would trigger unrelated keywords are removed
+ * before matching: “ça ne marche plus” must not point at the covered market
+ * (“marche couvert”), and “l'eau ne fonctionne pas” must stay a water issue.
+ * Operates on the already normalised (accent-less, lower-case) string.
+ */
+const IDIOM_PATTERNS = [
+  /(?:ne\s+)?(?:marche|fonctionne)(?:\s+(?:plus|pas|point))/g,
+  /(?:ne\s+)?s['’]?allume(?:\s+(?:plus|pas|point))/g,
+  /ne\s+(?:marche|fonctionne|s['’]?allume)/g,
+];
+
+export function stripQueryNoise(normalized: string): string {
+  let value = normalized;
+  for (const pattern of IDIOM_PATTERNS) value = value.replace(pattern, " ");
+  return value;
+}
 
 /** Lower-case, accent-less form. */
 function normalize(value: string): string {
@@ -126,8 +178,8 @@ export function orientServices(
   services: readonly OrientationService[],
   limit = 3,
 ): OrientationMatch[] {
-  const normalized = normalize(query);
-  const tokens = tokenize(query);
+  const normalized = stripQueryNoise(normalize(query));
+  const tokens = tokenize(normalized);
   if (tokens.length === 0) return [];
 
   const matches = services.map((service) => {

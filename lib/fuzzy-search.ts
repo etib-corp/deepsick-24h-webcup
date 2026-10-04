@@ -1,6 +1,7 @@
 import {
   ORIENTATION_KEYWORDS,
   orientServices,
+  stripQueryNoise,
   type OrientationMatch,
   type OrientationService,
 } from "@/lib/orientation";
@@ -113,7 +114,7 @@ export function fuzzySearchServices(
   services: readonly OrientationService[],
   limit = 4,
 ): FuzzyMatch[] {
-  const tokens = tokenizeQuery(query);
+  const tokens = tokenizeQuery(stripQueryNoise(normalizeText(query)));
   if (tokens.length === 0) return [];
 
   const results = services.map((service) => {

@@ -11,6 +11,18 @@ const SERVICES: OrientationService[] = [
     description: "Signaler un lampadaire cassé, une fuite d'eau, une voirie dégradée ou un problème de voirie.",
   },
   {
+    slug: "securite",
+    name: "Sécurité publique",
+    category: "Protection",
+    description: "Patrouilles, escorte et coordination des interventions pour la colonie.",
+  },
+  {
+    slug: "commerce",
+    name: "Commerce & restauration",
+    category: "Vie quotidienne",
+    description: "Cantines et fournisseurs : commandes, livraisons et marché couvert.",
+  },
+  {
     slug: "medical",
     name: "Centre médical Asclepius",
     category: "Santé",
@@ -76,4 +88,25 @@ test("every result carries a reason so the UI can justify itself", () => {
   for (const match of results) {
     assert.ok(["keywords", "text", "both"].includes(match.reason));
   }
+});
+
+test("idioms do not trigger unrelated keywords (ne marche plus is not the market)", () => {
+  const results = guidedServiceSearch("un lampadaire qui ne marche plus", SERVICES);
+  assert.equal(results[0]?.slug, "maintenance");
+  assert.ok(!results.some((match) => match.slug === "commerce"));
+});
+
+test("a neighbour-noise complaint reaches the security service", () => {
+  const results = guidedServiceSearch("mon voisin fait du bruit toute la nuit", SERVICES);
+  assert.equal(results[0]?.slug, "securite");
+});
+
+test("an appointment with the city hall reaches the administrative desk", () => {
+  const results = guidedServiceSearch("je veux prendre rendez-vous avec la mairie", SERVICES);
+  assert.equal(results[0]?.slug, "demarches");
+});
+
+test("the covered market is still a commerce topic", () => {
+  const results = guidedServiceSearch("je vais au marche couvert ce matin", SERVICES);
+  assert.equal(results[0]?.slug, "commerce");
 });

@@ -596,6 +596,24 @@ button[aria-pressed="true"] { text-decoration: underline; text-underline-offset:
 [data-lite="1"] [data-lite-hide] { display: none !important; }
 [data-lite="1"] .backdrop-blur { backdrop-filter: none !important; }
 
+/* Lite mode does not render the dark colony canvas, so the hero copy would
+   keep the constant scene palette (near-white) over the light theme
+   background. Remap the scene tokens to the page palette on the hero — in
+   every theme the result stays readable (dark themes already use light
+   foregrounds). The dark canvas on other pages (auth) is untouched. */
+[data-lite="1"] .hero-scene {
+  --scene-foreground: var(--foreground);
+  --scene-muted: var(--muted-foreground);
+  --scene-border: var(--border);
+  --scene-info: var(--info);
+  --scene-primary: var(--primary);
+  --color-scene-foreground: var(--foreground);
+  --color-scene-muted: var(--muted-foreground);
+  --color-scene-border: var(--border);
+  --color-scene-info: var(--info);
+  --color-scene-primary: var(--primary);
+}
+
 /* ------------------------------------------------------------------ */
 /* F95 — below-the-fold sections skip layout/paint until scrolled near. */
 /* ------------------------------------------------------------------ */
