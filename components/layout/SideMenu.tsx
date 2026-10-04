@@ -116,7 +116,7 @@ export function SideMenu({
         title={t.sideMenu.openAria}
         style={{ writingMode: "vertical-rl" }}
         className={cn(
-          "fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-border bg-card/95 px-1.5 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground shadow-lg backdrop-blur transition hover:text-primary",
+          "fixed h-[25%] right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-border bg-card/95 px-1.5 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground shadow-lg backdrop-blur transition hover:text-primary",
           open && "pointer-events-none opacity-0",
         )}
       >
