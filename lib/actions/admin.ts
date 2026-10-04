@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { AdminActionState } from "@/lib/action-state";
+import { getConsultationById } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 import { auditActor, auditNeutralizedInputs, recordSecurityEvent } from "@/lib/security";
@@ -17,6 +18,7 @@ import {
   deleteMunicipalService,
   setAnnouncementPublished,
   setBroadcastActive,
+  setConsultationOutcome,
   setConsultationPublished,
   setConsultationStatus,
   setServiceFeatured,
@@ -26,6 +28,7 @@ import { isConsultationStatus, isRole } from "@/lib/roles";
 import {
   announcementSchema,
   broadcastSchema,
+  consultationOutcomeSchema,
   consultationSchema,
   firstError,
   serviceSchema,
@@ -311,6 +314,7 @@ export async function createConsultationAction(
     summary: formData.get("summary"),
     description: formData.get("description"),
     published: formData.get("published") === "on" || formData.get("published") === "true",
+    anonymous: formData.get("anonymous") === "on" || formData.get("anonymous") === "true",
     opensAt: formData.get("opensAt"),
     closesAt: formData.get("closesAt"),
   });
@@ -342,10 +346,41 @@ export async function setConsultationStatusAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   if (!id || !isConsultationStatus(status)) return;
-  await setConsultationStatus(id, status);
+  const consultation = await setConsultationStatus(id, status);
   revalidatePath("/council/consultations");
   revalidatePath(`/council/consultations/${id}`);
   revalidatePath("/citizen/consultations");
+  revalidatePath(`/citizen/consultations/${consultation.slug}`);
+}
+
+/** Saves the Council's public outcome; citizens read it on the closed consultation. */
+export async function setConsultationOutcomeAction(
+  _previous: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  await requirePageRole(["COUNCIL"]);
+
+  const parsed = consultationOutcomeSchema.safeParse({
+    id: formData.get("id"),
+    outcome: formData.get("outcome"),
+  });
+  if (!parsed.success) return { ok: false, message: firstError(parsed.error) };
+
+  let slug: string;
+  try {
+    const consultation = await getConsultationById(parsed.data.id);
+    if (!consultation) return { ok: false, message: getDictionary().errors.consultationFailed };
+    slug = consultation.slug;
+    await setConsultationOutcome(parsed.data.id, parsed.data.outcome || null);
+  } catch {
+    return { ok: false, message: getDictionary().errors.consultationOutcomeFailed };
+  }
+
+  revalidatePath("/council/consultations");
+  revalidatePath(`/council/consultations/${parsed.data.id}`);
+  revalidatePath("/citizen/consultations");
+  revalidatePath(`/citizen/consultations/${slug}`);
+  return { ok: true, message: getDictionary().council.consultations.outcome.saved };
 }
 
 export async function deleteConsultationAction(formData: FormData) {

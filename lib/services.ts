@@ -289,6 +289,7 @@ export async function createConsultation(input: {
   summary?: string | null;
   description: string;
   published?: boolean;
+  anonymous?: boolean;
   opensAt?: Date | null;
   closesAt?: Date | null;
   authorId?: string | null;
@@ -301,10 +302,18 @@ export async function createConsultation(input: {
       description: input.description.trim(),
       status: "OPEN",
       published: input.published ?? true,
+      anonymous: input.anonymous ?? false,
       opensAt: input.opensAt ?? null,
       closesAt: input.closesAt ?? null,
       authorId: input.authorId ?? null,
     },
+  });
+}
+
+export async function setConsultationOutcome(id: string, outcome: string | null) {
+  return prisma.consultation.update({
+    where: { id },
+    data: { outcome: outcome?.trim() || null },
   });
 }
 

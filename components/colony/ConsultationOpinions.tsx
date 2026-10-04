@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { ConsultationOutcomeForm } from "@/components/colony/ConsultationOutcomeForm";
 import { FeedRow, SectionHeader } from "@/components/colony/FeedRow";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -9,10 +10,19 @@ import { format, getDictionary } from "@/lib/i18n/server";
 import type { OpinionStance } from "@/lib/roles";
 
 /**
- * Read-only view of a consultation's opinions for authorised agents
+ * Read-only view of a consultation's opinions for authorised staff
  * (COUNCIL / ADMIN_AGENT). Callers must enforce the role.
+ *
+ * `canManage` additionally renders the Council-only outcome editor. When the
+ * consultation is anonymous, the author identity is never rendered here.
  */
-export async function ConsultationOpinions({ id }: { id: string }) {
+export async function ConsultationOpinions({
+  id,
+  canManage = false,
+}: {
+  id: string;
+  canManage?: boolean;
+}) {
   const t = getDictionary();
   const consultation = await getConsultationById(id);
   if (!consultation) notFound();
@@ -36,6 +46,9 @@ export async function ConsultationOpinions({ id }: { id: string }) {
               ? t.council.consultations.published
               : t.council.consultations.draft}
           </Badge>
+          {consultation.anonymous ? (
+            <Badge tone="warning">{t.council.consultations.anonymousConsultation}</Badge>
+          ) : null}
         </div>
         <h1 className="mt-2 font-mono text-xl text-foreground">{consultation.title}</h1>
         {consultation.summary ? (
@@ -46,6 +59,24 @@ export async function ConsultationOpinions({ id }: { id: string }) {
       <Card className="p-4">
         <p className="whitespace-pre-line text-sm text-foreground">{consultation.description}</p>
       </Card>
+
+      {consultation.outcome ? (
+        <Card className="space-y-1 p-4">
+          <p className="font-mono text-xs uppercase tracking-wide text-primary">
+            {t.council.consultations.outcome.title}
+          </p>
+          <p className="whitespace-pre-line text-sm text-foreground">{consultation.outcome}</p>
+        </Card>
+      ) : null}
+
+      {canManage ? (
+        <Card className="p-4">
+          <ConsultationOutcomeForm
+            consultationId={consultation.id}
+            initialOutcome={consultation.outcome}
+          />
+        </Card>
+      ) : null}
 
       <Card className="p-4">
         <SectionHeader title={t.council.consultations.aggregate} />
@@ -76,7 +107,11 @@ export async function ConsultationOpinions({ id }: { id: string }) {
               <Card key={opinion.id} className="space-y-2">
                 <FeedRow
                   className="border-0 bg-transparent p-0"
-                  title={opinion.author?.name ?? t.common.none}
+                  title={
+                    consultation.anonymous
+                      ? t.council.consultations.anonymousAuthor
+                      : opinion.author?.name ?? t.common.none
+                  }
                   meta={`${opinion.reference} · ${formatDateTime(opinion.createdAt)}`}
                   trailing={
                     opinion.stance ? (

@@ -126,8 +126,15 @@ export const consultationSchema = z.object({
   summary: z.string().trim().max(400).optional().or(z.literal("")),
   description: z.string().trim().min(10, "Décrivez le projet.").max(8000),
   published: z.coerce.boolean().optional(),
+  anonymous: z.coerce.boolean().optional(),
   opensAt: optionalDateTime,
   closesAt: optionalDateTime,
+});
+
+/** Council-written, public outcome of a consultation (shown once closed). */
+export const consultationOutcomeSchema = z.object({
+  id: z.string().trim().min(1),
+  outcome: z.string().trim().max(4000),
 });
 
 export const opinionSchema = z.object({

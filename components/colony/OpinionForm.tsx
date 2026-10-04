@@ -26,16 +26,24 @@ export function OpinionForm({
   consultationId,
   initialStance,
   initialComment,
+  anonymous = false,
 }: {
   consultationId: string;
   initialStance?: string | null;
   initialComment?: string | null;
+  anonymous?: boolean;
 }) {
   const t = useT();
   const [state, formAction] = useFormState(submitOpinionAction, initialActionState);
 
   return (
     <form action={formAction} className="space-y-4">
+      {anonymous ? (
+        <p className="rounded-md border border-border bg-muted/40 p-2 text-xs text-muted-foreground">
+          {t.citizen.consultations.anonymousNote}
+        </p>
+      ) : null}
+
       {state.ok && state.reference ? (
         <Alert tone="success">
           {format(t.citizen.consultations.confirmation, { reference: state.reference })}

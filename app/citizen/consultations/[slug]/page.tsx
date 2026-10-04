@@ -5,7 +5,7 @@ import { OpinionForm } from "@/components/colony/OpinionForm";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getConsultationBySlug, getOpinionByAuthorAndConsultation } from "@/lib/data";
-import { getDictionary } from "@/lib/i18n/server";
+import { format, getDictionary } from "@/lib/i18n/server";
 import { requirePageRole } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +33,9 @@ export default async function CitizenConsultationPage({ params }: Params) {
           <Badge tone={isOpen ? "info" : "neutral"}>
             {isOpen ? t.citizen.consultations.open : t.citizen.consultations.closed}
           </Badge>
+          {consultation.anonymous ? (
+            <Badge tone="warning">{t.citizen.consultations.anonymous}</Badge>
+          ) : null}
           {opinion ? (
             <Badge tone="success">{t.citizen.consultations.opinionRecorded}</Badge>
           ) : null}
@@ -47,20 +50,40 @@ export default async function CitizenConsultationPage({ params }: Params) {
         <p className="whitespace-pre-line text-sm text-foreground">{consultation.description}</p>
       </Card>
 
+      {!isOpen && consultation.outcome ? (
+        <Card className="space-y-1 border-primary/40 p-4">
+          <p className="font-mono text-xs uppercase tracking-wide text-primary">
+            {t.citizen.consultations.outcome}
+          </p>
+          <p className="whitespace-pre-line text-sm text-foreground">{consultation.outcome}</p>
+        </Card>
+      ) : null}
+
       <p className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
         {isOpen ? t.citizen.consultations.note : t.citizen.consultations.readOnly}
       </p>
 
       <Card className="space-y-3 p-4">
         <h2 className="font-mono text-sm uppercase tracking-wide text-muted-foreground">
-          {opinion ? t.citizen.consultations.editOpinion : t.citizen.consultations.giveOpinion}
+          {isOpen
+            ? opinion
+              ? t.citizen.consultations.editOpinion
+              : t.citizen.consultations.giveOpinion
+            : t.citizen.consultations.yourOpinion}
         </h2>
+
+        {opinion ? (
+          <p className="font-mono text-xs text-muted-foreground">
+            {format(t.citizen.consultations.opinionReference, { reference: opinion.reference })}
+          </p>
+        ) : null}
 
         {isOpen ? (
           <OpinionForm
             consultationId={consultation.id}
             initialStance={opinion?.stance}
             initialComment={opinion?.comment}
+            anonymous={consultation.anonymous}
           />
         ) : opinion ? (
           <div className="space-y-2 text-sm">

@@ -56,6 +56,9 @@ export default async function CitizenConsultationsPage() {
                             ? t.citizen.consultations.open
                             : t.citizen.consultations.closed}
                         </Badge>
+                        {consultation.status !== "OPEN" && consultation.outcome ? (
+                          <Badge tone="success">{t.citizen.consultations.outcomeAvailable}</Badge>
+                        ) : null}
                         {answered.has(consultation.id) ? (
                           <Badge tone="success">{t.citizen.consultations.opinionRecorded}</Badge>
                         ) : null}

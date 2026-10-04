@@ -75,6 +75,9 @@ export default async function CouncilConsultationsPage() {
                         ? t.council.consultations.published
                         : t.council.consultations.draft}
                     </Badge>
+                    {consultation.anonymous ? (
+                      <Badge tone="warning">{t.council.consultations.anonymous}</Badge>
+                    ) : null}
                     <form action={toggleConsultationAction}>
                       <input type="hidden" name="id" value={consultation.id} />
                       <input
