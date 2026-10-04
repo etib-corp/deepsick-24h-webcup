@@ -1,6 +1,7 @@
 import { BroadcastBanner } from "@/components/layout/BroadcastBanner";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
+import { SideMenu } from "@/components/layout/SideMenu";
 import { getAuthSession } from "@/lib/permissions";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <BroadcastBanner />
       <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
       <PublicFooter />
+      <SideMenu />
     </div>
   );
 }

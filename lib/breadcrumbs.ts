@@ -19,6 +19,8 @@ export function getBreadcrumbs(
   const publicPages: Record<string, string> = {
     "/services": t.nav.services,
     "/announcements": t.nav.announcements,
+    "/arrivants": t.nav.arrivals,
+    "/guide": t.nav.guide,
     "/transport": t.nav.transport,
     "/projects": t.nav.projects,
     "/eco": t.nav.eco,

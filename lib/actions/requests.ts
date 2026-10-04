@@ -46,7 +46,7 @@ export async function createRequestAction(
     return { ok: false, message: getDictionary().errors.requestFailed };
   }
 
-  revalidatePath("/demandes");
-  revalidatePath("/espace");
-  redirect("/demandes?creee=1");
+  revalidatePath("/citizen/requests");
+  revalidatePath("/citizen");
+  redirect("/citizen/requests?creee=1");
 }

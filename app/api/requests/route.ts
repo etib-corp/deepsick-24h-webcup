@@ -49,9 +49,9 @@ export async function POST(request: Request) {
     return serverErrorResponse("requests.create", error);
   }
 
-  revalidatePath("/demandes");
-  revalidatePath("/espace");
-  revalidatePath("/agents/demandes");
+  revalidatePath("/citizen/requests");
+  revalidatePath("/citizen");
+  revalidatePath("/operations/administration");
 
   return NextResponse.json({ reference }, { status: 201 });
 }

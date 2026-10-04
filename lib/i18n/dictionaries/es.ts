@@ -1580,6 +1580,14 @@ const es: Dictionary = {
     protected: "Protegido contra envíos automatizados.",
     trapLabel: "No rellenes este campo",
   },
+  sideMenu: {
+    title: "Accesos rápidos",
+    open: "Más",
+    openAria: "Abrir los accesos rápidos",
+    close: "Cerrar el menú",
+    explore: "Explorar",
+    info: "Información",
+  },
   lite: {
     enable: "Modo ligero",
     disable: "Modo completo",

@@ -1580,6 +1580,14 @@ const en: Dictionary = {
     protected: "Protected against automated submissions.",
     trapLabel: "Do not fill this field",
   },
+  sideMenu: {
+    title: "Quick links",
+    open: "More",
+    openAria: "Open quick links",
+    close: "Close the menu",
+    explore: "Explore",
+    info: "Information",
+  },
   lite: {
     enable: "Light mode",
     disable: "Full mode",

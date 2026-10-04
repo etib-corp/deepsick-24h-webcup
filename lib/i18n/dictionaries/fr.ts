@@ -1589,6 +1589,14 @@ const fr = {
     protected: "Protégé contre les envois automatisés.",
     trapLabel: "Ne pas remplir ce champ",
   },
+  sideMenu: {
+    title: "Accès rapides",
+    open: "Plus",
+    openAria: "Ouvrir les accès rapides",
+    close: "Fermer le menu",
+    explore: "Explorer",
+    info: "Informations",
+  },
   lite: {
     enable: "Mode allégé",
     disable: "Mode complet",

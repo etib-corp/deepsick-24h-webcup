@@ -415,7 +415,7 @@ export async function getActivityFeed(limit = 8): Promise<ActivityItem[]> {
       title: `Demande — ${request.subject}`,
       subtitle: `${request.author?.name ?? "Habitant"} · ${request.status}`,
       date: request.createdAt,
-      href: `/agents/demandes/${request.id}`,
+      href: `/operations/administration/${request.id}`,
     })),
     ...contacts.map((message) => ({
       id: `contact-${message.id}`,
@@ -423,7 +423,7 @@ export async function getActivityFeed(limit = 8): Promise<ActivityItem[]> {
       title: `Message — ${message.subject}`,
       subtitle: message.email,
       date: message.createdAt,
-      href: "/agents",
+      href: "/operations/administration",
     })),
     ...announcements.map((announcement) => ({
       id: `announcement-${announcement.id}`,
