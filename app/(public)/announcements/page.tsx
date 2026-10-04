@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/Alert";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { getPublishedAnnouncements } from "@/lib/data";
+import { getPublishedAnnouncementSummaries } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
 
@@ -16,7 +16,7 @@ export function generateMetadata(): Metadata {
 
 export default async function AnnouncementsPage() {
   const t = getDictionary();
-  const announcements = await getPublishedAnnouncements();
+  const announcements = await getPublishedAnnouncementSummaries();
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">

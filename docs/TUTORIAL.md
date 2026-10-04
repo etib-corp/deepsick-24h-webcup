@@ -33,6 +33,7 @@ démarches, so every console has something to show.
 | Commerce | `commerce@terranova.fr` | `password123` | `/operations/commerce` |
 | Administrative agent | `administration@terranova.fr` | `password123` | `/operations/administration` |
 | High Council | `conseil@terranova.fr` | `password123` | `/council` |
+| New arrival, no email | `iris.nouvelle` (colon ID) | `password123` | `/citizen` |
 
 The visitor profile needs no account: the whole public site is open.
 
@@ -84,7 +85,10 @@ is checked too — a citizen can only ever open their own report (`/citizen/repo
 4. **Write to the administration** — `/contact`: subject, e-mail, message. On submit you get an
    acknowledgement **with a tracking reference** — keep it, it identifies your message.
 5. **Make it yours** — pick a theme and a language, then **create your colonist identity** at
-   `/register` (name, e-mail, password ≥ 8 characters).
+   `/register` — with an email or, for residents who don't have one, with a colon identifier
+   (suggested from your name). [`/arrivants`](<../app/(public)/arrivants/page.tsx>) walks through
+   the first steps in simple language, in French, English or Spanish, and keeps your progress
+   when you switch language.
 6. **Sign in** — `/login`. You are redirected to the space matching your role.
 
 > Tip: a fresh account is always a `CITIZEN`. Only the Council can grant a staff role.

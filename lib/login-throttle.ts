@@ -7,9 +7,10 @@ import { prisma } from "@/lib/prisma";
  *
  * Policy (env-overridable):
  *  - Per IP (primary, hard lock): N failures within a window → block the IP.
- *  - Per email (short backoff, never a hard lock): a short cooldown so an
- *    attacker cannot lock a victim out of their own account.
- *  - A successful login clears that email's failure history.
+ *  - Per account key (short backoff, never a hard lock): a short cooldown so
+ *    an attacker cannot lock a victim out of their own account. The key is the
+ *    normalised email **or** colon identifier (see `lib/identity.ts`).
+ *  - A successful login clears that key's failure history.
  * ------------------------------------------------------------------ */
 
 function envInt(value: string | undefined, fallback: number): number {
@@ -57,10 +58,6 @@ export function getClientIp(headers: HeadersLike): string {
   return "unknown";
 }
 
-export function normalizeEmail(email: string): string {
-  return email.toLowerCase().trim();
-}
-
 const ipIdentifier = (ip: string) => `ip:${ip}`;
 
 function windowStart(seconds: number): Date {
@@ -74,11 +71,11 @@ async function failureCount(identifier: string, since: Date): Promise<number> {
 }
 
 /**
- * Returns whether this email/IP pair is currently throttled, and for how long.
- * Safe to expose: the response shape is identical for existing and unknown
+ * Returns whether this account key/IP pair is currently throttled, and for how
+ * long. Safe to expose: the response shape is identical for existing and unknown
  * accounts (it never reads the User table).
  */
-export async function getThrottleStatus(email: string, ip: string): Promise<ThrottleStatus> {
+export async function getThrottleStatus(identifier: string, ip: string): Promise<ThrottleStatus> {
   const ipId = ipIdentifier(ip);
   const ipSince = windowStart(LOGIN_THROTTLE.ipWindowSeconds);
   const ipFailures = await failureCount(ipId, ipSince);
@@ -97,11 +94,11 @@ export async function getThrottleStatus(email: string, ip: string): Promise<Thro
     return { locked: true, retryAfterSeconds: retry, reason: "ip" };
   }
 
-  const emailSince = windowStart(LOGIN_THROTTLE.emailWindowSeconds);
-  const emailFailures = await failureCount(email, emailSince);
-  if (emailFailures >= LOGIN_THROTTLE.emailMaxFailures) {
+  const accountSince = windowStart(LOGIN_THROTTLE.emailWindowSeconds);
+  const accountFailures = await failureCount(identifier, accountSince);
+  if (accountFailures >= LOGIN_THROTTLE.emailMaxFailures) {
     const last = await prisma.loginAttempt.findFirst({
-      where: { identifier: email, success: false },
+      where: { identifier, success: false },
       orderBy: { createdAt: "desc" },
     });
     const elapsedMs = last ? Date.now() - last.createdAt.getTime() : Infinity;
@@ -118,20 +115,20 @@ export async function getThrottleStatus(email: string, ip: string): Promise<Thro
   return { locked: false, retryAfterSeconds: 0, reason: null };
 }
 
-/** Records a failed attempt for both the email and the IP, then prunes old rows. */
-export async function recordLoginFailure(email: string, ip: string): Promise<void> {
+/** Records a failed attempt for both the account key and the IP, then prunes old rows. */
+export async function recordLoginFailure(identifier: string, ip: string): Promise<void> {
   await prisma.loginAttempt.createMany({
     data: [
-      { identifier: email, success: false },
+      { identifier, success: false },
       { identifier: ipIdentifier(ip), success: false },
     ],
   });
   await pruneOldAttempts();
 }
 
-/** Clears the email's failure history so legitimate users are never punished. */
-export async function recordLoginSuccess(email: string): Promise<void> {
-  await prisma.loginAttempt.deleteMany({ where: { identifier: email, success: false } });
+/** Clears the account key's failure history so legitimate users are never punished. */
+export async function recordLoginSuccess(identifier: string): Promise<void> {
+  await prisma.loginAttempt.deleteMany({ where: { identifier, success: false } });
 }
 
 /** Deletes attempts older than a day (well beyond every configured window). */

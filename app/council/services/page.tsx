@@ -5,7 +5,11 @@ import { ServiceForm } from "@/components/colony/ServiceForm";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { deleteServiceAction, toggleServiceFeaturedAction } from "@/lib/actions/admin";
+import {
+  deleteServiceAction,
+  toggleServiceFeaturedAction,
+  toggleServicePublishedAction,
+} from "@/lib/actions/admin";
 import { getAllServices } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/server";
@@ -50,12 +54,32 @@ export default async function CouncilServicesPage() {
                     title={service.name}
                     meta={`/${service.slug} · ${formatDate(service.createdAt)}`}
                     trailing={
-                      service.featured ? (
-                        <Badge tone="mars">{t.council.services.featured}</Badge>
-                      ) : null
+                      <span className="flex items-center gap-2">
+                        {service.featured ? (
+                          <Badge tone="mars">{t.council.services.featured}</Badge>
+                        ) : null}
+                        {!service.published ? (
+                          <Badge tone="danger">{t.council.services.disabled}</Badge>
+                        ) : null}
+                      </span>
                     }
                   />
                   <div className="flex flex-wrap items-center gap-2">
+                    <form action={toggleServicePublishedAction}>
+                      <input type="hidden" name="id" value={service.id} />
+                      <input
+                        type="hidden"
+                        name="published"
+                        value={service.published ? "false" : "true"}
+                      />
+                      <Button
+                        type="submit"
+                        variant={service.published ? "danger" : "secondary"}
+                        size="sm"
+                      >
+                        {service.published ? t.council.services.disable : t.council.services.enable}
+                      </Button>
+                    </form>
                     <form action={toggleServiceFeaturedAction}>
                       <input type="hidden" name="id" value={service.id} />
                       <input

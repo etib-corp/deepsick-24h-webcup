@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useId } from "react";
+import { createContext, forwardRef, useContext, useId } from "react";
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -49,10 +49,19 @@ export function Field({
   );
 }
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  const describedBy = useFieldDescription(props.id, props["aria-describedby"]);
-  return <ShadcnInput className={cn("font-mono", className)} {...props} aria-describedby={describedBy} />;
-}
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  function Input({ className, ...props }, ref) {
+    const describedBy = useFieldDescription(props.id, props["aria-describedby"]);
+    return (
+      <ShadcnInput
+        ref={ref}
+        className={cn("font-mono", className)}
+        {...props}
+        aria-describedby={describedBy}
+      />
+    );
+  },
+);
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const describedBy = useFieldDescription(props.id, props["aria-describedby"]);

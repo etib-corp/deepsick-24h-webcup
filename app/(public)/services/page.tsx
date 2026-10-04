@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/Alert";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ServicesView } from "@/components/public/ServicesView";
-import { getPublishedServices } from "@/lib/data";
+import { getAllServices } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n/server";
 import { buildMapServices } from "@/lib/map-layout";
 
@@ -15,7 +15,7 @@ export function generateMetadata(): Metadata {
 
 export default async function ServicesPage() {
   const t = getDictionary();
-  const services = buildMapServices(await getPublishedServices());
+  const services = buildMapServices(await getAllServices());
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">

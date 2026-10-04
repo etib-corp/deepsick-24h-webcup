@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -36,14 +36,28 @@ export function IncidentConsole({
   const t = useT();
   const [chip, setChip] = useState<Chip>("ACTION");
   const router = useRouter();
+  const [refreshing, startRefresh] = useTransition();
+  const refreshPending = useRef(false);
 
-  // Short polling (~5 s) so the console stays live during the demo. Skipped
-  // while the tab is hidden so background tabs never do heavy work.
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") router.refresh();
-    }, 5000);
-    return () => clearInterval(interval);
+    if (!refreshing) refreshPending.current = false;
+  }, [refreshing]);
+
+  // Keep visible consoles live without stacking refreshes on a slow connection.
+  useEffect(() => {
+    const refresh = () => {
+      if (refreshPending.current || document.visibilityState === "hidden" || !navigator.onLine) return;
+      refreshPending.current = true;
+      startRefresh(() => router.refresh());
+    };
+    const interval = window.setInterval(refresh, 5000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("online", refresh);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("online", refresh);
+    };
   }, [router]);
 
   const chips: { key: Chip; label: string }[] = [

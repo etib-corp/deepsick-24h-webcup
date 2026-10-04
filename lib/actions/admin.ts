@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import type { AdminActionState } from "@/lib/action-state";
 import { getDictionary } from "@/lib/i18n/server";
@@ -20,6 +20,7 @@ import {
   setConsultationPublished,
   setConsultationStatus,
   setServiceFeatured,
+  setServicePublished,
   setUserRole,
 } from "@/lib/services";
 import { isConsultationStatus, isRole } from "@/lib/roles";
@@ -77,6 +78,7 @@ export async function createServiceAction(
   });
 
   revalidatePath("/council/services");
+  revalidateTag("public-services");
   revalidatePath("/services");
   return { ok: true, message: getDictionary().council.services.form.created };
 }
@@ -102,6 +104,7 @@ export async function deleteServiceAction(formData: FormData) {
   });
 
   revalidatePath("/council/services");
+  revalidateTag("public-services");
   revalidatePath("/services");
 }
 
@@ -127,7 +130,34 @@ export async function toggleServiceFeaturedAction(formData: FormData) {
   });
 
   revalidatePath("/council/services");
+  revalidateTag("public-services");
   revalidatePath("/services");
+}
+
+export async function toggleServicePublishedAction(formData: FormData) {
+  const session = await requirePageRole(["COUNCIL"]);
+  const id = readId(formData.get("id"));
+  const published = formData.get("published") === "true";
+  if (!id) return;
+
+  try {
+    await setServicePublished(id, published);
+  } catch {
+    return;
+  }
+
+  await recordSecurityEvent({
+    type: "CONTENT_CHANGED",
+    outcome: "SUCCESS",
+    ...auditActor(session),
+    targetType: "service",
+    targetId: id,
+    detail: published ? "service réactivé" : "service désactivé",
+  });
+
+  revalidatePath("/council/services");
+  revalidatePath("/services");
+  revalidatePath("/citizen/appointments/nouveau");
 }
 
 export async function createAnnouncementAction(
@@ -172,6 +202,7 @@ export async function createAnnouncementAction(
   });
 
   revalidatePath("/council/announcements");
+  revalidateTag("public-announcements");
   revalidatePath("/announcements");
   return { ok: true, message: getDictionary().council.announcements.form.created };
 }
@@ -198,6 +229,7 @@ export async function toggleAnnouncementAction(formData: FormData) {
   });
 
   revalidatePath("/council/announcements");
+  revalidateTag("public-announcements");
   revalidatePath("/announcements");
 }
 
