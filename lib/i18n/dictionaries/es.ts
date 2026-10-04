@@ -1587,6 +1587,8 @@ const es: Dictionary = {
     close: "Cerrar el menú",
     explore: "Explorar",
     info: "Información",
+    shortcuts: "Atajos",
+    publicSite: "Sitio público",
   },
   lite: {
     enable: "Modo ligero",

@@ -1596,6 +1596,8 @@ const fr = {
     close: "Fermer le menu",
     explore: "Explorer",
     info: "Informations",
+    shortcuts: "Raccourcis",
+    publicSite: "Site public",
   },
   lite: {
     enable: "Mode allégé",

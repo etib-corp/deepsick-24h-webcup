@@ -7,30 +7,29 @@ import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/ui";
 
 /**
- * Hideable side menu (public shell).
+ * Hideable side menu.
  *
- * Collects the secondary pages that are not directly reachable from the main
- * navbar (arrivals, guide, projects, transport, appearance, eco, service
- * status). Hidden by default behind a slim edge handle; closes on ✕, backdrop
- * click or Escape, and restores focus to the handle.
+ * - `variant="public"` (default): secondary pages of the public site that
+ *   are not in the main navbar (arrivals, guide, projects, transport,
+ *   appearance, eco, service status).
+ * - `variant="console"`: from the citizen/staff shells, points to the public
+ *   site (otherwise unreachable from those workspaces) plus a role shortcut
+ *   (notifications for citizens, dev ticket panel for the Council).
+ *
+ * Hidden by default behind a slim edge handle; closes on ✕, backdrop click or
+ * Escape, and restores focus to the handle.
  */
 
-const SECTIONS = [
-  { titleKey: "explore", items: ["arrivals", "guide", "projects", "transport"] },
-  { titleKey: "info", items: ["appearance", "eco", "status"] },
-] as const;
+type MenuItem = { href: string; label: string };
+type MenuSection = { title: string; items: MenuItem[] };
 
-const HREFS: Record<(typeof SECTIONS)[number]["items"][number], string> = {
-  arrivals: "/arrivants",
-  guide: "/guide",
-  projects: "/projects",
-  transport: "/transport",
-  appearance: "/apparence",
-  eco: "/eco",
-  status: "/statut",
-};
-
-export function SideMenu() {
+export function SideMenu({
+  variant = "public",
+  role = null,
+}: {
+  variant?: "public" | "console";
+  role?: string | null;
+}) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const handleRef = useRef<HTMLButtonElement>(null);
@@ -55,6 +54,55 @@ export function SideMenu() {
     setOpen(false);
     handleRef.current?.focus();
   }
+
+  const publicSections: MenuSection[] = [
+    {
+      title: t.sideMenu.explore,
+      items: [
+        { href: "/arrivants", label: t.nav.arrivals },
+        { href: "/guide", label: t.nav.guide },
+        { href: "/projects", label: t.nav.projects },
+        { href: "/transport", label: t.nav.transport },
+      ],
+    },
+    {
+      title: t.sideMenu.info,
+      items: [
+        { href: "/apparence", label: t.nav.appearance },
+        { href: "/eco", label: t.nav.eco },
+        { href: "/statut", label: t.nav.status },
+      ],
+    },
+  ];
+
+  const consoleShortcuts: MenuItem[] = [];
+  if (variant === "console") {
+    if (role === "CITIZEN") {
+      consoleShortcuts.push({ href: "/citizen/notifications", label: t.nav.notifications });
+    }
+    if (role === "COUNCIL") {
+      consoleShortcuts.push({ href: "/dev/tickets", label: t.dev.nav.tickets });
+    }
+  }
+
+  const sections: MenuSection[] =
+    variant === "console"
+      ? [
+          ...(consoleShortcuts.length > 0
+            ? [{ title: t.sideMenu.shortcuts, items: consoleShortcuts }]
+            : []),
+          {
+            title: t.sideMenu.publicSite,
+            items: [
+              { href: "/", label: t.nav.home },
+              { href: "/services", label: t.nav.services },
+              { href: "/announcements", label: t.nav.announcements },
+              { href: "/guide", label: t.nav.guide },
+              { href: "/statut", label: t.nav.status },
+            ],
+          },
+        ]
+      : publicSections;
 
   return (
     <>
@@ -109,23 +157,23 @@ export function SideMenu() {
             </div>
 
             <nav className="mt-6 flex-1 space-y-6 overflow-y-auto">
-              {SECTIONS.map((section) => (
-                <div key={section.titleKey}>
+              {sections.map((section) => (
+                <div key={section.title}>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {t.sideMenu[section.titleKey]}
+                    {section.title}
                   </p>
                   <ul className="mt-2 space-y-1">
                     {section.items.map((item) => (
-                      <li key={item}>
+                      <li key={item.href}>
                         <Link
-                          href={HREFS[item]}
+                          href={item.href}
                           onClick={close}
                           className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
                         >
                           <span aria-hidden className="text-primary/70">
                             /
                           </span>
-                          {t.nav[item]}
+                          {item.label}
                         </Link>
                       </li>
                     ))}

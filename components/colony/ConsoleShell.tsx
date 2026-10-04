@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import { Bell } from "lucide-react";
 
 import { SkipLink } from "@/components/layout/SkipLink";
+import { SideMenu } from "@/components/layout/SideMenu";
 import { StatusStrip } from "@/components/colony/StatusStrip";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemePicker } from "@/components/layout/ThemePicker";
@@ -131,6 +132,8 @@ export function ConsoleShell({
         <Breadcrumbs />
         {children}
       </main>
+
+      <SideMenu variant="console" role={role} />
     </div>
   );
 }
