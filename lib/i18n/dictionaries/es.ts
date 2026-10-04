@@ -796,6 +796,9 @@ const es: Dictionary = {
       featured: "Prioritario",
       feature: "Destacar",
       unfeature: "Quitar destacado",
+      disabled: "Desactivado",
+      disable: "Desactivar",
+      enable: "Reactivar",
       form: {
         name: "Nombre del servicio",
         namePlaceholder: "Ej. Reciclaje de aire",
@@ -1021,6 +1024,11 @@ const es: Dictionary = {
       createRequest: "Crear una solicitud relacionada",
       askQuestion: "Hacer una pregunta",
       bookAppointment: "Reservar una cita",
+      unavailableBadge: "No disponible",
+      unavailableTitle: "Servicio temporalmente no disponible",
+      unavailableBody:
+        "Se está trabajando en este servicio. No puedes iniciar un nuevo trámite por el momento. Vuelve a intentarlo más tarde o contacta con la administración.",
+      unavailableAction: "Contactar con la administración",
     },
     announcements: {
       title: "Anuncios oficiales",
@@ -1342,6 +1350,8 @@ const es: Dictionary = {
     consultationClosed: "Esta consulta está cerrada.",
     opinionFailed: "No se pudo registrar tu opinión.",
     appointmentFailed: "No se pudo crear la cita.",
+    serviceUnavailable:
+      "Este servicio no está disponible temporalmente. Elige otro o inténtalo más tarde.",
     appointmentSlotTaken: "Esta franja acaba de reservarse. Elige otra.",
     appointmentSlotInvalid: "Franja no válida o ya pasada.",
     registerFailed: "No se pudo crear la cuenta.",

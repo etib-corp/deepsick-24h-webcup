@@ -24,6 +24,10 @@ export function getServiceBySlug(slug: string) {
   return prisma.municipalService.findUnique({ where: { slug } });
 }
 
+export function getServiceById(id: string) {
+  return prisma.municipalService.findUnique({ where: { id } });
+}
+
 export function getPublishedAnnouncements() {
   return prisma.announcement.findMany({
     where: { published: true },

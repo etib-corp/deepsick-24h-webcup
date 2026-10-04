@@ -796,6 +796,9 @@ const en: Dictionary = {
       featured: "Priority",
       feature: "Highlight",
       unfeature: "Remove highlight",
+      disabled: "Disabled",
+      disable: "Disable",
+      enable: "Re-enable",
       form: {
         name: "Service name",
         namePlaceholder: "e.g. Air recycling",
@@ -1020,6 +1023,11 @@ const en: Dictionary = {
       createRequest: "Create a related request",
       askQuestion: "Ask a question",
       bookAppointment: "Book an appointment",
+      unavailableBadge: "Unavailable",
+      unavailableTitle: "Service temporarily unavailable",
+      unavailableBody:
+        "Work is underway on this service. You cannot start a new procedure right now. Please try again later or contact the administration.",
+      unavailableAction: "Contact the administration",
     },
     announcements: {
       title: "Official announcements",
@@ -1341,6 +1349,8 @@ const en: Dictionary = {
     consultationClosed: "This consultation is closed.",
     opinionFailed: "Your opinion could not be recorded.",
     appointmentFailed: "The appointment could not be created.",
+    serviceUnavailable:
+      "This service is temporarily unavailable. Choose another one or try again later.",
     appointmentSlotTaken: "This slot was just booked. Please pick another one.",
     appointmentSlotInvalid: "Invalid or past slot.",
     registerFailed: "The account could not be created.",

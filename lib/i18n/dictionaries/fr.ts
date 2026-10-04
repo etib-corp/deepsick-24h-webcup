@@ -800,6 +800,9 @@ const fr = {
       featured: "Prioritaire",
       feature: "Mettre en avant",
       unfeature: "Retirer de la priorité",
+      disabled: "Désactivé",
+      disable: "Désactiver",
+      enable: "Réactiver",
       form: {
         name: "Nom du service",
         namePlaceholder: "Ex. Recyclage d'air",
@@ -1025,6 +1028,11 @@ const fr = {
       createRequest: "Créer une demande liée",
       askQuestion: "Poser une question",
       bookAppointment: "Prendre rendez-vous",
+      unavailableBadge: "Indisponible",
+      unavailableTitle: "Service temporairement indisponible",
+      unavailableBody:
+        "Une intervention est en cours sur ce service. Vous ne pouvez pas démarrer de nouvelle démarche pour le moment. Réessayez plus tard ou contactez l'administration.",
+      unavailableAction: "Contacter l'administration",
     },
     announcements: {
       title: "Annonces officielles",
@@ -1348,6 +1356,7 @@ const fr = {
     consultationClosed: "Cette consultation est clôturée.",
     opinionFailed: "Votre avis n'a pas pu être enregistré.",
     appointmentFailed: "Le rendez-vous n'a pas pu être créé.",
+    serviceUnavailable: "Ce service est temporairement indisponible. Choisissez-en un autre ou réessayez plus tard.",
     appointmentSlotTaken: "Ce créneau vient d'être réservé. Choisissez-en un autre.",
     appointmentSlotInvalid: "Créneau invalide ou déjà passé.",
     registerFailed: "L'inscription n'a pas pu être réalisée.",
