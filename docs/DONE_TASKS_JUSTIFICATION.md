@@ -7,6 +7,11 @@
 > vérifier — dans le format attendu par les formulaires de soumission de la Webcup.
 >
 > Les besoins **encore réellement ouverts** sont listés en fin de document (§ « Reste à faire »).
+>
+> **Fiches de soumission :** chaque besoin livré ci-dessous dispose aussi d'une fiche au **format
+> jury** (mêmes trois questions que `F65_justification.md`) dans `docs/<CODE>_justification.md`
+> — par ex. [`F33_justification.md`](F33_justification.md), [`F49_justification.md`](F49_justification.md),
+> [`F80_justification.md`](F80_justification.md), [`D20_justification.md`](D20_justification.md).
 
 ---
 
