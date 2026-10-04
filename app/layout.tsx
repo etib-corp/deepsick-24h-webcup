@@ -5,6 +5,7 @@ import { Toaster } from "@/components/shadcn/sonner";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
 import { LiteModeAuto } from "@/components/layout/LiteModeAuto";
 import { OfflineNotice } from "@/components/layout/OfflineNotice";
+import { OrderButton } from "@/components/layout/OrderButton";
 import { ReportButton } from "@/components/layout/ReportButton";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TourProvider } from "@/components/tour/TourProvider";
@@ -48,6 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {children}
                 <Toaster />
                 <ReportButton role={session?.user?.role ?? null} />
+                <OrderButton role={session?.user?.role ?? null} />
               </TourProvider>
             </TooltipProvider>
           </LocaleProvider>

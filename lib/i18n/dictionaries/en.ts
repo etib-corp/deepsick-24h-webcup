@@ -1580,6 +1580,18 @@ const en: Dictionary = {
     protected: "Protected against automated submissions.",
     trapLabel: "Do not fill this field",
   },
+  quickOrder: {
+    button: "Order",
+    title: "Transport & orders",
+    close: "Close the form",
+    visitorText:
+      "Rides and meals are ordered from a citizen account: sign in to place an order.",
+    login: "Sign in",
+    staffText: "Rides and orders are handled from the Transport and Commerce consoles.",
+    openConsole: "Open my console",
+    schedules: "Shuttle schedules",
+    myOrders: "My orders",
+  },
   quickReport: {
     button: "Report",
     title: "Report an incident",

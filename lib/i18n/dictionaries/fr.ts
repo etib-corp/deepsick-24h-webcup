@@ -1589,6 +1589,19 @@ const fr = {
     protected: "Protégé contre les envois automatisés.",
     trapLabel: "Ne pas remplir ce champ",
   },
+  quickOrder: {
+    button: "Commander",
+    title: "Transports & commandes",
+    close: "Fermer le formulaire",
+    visitorText:
+      "Les trajets et les repas se commandent depuis un compte citoyen : connectez-vous pour commander.",
+    login: "Se connecter",
+    staffText:
+      "Les trajets et les commandes sont suivis depuis les consoles Transport et Commerce.",
+    openConsole: "Ouvrir ma console",
+    schedules: "Horaires des navettes",
+    myOrders: "Mes commandes",
+  },
   quickReport: {
     button: "Signaler",
     title: "Signaler un incident",

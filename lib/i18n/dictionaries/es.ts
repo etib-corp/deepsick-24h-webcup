@@ -1580,6 +1580,19 @@ const es: Dictionary = {
     protected: "Protegido contra envíos automatizados.",
     trapLabel: "No rellenes este campo",
   },
+  quickOrder: {
+    button: "Pedir",
+    title: "Transporte y pedidos",
+    close: "Cerrar el formulario",
+    visitorText:
+      "Los trayectos y las comidas se piden desde una cuenta ciudadana: inicie sesión para pedir.",
+    login: "Iniciar sesión",
+    staffText:
+      "Los trayectos y los pedidos se gestionan desde las consolas de Transporte y Comercio.",
+    openConsole: "Abrir mi consola",
+    schedules: "Horarios de las navetas",
+    myOrders: "Mis pedidos",
+  },
   quickReport: {
     button: "Informar",
     title: "Informar de un incidente",
