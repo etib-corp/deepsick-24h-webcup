@@ -25,14 +25,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: firstError(parsed.error) }, { status: 400 });
   }
 
-  const service = await createMunicipalService(parsed.data);
-  revalidateTag("public-services");
   let service;
   try {
     service = await createMunicipalService(parsed.data);
   } catch (error) {
     return serverErrorResponse("services.create", error);
   }
+  revalidateTag("public-services");
 
   await recordSecurityEvent({
     type: "CONTENT_CHANGED",

@@ -2,7 +2,6 @@ import "server-only";
 
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
 
 import { PublicError } from "@/lib/errors";
 import { formatDateTime, slugify } from "@/lib/format";

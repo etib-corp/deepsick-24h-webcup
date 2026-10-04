@@ -99,7 +99,7 @@ test("all detail categories enforce ownership and preserve the full timeline", a
   } });
   const order = await prisma.order.create({ data: { type: "FOOD", summary: "F78 order", customerId: fixture.owner.id } });
   const contact = await prisma.contactMessage.create({ data: {
-    subject: "F78 contact", body: "Full message", email: fixture.owner.email, authorId: fixture.owner.id,
+    subject: "F78 contact", body: "Full message", email: fixture.owner.email ?? "f78@example.com", authorId: fixture.owner.id,
   } });
   const appointment = await createAppointment(fixture.owner.id, {
     serviceId: fixture.service.id, date: new Date(Date.now() + 50 * 60 * 60 * 1000),
